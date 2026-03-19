@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PySpark — Complete Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;0,900;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #f97316;
+    --accent2: #38bdf8;
+    --accent3: #a78bfa;
+    --accent4: #34d399;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --code-bg: #0d1117;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .hero {
+    position: relative;
+    padding: 80px 60px 70px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 60% 40%, rgba(249,115,22,.12) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 50% at 20% 80%, rgba(56,189,248,.08) 0%, transparent 60%);
+  }
+  .hero-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(48px, 7vw, 88px);
+    font-weight: 900;
+    line-height: .95;
+    letter-spacing: -.03em;
+    position: relative;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    margin-top: 20px;
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 520px;
+    position: relative;
+  }
+  .hero-badges {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+  .badge.orange { border-color: var(--accent); color: var(--accent); background: rgba(249,115,22,.08); }
+  .badge.blue { border-color: var(--accent2); color: var(--accent2); background: rgba(56,189,248,.08); }
+  .badge.purple { border-color: var(--accent3); color: var(--accent3); background: rgba(167,139,250,.08); }
+  .badge.green { border-color: var(--accent4); color: var(--accent4); background: rgba(52,211,153,.08); }
+
+  .spark-logo {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 160px;
+    opacity: .04;
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    pointer-events: none;
+  }
+
+  /* ── LAYOUT ── */
+  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 36px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .sidebar-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 24px 12px;
+  }
+  .nav-section { margin-bottom: 8px; }
+  .nav-section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 16px 24px 6px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 24px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all .15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,.03); border-left-color: var(--accent); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(249,115,22,.06); }
+
+  /* ── MAIN ── */
+  main { padding: 60px; max-width: 960px; }
+
+  /* ── SECTIONS ── */
+  .section { margin-bottom: 80px; scroll-margin-top: 30px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    opacity: .6;
+  }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 36px 0 14px;
+    color: var(--text);
+  }
+  h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 28px 0 10px;
+  }
+  p { color: var(--text-dim); margin-bottom: 14px; }
+
+  /* ── CODE ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 18px 0;
+    overflow-x: auto;
+    position: relative;
+  }
+  .code-block::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  pre, code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #cdd6f4;
+  }
+  .kw { color: #cba6f7; }
+  .fn { color: #89b4fa; }
+  .str { color: #a6e3a1; }
+  .cm { color: #585b70; font-style: italic; }
+  .num { color: #fab387; }
+  .cls { color: #f38ba8; }
+
+  /* ── CARDS ── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin: 20px 0; }
+  .card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px;
+    transition: border-color .2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-icon { font-size: 28px; margin-bottom: 12px; }
+  .card-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    text-align: left;
+  }
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid rgba(30,45,69,.5);
+    color: var(--text-dim);
+    font-size: 13.5px;
+  }
+  td code { background: var(--code-bg); padding: 2px 7px; border-radius: 3px; font-size: 12px; color: var(--accent2); }
+  tr:hover td { background: rgba(255,255,255,.02); }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-left: 3px solid;
+    padding: 16px 20px;
+    border-radius: 0 6px 6px 0;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+  .callout.info { border-color: var(--accent2); background: rgba(56,189,248,.06); color: var(--accent2); }
+  .callout.warn { border-color: var(--accent); background: rgba(249,115,22,.06); color: #fdba74; }
+  .callout.tip { border-color: var(--accent4); background: rgba(52,211,153,.06); color: var(--accent4); }
+  .callout strong { display: block; margin-bottom: 4px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+
+  /* ── CHARTS ── */
+  .chart-wrap {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    margin: 24px 0;
+  }
+  .chart-title {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .chart-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 22px; }
+  canvas { max-height: 340px; }
+
+  /* ── ARCH DIAGRAM ── */
+  .arch-diagram {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 36px;
+    margin: 24px 0;
+    overflow: auto;
+  }
+
+  /* ── FLOW ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 24px 0;
+  }
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 13px;
+    font-family: 'IBM Plex Mono', monospace;
+    white-space: nowrap;
+  }
+  .flow-box.highlight { border-color: var(--accent); color: var(--accent); }
+  .flow-box.blue { border-color: var(--accent2); color: var(--accent2); }
+  .flow-box.purple { border-color: var(--accent3); color: var(--accent3); }
+  .flow-box.green { border-color: var(--accent4); color: var(--accent4); }
+  .flow-arrow {
+    color: var(--text-muted);
+    font-size: 20px;
+    padding: 0 12px;
+    padding-top: 0;
+    margin-bottom: 28px;
+  }
+  .flow-label { font-size: 10px; color: var(--text-muted); margin-top: 6px; max-width: 90px; line-height: 1.3; }
+
+  /* ── TAG ── */
+  .tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    margin: 2px;
+  }
+  .tag.lazy { background: rgba(249,115,22,.15); color: var(--accent); }
+  .tag.action { background: rgba(56,189,248,.15); color: var(--accent2); }
+
+  /* ── PROGRESS ── */
+  .perf-row { display: flex; align-items: center; gap: 14px; margin: 10px 0; }
+  .perf-label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-dim); width: 120px; flex-shrink: 0; }
+  .perf-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .perf-bar { height: 100%; border-radius: 4px; transition: width 1s ease; }
+
+  /* ── TOC ── */
+  .toc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--text-dim);
+    font-size: 13.5px;
+    transition: all .15s;
+  }
+  .toc-item:hover { color: var(--accent); border-color: var(--accent); }
+  .toc-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--accent); opacity: .7; }
+
+  /* ── PARTITION VIZ ── */
+  .partitions { display: flex; gap: 8px; margin: 20px 0; flex-wrap: wrap; }
+  .partition {
+    flex: 1;
+    min-width: 80px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .partition-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-muted); margin-bottom: 6px; }
+  .partition-rows { font-size: 20px; margin-bottom: 4px; }
+  .partition-label { font-size: 11px; color: var(--accent4); }
+
+  /* ── PIPELINE ── */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 20px 0;
+  }
+  .pipe-step {
+    display: flex;
+    align-items: stretch;
+  }
+  .pipe-line {
+    width: 2px;
+    background: var(--border);
+    margin: 0 21px;
+    flex-shrink: 0;
+  }
+  .pipe-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin: 14px 16px 14px 0;
+  }
+  .pipe-content {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 6px 0;
+    flex: 1;
+  }
+  .pipe-op { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; }
+  .pipe-desc { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+  /* responsive */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    main { padding: 30px 20px; }
+    .hero { padding: 40px 20px; }
+    .spark-logo { display: none; }
+    .toc-grid { grid-template-columns: 1fr; }
+    .flow { gap: 0; }
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* inline code */
+  p code, li code { background: var(--code-bg); padding: 2px 7px; border-radius: 3px; font-size: 12px; color: var(--accent2); font-family: 'IBM Plex Mono', monospace; }
+  ul { padding-left: 22px; color: var(--text-dim); }
+  li { margin-bottom: 6px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-label">Complete Reference · v3.5</div>
+  <h1>Py<span>Spark</span><br>Documentation</h1>
+  <p class="hero-sub">Distributed computing with Apache Spark and Python — from first principles to production patterns.</p>
+  <div class="hero-badges">
+    <span class="badge orange">Apache Spark 3.5</span>
+    <span class="badge blue">Python 3.9+</span>
+    <span class="badge purple">Scala JVM</span>
+    <span class="badge green">Distributed</span>
+  </div>
+  <div class="spark-logo">⚡</div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-title">Contents</div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Getting Started</div>
+      <a class="nav-item active" href="#overview">Overview</a>
+      <a class="nav-item" href="#architecture">Architecture</a>
+      <a class="nav-item" href="#install">Installation & Setup</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Core Concepts</div>
+      <a class="nav-item" href="#rdd">RDDs</a>
+      <a class="nav-item" href="#dataframe">DataFrames</a>
+      <a class="nav-item" href="#dataset">Datasets</a>
+      <a class="nav-item" href="#transformations">Transformations & Actions</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">APIs</div>
+      <a class="nav-item" href="#sparksql">Spark SQL</a>
+      <a class="nav-item" href="#streaming">Structured Streaming</a>
+      <a class="nav-item" href="#mllib">MLlib</a>
+      <a class="nav-item" href="#graphx">GraphFrames</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Advanced</div>
+      <a class="nav-item" href="#optimization">Performance & Tuning</a>
+      <a class="nav-item" href="#deployment">Cluster Deployment</a>
+      <a class="nav-item" href="#best-practices">Best Practices</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- 0: TOC -->
+    <div class="section" id="toc">
+      <div class="section-header">
+        <span class="section-num">00</span>
+        <h2>Quick Navigation</h2>
+      </div>
+      <div class="toc-grid">
+        <a href="#overview" class="toc-item"><span class="toc-num">01</span> Overview &amp; What is PySpark</a>
+        <a href="#architecture" class="toc-item"><span class="toc-num">02</span> Architecture Deep Dive</a>
+        <a href="#install" class="toc-item"><span class="toc-num">03</span> Installation &amp; Setup</a>
+        <a href="#rdd" class="toc-item"><span class="toc-num">04</span> RDDs</a>
+        <a href="#dataframe" class="toc-item"><span class="toc-num">05</span> DataFrames</a>
+        <a href="#transformations" class="toc-item"><span class="toc-num">06</span> Transformations &amp; Actions</a>
+        <a href="#sparksql" class="toc-item"><span class="toc-num">07</span> Spark SQL</a>
+        <a href="#streaming" class="toc-item"><span class="toc-num">08</span> Structured Streaming</a>
+        <a href="#mllib" class="toc-item"><span class="toc-num">09</span> MLlib</a>
+        <a href="#optimization" class="toc-item"><span class="toc-num">10</span> Performance &amp; Tuning</a>
+        <a href="#deployment" class="toc-item"><span class="toc-num">11</span> Cluster Deployment</a>
+        <a href="#best-practices" class="toc-item"><span class="toc-num">12</span> Best Practices</a>
+      </div>
+    </div>
+
+    <!-- 1: OVERVIEW -->
+    <div class="section" id="overview">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2>Overview</h2>
+      </div>
+
+      <p>PySpark is the Python API for <strong>Apache Spark</strong>, an open-source, distributed computing system that provides an interface for programming entire clusters with implicit data parallelism and fault tolerance.</p>
+      <p>Originally developed at UC Berkeley's AMPLab in 2009 and later donated to Apache, Spark processes data at massive scale — up to 100× faster than Hadoop MapReduce through in-memory computing.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">In-Memory Speed</div>
+          <div class="card-desc">Up to 100× faster than MapReduce by caching data in RAM across nodes.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🐍</div>
+          <div class="card-title">Python Native</div>
+          <div class="card-desc">Full Python API with DataFrame, SQL, ML, and Streaming support.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔀</div>
+          <div class="card-title">Unified Engine</div>
+          <div class="card-desc">Batch, streaming, ML, and graph processing in one platform.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🌐</div>
+          <div class="card-title">Any Scale</div>
+          <div class="card-desc">From laptop to thousands of nodes, the same code runs everywhere.</div>
+        </div>
+      </div>
+
+      <!-- Ecosystem Chart -->
+      <div class="chart-wrap">
+        <div class="chart-title">Spark Ecosystem Components</div>
+        <div class="chart-sub">Usage popularity across data engineering workloads (2024 survey)</div>
+        <canvas id="ecosystemChart"></canvas>
+      </div>
+
+      <h3>Spark vs Hadoop MapReduce</h3>
+      <div class="chart-wrap">
+        <div class="chart-title">Performance Comparison</div>
+        <div class="chart-sub">Relative throughput — higher is better</div>
+        <canvas id="perfChart"></canvas>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Feature</th><th>Spark</th><th>Hadoop MapReduce</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Processing</td><td>In-memory + disk</td><td>Disk only</td></tr>
+            <tr><td>Speed</td><td>Up to 100× faster</td><td>Baseline</td></tr>
+            <tr><td>Ease of use</td><td>Rich APIs (Python, Scala, Java, R)</td><td>Verbose Java API</td></tr>
+            <tr><td>Streaming</td><td>Native (micro-batch + continuous)</td><td>Requires Storm/Flink</td></tr>
+            <tr><td>ML support</td><td>Built-in MLlib</td><td>Mahout (separate)</td></tr>
+            <tr><td>Graph processing</td><td>GraphX / GraphFrames</td><td>None native</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2: ARCHITECTURE -->
+    <div class="section" id="architecture">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>Architecture</h2>
+      </div>
+
+      <p>Spark follows a <strong>master-worker</strong> architecture. The driver program runs the main function and coordinates distributed operations across worker nodes via a cluster manager.</p>
+
+      <!-- Architecture SVG -->
+      <div class="arch-diagram">
+        <svg width="100%" viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+            </marker>
+          </defs>
+
+          <!-- USER APP -->
+          <rect x="310" y="10" width="140" height="50" rx="6" fill="#1a2235" stroke="#f97316" stroke-width="1.5"/>
+          <text x="380" y="30" text-anchor="middle" fill="#f97316" font-size="10" font-weight="600" letter-spacing="1">USER PROGRAM</text>
+          <text x="380" y="48" text-anchor="middle" fill="#94a3b8" font-size="9">(PySpark Script)</text>
+
+          <!-- DRIVER -->
+          <rect x="270" y="100" width="220" height="90" rx="6" fill="#1a2235" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="380" y="122" text-anchor="middle" fill="#38bdf8" font-size="10" font-weight="600" letter-spacing="1">DRIVER PROCESS</text>
+          <rect x="290" y="130" width="80" height="24" rx="3" fill="#0d1117" stroke="#1e2d45"/>
+          <text x="330" y="147" text-anchor="middle" fill="#94a3b8" font-size="9">SparkContext</text>
+          <rect x="390" y="130" width="80" height="24" rx="3" fill="#0d1117" stroke="#1e2d45"/>
+          <text x="430" y="147" text-anchor="middle" fill="#94a3b8" font-size="9">DAG Scheduler</text>
+          <text x="380" y="178" text-anchor="middle" fill="#64748b" font-size="8">Task Scheduler</text>
+
+          <!-- CLUSTER MANAGER -->
+          <rect x="550" y="100" width="180" height="60" rx="6" fill="#1a2235" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="640" y="122" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="600" letter-spacing="1">CLUSTER MANAGER</text>
+          <text x="640" y="146" text-anchor="middle" fill="#64748b" font-size="8.5">Standalone / YARN / Mesos / K8s</text>
+
+          <!-- EXECUTORS -->
+          <rect x="60" y="280" width="160" height="130" rx="6" fill="#1a2235" stroke="#34d399" stroke-width="1.5"/>
+          <text x="140" y="302" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600" letter-spacing="1">EXECUTOR 1</text>
+          <rect x="76" y="312" width="60" height="20" rx="3" fill="#0d1117" stroke="#1e2d45"/>
+          <text x="106" y="327" text-anchor="middle" fill="#94a3b8" font-size="8.5">Task</text>
+          <rect x="146" y="312" width="60" height="20" rx="3" fill="#0d1117" stroke="#1e2d45"/>
+          <text x="176" y="327" text-anchor="middle" fill="#94a3b8" font-size="8.5">Task</text>
+          <rect x="76" y="342" width="130" height="20" rx="3" fill="#0f2018" stroke="#34d399" stroke-opacity=".4"/>
+          <text x="141" y="357" text-anchor="middle" fill="#34d399" font-size="8">Cache / Memory</text>
+          <text x="140" y="385" text-anchor="middle" fill="#64748b" font-size="8">JVM Process</text>
+          <text x="140" y="400" text-anchor="middle" fill="#64748b" font-size="8">Worker Node 1</text>
+
+          <rect x="300" y="280" width="160" height="130" rx="6" fill="#1a2235" stroke="#34d399" stroke-width="1.5"/>
+          <text x="380" y="302" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600" letter-spacing="1">EXECUTOR 2</text>
+          <rect x="316" y="312" width="60" height="20" rx="3" fill="#0d1117" stroke="#1e2d45"/>
+          <text x="346" y="327" text-anchor="middle" fill="#94a3b8" font-size="8.5">Task</text>
+          <rect x="386" y="312" width="60" height="20" rx="3" fill="#0d1117" stroke="#1e2d45"/>
+          <text x="416" y="327" text-anchor="middle" fill="#94a3b8" font-size="8.5">Task</text>
+          <rect x="316" y="342" width="130" height="20" rx="3" fill="#0f2018" stroke="#34d399" stroke-opacity=".4"/>
+          <text x="381" y="357" text-anchor="middle" fill="#34d399" font-size="8">Cache / Memory</text>
+          <text x="380" y="385" text-anchor="middle" fill="#64748b" font-size="8">JVM Process</text>
+          <text x="380" y="400" text-anchor="middle" fill="#64748b" font-size="8">Worker Node 2</text>
+
+          <rect x="540" y="280" width="160" height="130" rx="6" fill="#1a2235" stroke="#34d399" stroke-width="1.5"/>
+          <text x="620" y="302" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600" letter-spacing="1">EXECUTOR N</text>
+          <rect x="556" y="312" width="60" height="20" rx="3" fill="#0d1117" stroke="#1e2d45"/>
+          <text x="586" y="327" text-anchor="middle" fill="#94a3b8" font-size="8.5">Task</text>
+          <rect x="626" y="312" width="60" height="20" rx="3" fill="#0d1117" stroke="#1e2d45"/>
+          <text x="656" y="327" text-anchor="middle" fill="#94a3b8" font-size="8.5">Task</text>
+          <rect x="556" y="342" width="130" height="20" rx="3" fill="#0f2018" stroke="#34d399" stroke-opacity=".4"/>
+          <text x="621" y="357" text-anchor="middle" fill="#34d399" font-size="8">Cache / Memory</text>
+          <text x="620" y="385" text-anchor="middle" fill="#64748b" font-size="8">JVM Process</text>
+          <text x="620" y="400" text-anchor="middle" fill="#64748b" font-size="8">Worker Node N</text>
+
+          <!-- Arrows -->
+          <line x1="380" y1="60" x2="380" y2="99" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <line x1="490" y1="140" x2="549" y2="130" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <line x1="380" y1="190" x2="140" y2="279" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+          <line x1="380" y1="190" x2="380" y2="279" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+          <line x1="380" y1="190" x2="620" y2="279" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+
+          <!-- Labels -->
+          <text x="406" y="82" fill="#64748b" font-size="8.5">coordinates</text>
+          <text x="504" y="126" fill="#64748b" font-size="8.5">requests resources</text>
+          <text x="180" y="232" fill="#64748b" font-size="8" text-anchor="middle">launches tasks</text>
+        </svg>
+      </div>
+
+      <h3>Key Components</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title">Driver Program</div>
+          <div class="card-desc">Runs the <code>main()</code> function, creates <code>SparkContext</code>, converts user code into tasks, and schedules them on executors.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">SparkContext</div>
+          <div class="card-desc">Entry point for Spark functionality. Connects to cluster manager, creates RDDs, accumulators, and broadcast variables.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Executor</div>
+          <div class="card-desc">JVM process on worker nodes. Runs tasks assigned by driver, reports results, stores data in cache.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">DAG Scheduler</div>
+          <div class="card-desc">Converts logical execution plan into a directed acyclic graph of stages, optimising for data locality.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Task Scheduler</div>
+          <div class="card-desc">Assigns individual tasks from stages to executor slots, respecting data locality preferences.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Cluster Manager</div>
+          <div class="card-desc">Allocates resources. Options: Standalone, Apache YARN, Apache Mesos, or Kubernetes.</div>
+        </div>
+      </div>
+
+      <h3>DAG Execution Model</h3>
+      <p>Spark builds a <strong>Directed Acyclic Graph (DAG)</strong> of operations before executing. This allows query optimization, fault recovery, and stage-level parallelism.</p>
+
+      <div class="pipeline">
+        <div class="pipe-step">
+          <div style="display:flex;align-items:center;gap:12px;width:100%">
+            <div class="pipe-dot" style="background:var(--accent)"></div>
+            <div class="pipe-content">
+              <div class="pipe-op" style="color:var(--accent)">Stage 1 — Read + Map</div>
+              <div class="pipe-desc">Read data from HDFS/S3 → apply map transformations (narrow dependency)</div>
+            </div>
+          </div>
+        </div>
+        <div style="width:2px;height:20px;background:var(--border);margin-left:5px"></div>
+        <div class="pipe-step">
+          <div style="display:flex;align-items:center;gap:12px;width:100%">
+            <div class="pipe-dot" style="background:var(--accent3)"></div>
+            <div class="pipe-content">
+              <div class="pipe-op" style="color:var(--accent3)">Shuffle Boundary</div>
+              <div class="pipe-desc">Wide dependency (groupBy, join) — data redistribution across network</div>
+            </div>
+          </div>
+        </div>
+        <div style="width:2px;height:20px;background:var(--border);margin-left:5px"></div>
+        <div class="pipe-step">
+          <div style="display:flex;align-items:center;gap:12px;width:100%">
+            <div class="pipe-dot" style="background:var(--accent2)"></div>
+            <div class="pipe-content">
+              <div class="pipe-op" style="color:var(--accent2)">Stage 2 — Aggregate</div>
+              <div class="pipe-desc">Aggregation, reduce, sort on shuffled partitions</div>
+            </div>
+          </div>
+        </div>
+        <div style="width:2px;height:20px;background:var(--border);margin-left:5px"></div>
+        <div class="pipe-step">
+          <div style="display:flex;align-items:center;gap:12px;width:100%">
+            <div class="pipe-dot" style="background:var(--accent4)"></div>
+            <div class="pipe-content">
+              <div class="pipe-op" style="color:var(--accent4)">Action — Write Output</div>
+              <div class="pipe-desc">Trigger execution; write results to sink (file, database, stream)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3: INSTALL -->
+    <div class="section" id="install">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>Installation &amp; Setup</h2>
+      </div>
+
+      <h4>Prerequisites</h4>
+      <ul>
+        <li>Java 8 or Java 11 (JDK) — required for the JVM</li>
+        <li>Python 3.8+ with <code>pip</code></li>
+        <li>Apache Spark binaries (or install via <code>pyspark</code> package which bundles Spark)</li>
+      </ul>
+
+      <h4>Install via pip</h4>
+      <div class="code-block" data-lang="shell">
+        <pre><span class="cm"># Install PySpark (bundles Apache Spark)</span>
+pip install pyspark
+
+<span class="cm"># Install with extras</span>
+pip install pyspark[sql]       <span class="cm"># Spark SQL</span>
+pip install pyspark[ml]        <span class="cm"># MLlib</span>
+pip install pyspark[streaming] <span class="cm"># Structured Streaming</span>
+pip install pyspark[pandas_on_spark]  <span class="cm"># Pandas API</span></pre>
+      </div>
+
+      <h4>First SparkSession</h4>
+      <div class="code-block" data-lang="python">
+        <pre><span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession
+
+<span class="cm"># Create or get existing session</span>
+spark = SparkSession.builder \
+    .appName(<span class="str">"MyApp"</span>) \
+    .master(<span class="str">"local[*]"</span>) \          <span class="cm"># local mode: all cores</span>
+    .config(<span class="str">"spark.executor.memory"</span>, <span class="str">"4g"</span>) \
+    .config(<span class="str">"spark.driver.memory"</span>, <span class="str">"2g"</span>) \
+    .getOrCreate()
+
+<span class="cm"># Access underlying SparkContext</span>
+sc = spark.sparkContext
+sc.setLogLevel(<span class="str">"WARN"</span>)
+
+<span class="fn">print</span>(spark.version)  <span class="cm"># e.g., "3.5.0"</span></pre>
+      </div>
+
+      <div class="callout info">
+        <strong>💡 Tip</strong>
+        Use <code>local[*]</code> to use all available CPU cores. Use <code>local[4]</code> for exactly 4 threads. Use <code>spark://master:7077</code> to connect to a standalone cluster.
+      </div>
+
+      <h4>Master URL Options</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Master URL</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>local</code></td><td>Single thread (no parallelism)</td></tr>
+            <tr><td><code>local[N]</code></td><td>N worker threads</td></tr>
+            <tr><td><code>local[*]</code></td><td>As many threads as CPU cores</td></tr>
+            <tr><td><code>spark://HOST:PORT</code></td><td>Spark Standalone cluster</td></tr>
+            <tr><td><code>yarn</code></td><td>Apache YARN cluster</td></tr>
+            <tr><td><code>k8s://HOST:PORT</code></td><td>Kubernetes cluster</td></tr>
+            <tr><td><code>mesos://HOST:PORT</code></td><td>Apache Mesos cluster</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4: RDD -->
+    <div class="section" id="rdd">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>Resilient Distributed Datasets (RDDs)</h2>
+      </div>
+
+      <p>RDDs are the fundamental data structure in Spark — an immutable, partitioned collection of elements that can be operated on in parallel. RDDs provide fault tolerance through <strong>lineage</strong> (recomputing lost data from its transformation history).</p>
+
+      <div class="callout warn">
+        <strong>⚠️ Note</strong>
+        In most cases, prefer DataFrames over RDDs. DataFrames leverage the Catalyst query optimizer and Tungsten execution engine for much better performance. Use RDDs only when you need fine-grained control.
+      </div>
+
+      <h3>RDD Properties</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title">Immutable</div>
+          <div class="card-desc">Once created, RDDs cannot be changed. Transformations create new RDDs.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Partitioned</div>
+          <div class="card-desc">Data is split across partitions distributed on worker nodes.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Lazy</div>
+          <div class="card-desc">Transformations are deferred; computed only when an action is called.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Fault-Tolerant</div>
+          <div class="card-desc">Lost partitions can be recomputed using the lineage graph.</div>
+        </div>
+      </div>
+
+      <!-- Partition visualization -->
+      <h3>Partitioning</h3>
+      <p>Each RDD is divided into <em>partitions</em>. Each partition is processed by one task on one executor core.</p>
+      <div class="partitions">
+        <div class="partition"><div class="partition-num">PARTITION 0</div><div class="partition-rows">🔵</div><div class="partition-label">rows 0–249k</div></div>
+        <div class="partition"><div class="partition-num">PARTITION 1</div><div class="partition-rows">🟠</div><div class="partition-label">rows 250k–499k</div></div>
+        <div class="partition"><div class="partition-num">PARTITION 2</div><div class="partition-rows">🟣</div><div class="partition-label">rows 500k–749k</div></div>
+        <div class="partition"><div class="partition-num">PARTITION 3</div><div class="partition-rows">🟢</div><div class="partition-label">rows 750k–999k</div></div>
+        <div class="partition"><div class="partition-num">PARTITION N</div><div class="partition-rows">⚪</div><div class="partition-label">remaining rows</div></div>
+      </div>
+
+      <h4>Creating RDDs</h4>
+      <div class="code-block" data-lang="python">
+        <pre><span class="cm"># From Python collection</span>
+rdd1 = sc.parallelize([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>], numSlices=<span class="num">4</span>)
+
+<span class="cm"># From text file (each line = one element)</span>
+rdd2 = sc.textFile(<span class="str">"hdfs://path/to/file.txt"</span>)
+rdd3 = sc.textFile(<span class="str">"s3a://bucket/data/*.csv"</span>)
+
+<span class="cm"># From multiple files</span>
+rdd4 = sc.wholeTextFiles(<span class="str">"/data/logs/"</span>)  <span class="cm"># (filename, content)</span>
+
+<span class="cm"># Check number of partitions</span>
+<span class="fn">print</span>(rdd1.getNumPartitions())  <span class="cm"># 4</span></pre>
+      </div>
+
+      <h4>RDD Transformations</h4>
+      <div class="code-block" data-lang="python">
+        <pre>numbers = sc.parallelize(<span class="fn">range</span>(<span class="num">1</span>, <span class="num">11</span>))
+
+<span class="cm"># map — apply function to each element</span>
+squared = numbers.<span class="fn">map</span>(<span class="kw">lambda</span> x: x ** <span class="num">2</span>)
+
+<span class="cm"># filter — keep elements matching predicate</span>
+evens = numbers.<span class="fn">filter</span>(<span class="kw">lambda</span> x: x % <span class="num">2</span> == <span class="num">0</span>)
+
+<span class="cm"># flatMap — map then flatten</span>
+words = sc.parallelize([<span class="str">"hello world"</span>, <span class="str">"foo bar"</span>])
+tokens = words.<span class="fn">flatMap</span>(<span class="kw">lambda</span> line: line.<span class="fn">split</span>())
+
+<span class="cm"># reduceByKey — aggregate by key</span>
+pairs = sc.parallelize([(<span class="str">"a"</span>, <span class="num">1</span>), (<span class="str">"b"</span>, <span class="num">2</span>), (<span class="str">"a"</span>, <span class="num">3</span>)])
+sums  = pairs.<span class="fn">reduceByKey</span>(<span class="kw">lambda</span> x, y: x + y)  <span class="cm"># [("a",4),("b",2)]</span>
+
+<span class="cm"># groupByKey — group values by key</span>
+groups = pairs.<span class="fn">groupByKey</span>()
+
+<span class="cm"># sortByKey</span>
+sorted_pairs = pairs.<span class="fn">sortByKey</span>(ascending=<span class="kw">True</span>)
+
+<span class="cm"># distinct</span>
+unique = numbers.<span class="fn">distinct</span>()
+
+<span class="cm"># union, intersection, subtract</span>
+rdd_a = sc.parallelize([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>])
+rdd_b = sc.parallelize([<span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>])
+union_rdd = rdd_a.<span class="fn">union</span>(rdd_b)
+inter_rdd = rdd_a.<span class="fn">intersection</span>(rdd_b)
+diff_rdd  = rdd_a.<span class="fn">subtract</span>(rdd_b)</pre>
+      </div>
+
+      <h4>RDD Actions</h4>
+      <div class="code-block" data-lang="python">
+        <pre>rdd = sc.parallelize([<span class="num">3</span>, <span class="num">1</span>, <span class="num">4</span>, <span class="num">1</span>, <span class="num">5</span>, <span class="num">9</span>])
+
+<span class="cm"># collect — return all elements to driver</span>
+result = rdd.<span class="fn">collect</span>()            <span class="cm"># [3,1,4,1,5,9]</span>
+
+<span class="cm"># count — number of elements</span>
+n = rdd.<span class="fn">count</span>()                   <span class="cm"># 6</span>
+
+<span class="cm"># first, take</span>
+first = rdd.<span class="fn">first</span>()              <span class="cm"># 3</span>
+top3  = rdd.<span class="fn">take</span>(<span class="num">3</span>)             <span class="cm"># [3,1,4]</span>
+top3s = rdd.<span class="fn">top</span>(<span class="num">3</span>)              <span class="cm"># [9,5,4]</span>
+
+<span class="cm"># reduce</span>
+total = rdd.<span class="fn">reduce</span>(<span class="kw">lambda</span> a, b: a + b)   <span class="cm"># 23</span>
+
+<span class="cm"># aggregate — more flexible reduce</span>
+stats = rdd.<span class="fn">aggregate</span>(
+    (<span class="num">0</span>, <span class="num">0</span>),
+    <span class="kw">lambda</span> acc, x: (acc[<span class="num">0</span>] + x, acc[<span class="num">1</span>] + <span class="num">1</span>),
+    <span class="kw">lambda</span> a, b: (a[<span class="num">0</span>] + b[<span class="num">0</span>], a[<span class="num">1</span>] + b[<span class="num">1</span>])
+)
+
+<span class="cm"># countByValue, countByKey</span>
+vc = rdd.<span class="fn">countByValue</span>()   <span class="cm"># {3:1, 1:2, 4:1, 5:1, 9:1}</span>
+
+<span class="cm"># saveAsTextFile</span>
+rdd.<span class="fn">saveAsTextFile</span>(<span class="str">"hdfs://output/path"</span>)</pre>
+      </div>
+    </div>
+
+    <!-- 5: DATAFRAME -->
+    <div class="section" id="dataframe">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2>DataFrames</h2>
+      </div>
+
+      <p>A DataFrame is a distributed collection of data organized into named columns — conceptually equivalent to a table in a relational database or a Pandas DataFrame, but distributed. DataFrames use Spark's Catalyst optimizer and Tungsten engine for dramatic performance improvements over RDDs.</p>
+
+      <h3>Creating DataFrames</h3>
+      <div class="code-block" data-lang="python">
+        <pre><span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> *
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+
+<span class="cm"># ── From Python list ─────────────────────────────</span>
+data = [(<span class="str">"Alice"</span>, <span class="num">34</span>, <span class="str">"Engineering"</span>),
+        (<span class="str">"Bob"</span>,   <span class="num">28</span>, <span class="str">"Marketing"</span>  ),
+        (<span class="str">"Carol"</span>, <span class="num">41</span>, <span class="str">"Engineering"</span>)]
+
+schema = StructType([
+    StructField(<span class="str">"name"</span>,       StringType(),  nullable=<span class="kw">False</span>),
+    StructField(<span class="str">"age"</span>,        IntegerType(), nullable=<span class="kw">True</span>),
+    StructField(<span class="str">"department"</span>, StringType(),  nullable=<span class="kw">True</span>),
+])
+
+df = spark.createDataFrame(data, schema=schema)
+
+<span class="cm"># ── From CSV ──────────────────────────────────────</span>
+df_csv = spark.read \
+    .option(<span class="str">"header"</span>,          <span class="str">"true"</span>) \
+    .option(<span class="str">"inferSchema"</span>,     <span class="str">"true"</span>) \
+    .option(<span class="str">"nullValue"</span>,       <span class="str">"NA"</span>)   \
+    .csv(<span class="str">"data/employees.csv"</span>)
+
+<span class="cm"># ── From JSON / Parquet / ORC ─────────────────────</span>
+df_json    = spark.read.json(<span class="str">"data/events.json"</span>)
+df_parquet = spark.read.parquet(<span class="str">"data/sales/"</span>)
+df_orc     = spark.read.orc(<span class="str">"data/logs/"</span>)
+
+<span class="cm"># ── From Pandas ───────────────────────────────────</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+pdf = pd.DataFrame({<span class="str">"x"</span>: [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>], <span class="str">"y"</span>: [<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>]})
+df_from_pandas = spark.createDataFrame(pdf)</pre>
+      </div>
+
+      <h3>DataFrame Operations</h3>
+      <div class="code-block" data-lang="python">
+        <pre><span class="cm"># ── Inspection ────────────────────────────────────</span>
+df.<span class="fn">show</span>(<span class="num">5</span>)              <span class="cm"># print first 5 rows</span>
+df.<span class="fn">printSchema</span>()        <span class="cm"># print schema tree</span>
+df.<span class="fn">dtypes</span>               <span class="cm"># list of (name, type) tuples</span>
+df.<span class="fn">describe</span>().<span class="fn">show</span>()    <span class="cm"># descriptive statistics</span>
+df.<span class="fn">count</span>()              <span class="cm"># row count (action)</span>
+df.<span class="fn">columns</span>             <span class="cm"># list of column names</span>
+
+<span class="cm"># ── Selection ─────────────────────────────────────</span>
+df.<span class="fn">select</span>(<span class="str">"name"</span>, <span class="str">"age"</span>)
+df.<span class="fn">select</span>(df.name, df.age + <span class="num">1</span>)
+df.<span class="fn">select</span>(F.<span class="fn">col</span>(<span class="str">"age"</span>) * <span class="num">2</span>)
+
+<span class="cm"># ── Filtering ─────────────────────────────────────</span>
+df.<span class="fn">filter</span>(F.<span class="fn">col</span>(<span class="str">"age"</span>) > <span class="num">30</span>)
+df.<span class="fn">filter</span>((df.age > <span class="num">25</span>) &amp; (df.department == <span class="str">"Engineering"</span>))
+df.<span class="fn">where</span>(<span class="str">"age > 30"</span>)    <span class="cm"># SQL-string syntax</span>
+
+<span class="cm"># ── Adding / Renaming columns ──────────────────────</span>
+df.<span class="fn">withColumn</span>(<span class="str">"age_squared"</span>, F.<span class="fn">col</span>(<span class="str">"age"</span>) ** <span class="num">2</span>)
+df.<span class="fn">withColumnRenamed</span>(<span class="str">"name"</span>, <span class="str">"employee_name"</span>)
+df.<span class="fn">drop</span>(<span class="str">"department"</span>)
+
+<span class="cm"># ── Sorting ───────────────────────────────────────</span>
+df.<span class="fn">orderBy</span>(F.<span class="fn">col</span>(<span class="str">"age"</span>).<span class="fn">desc</span>())
+df.<span class="fn">sort</span>(<span class="str">"department"</span>, <span class="str">"age"</span>)
+
+<span class="cm"># ── Grouping &amp; Aggregation ────────────────────────</span>
+df.<span class="fn">groupBy</span>(<span class="str">"department"</span>) \
+  .<span class="fn">agg</span>(F.<span class="fn">count</span>(<span class="str">"*"</span>).<span class="fn">alias</span>(<span class="str">"headcount"</span>),
+       F.<span class="fn">avg</span>(<span class="str">"age"</span>).<span class="fn">alias</span>(<span class="str">"avg_age"</span>),
+       F.<span class="fn">max</span>(<span class="str">"age"</span>).<span class="fn">alias</span>(<span class="str">"max_age"</span>)) \
+  .<span class="fn">show</span>()
+
+<span class="cm"># ── Joins ─────────────────────────────────────────</span>
+dept_df = spark.createDataFrame(
+    [(<span class="str">"Engineering"</span>, <span class="str">"San Francisco"</span>),
+     (<span class="str">"Marketing"</span>,   <span class="str">"New York"</span>)],
+    [<span class="str">"dept"</span>, <span class="str">"location"</span>])
+
+joined = df.<span class="fn">join</span>(dept_df, df.department == dept_df.dept, <span class="str">"left"</span>)
+
+<span class="cm"># ── Writing ───────────────────────────────────────</span>
+df.<span class="fn">write</span> \
+  .<span class="fn">mode</span>(<span class="str">"overwrite"</span>) \
+  .<span class="fn">partitionBy</span>(<span class="str">"department"</span>) \
+  .<span class="fn">parquet</span>(<span class="str">"output/employees/"</span>)</pre>
+      </div>
+
+      <h3>Schema Types</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>PySpark Type</th><th>Python Equivalent</th><th>SQL Type</th></tr></thead>
+          <tbody>
+            <tr><td><code>StringType()</code></td><td>str</td><td>STRING / VARCHAR</td></tr>
+            <tr><td><code>IntegerType()</code></td><td>int (32-bit)</td><td>INT</td></tr>
+            <tr><td><code>LongType()</code></td><td>int (64-bit)</td><td>BIGINT</td></tr>
+            <tr><td><code>FloatType()</code></td><td>float (32-bit)</td><td>FLOAT</td></tr>
+            <tr><td><code>DoubleType()</code></td><td>float (64-bit)</td><td>DOUBLE</td></tr>
+            <tr><td><code>BooleanType()</code></td><td>bool</td><td>BOOLEAN</td></tr>
+            <tr><td><code>TimestampType()</code></td><td>datetime</td><td>TIMESTAMP</td></tr>
+            <tr><td><code>DateType()</code></td><td>date</td><td>DATE</td></tr>
+            <tr><td><code>ArrayType(T)</code></td><td>list</td><td>ARRAY&lt;T&gt;</td></tr>
+            <tr><td><code>MapType(K,V)</code></td><td>dict</td><td>MAP&lt;K,V&gt;</td></tr>
+            <tr><td><code>StructType([])</code></td><td>dict / namedtuple</td><td>STRUCT&lt;...&gt;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 6: TRANSFORMATIONS & ACTIONS -->
+    <div class="section" id="transformations">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2>Transformations &amp; Actions</h2>
+      </div>
+
+      <p>Every operation in Spark is either a <strong>transformation</strong> (lazy, returns new Dataset) or an <strong>action</strong> (eager, triggers computation and returns result).</p>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Lazy Evaluation Flow</div>
+        <div class="chart-sub">Transformations build a logical plan; actions execute it</div>
+        <div class="flow" style="margin-top:16px">
+          <div class="flow-step">
+            <div class="flow-box highlight">read()</div>
+            <div class="flow-label">Source</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box">filter()</div>
+            <div class="flow-label"><span class="tag lazy">Lazy</span></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box">groupBy()</div>
+            <div class="flow-label"><span class="tag lazy">Lazy</span></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box">agg()</div>
+            <div class="flow-label"><span class="tag lazy">Lazy</span></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box blue">show()</div>
+            <div class="flow-label"><span class="tag action">Action ⚡</span></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Narrow vs Wide Transformations</h3>
+
+      <div class="arch-diagram">
+        <svg width="100%" viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+          <!-- Narrow -->
+          <text x="170" y="20" text-anchor="middle" fill="#34d399" font-size="12" font-weight="600" letter-spacing="1">NARROW DEPENDENCY</text>
+          <text x="170" y="36" text-anchor="middle" fill="#64748b" font-size="9">map, filter, flatMap, sample, union</text>
+
+          <rect x="30" y="55" width="80" height="30" rx="4" fill="#1a2235" stroke="#34d399" stroke-width="1"/>
+          <text x="70" y="75" text-anchor="middle" fill="#94a3b8" font-size="10">Partition 0</text>
+          <rect x="30" y="100" width="80" height="30" rx="4" fill="#1a2235" stroke="#34d399" stroke-width="1"/>
+          <text x="70" y="120" text-anchor="middle" fill="#94a3b8" font-size="10">Partition 1</text>
+          <rect x="30" y="145" width="80" height="30" rx="4" fill="#1a2235" stroke="#34d399" stroke-width="1"/>
+          <text x="70" y="165" text-anchor="middle" fill="#94a3b8" font-size="10">Partition 2</text>
+
+          <rect x="240" y="55" width="80" height="30" rx="4" fill="#0f2018" stroke="#34d399" stroke-width="1"/>
+          <text x="280" y="75" text-anchor="middle" fill="#34d399" font-size="10">Partition 0'</text>
+          <rect x="240" y="100" width="80" height="30" rx="4" fill="#0f2018" stroke="#34d399" stroke-width="1"/>
+          <text x="280" y="120" text-anchor="middle" fill="#34d399" font-size="10">Partition 1'</text>
+          <rect x="240" y="145" width="80" height="30" rx="4" fill="#0f2018" stroke="#34d399" stroke-width="1"/>
+          <text x="280" y="165" text-anchor="middle" fill="#34d399" font-size="10">Partition 2'</text>
+
+          <line x1="110" y1="70" x2="238" y2="70" stroke="#34d399" stroke-width="1.5" stroke-opacity=".6"/>
+          <line x1="110" y1="115" x2="238" y2="115" stroke="#34d399" stroke-width="1.5" stroke-opacity=".6"/>
+          <line x1="110" y1="160" x2="238" y2="160" stroke="#34d399" stroke-width="1.5" stroke-opacity=".6"/>
+
+          <text x="174" y="230" text-anchor="middle" fill="#64748b" font-size="9">No network shuffle needed</text>
+
+          <!-- Wide -->
+          <text x="500" y="20" text-anchor="middle" fill="#f97316" font-size="12" font-weight="600" letter-spacing="1">WIDE DEPENDENCY</text>
+          <text x="500" y="36" text-anchor="middle" fill="#64748b" font-size="9">groupBy, join, distinct, repartition</text>
+
+          <rect x="370" y="55" width="80" height="30" rx="4" fill="#1a2235" stroke="#f97316" stroke-width="1"/>
+          <text x="410" y="75" text-anchor="middle" fill="#94a3b8" font-size="10">Partition 0</text>
+          <rect x="370" y="100" width="80" height="30" rx="4" fill="#1a2235" stroke="#f97316" stroke-width="1"/>
+          <text x="410" y="120" text-anchor="middle" fill="#94a3b8" font-size="10">Partition 1</text>
+          <rect x="370" y="145" width="80" height="30" rx="4" fill="#1a2235" stroke="#f97316" stroke-width="1"/>
+          <text x="410" y="165" text-anchor="middle" fill="#94a3b8" font-size="10">Partition 2</text>
+
+          <rect x="570" y="55" width="80" height="30" rx="4" fill="#1e0e00" stroke="#f97316" stroke-width="1"/>
+          <text x="610" y="75" text-anchor="middle" fill="#f97316" font-size="10">Partition 0'</text>
+          <rect x="570" y="100" width="80" height="30" rx="4" fill="#1e0e00" stroke="#f97316" stroke-width="1"/>
+          <text x="610" y="120" text-anchor="middle" fill="#f97316" font-size="10">Partition 1'</text>
+          <rect x="570" y="145" width="80" height="30" rx="4" fill="#1e0e00" stroke="#f97316" stroke-width="1"/>
+          <text x="610" y="165" text-anchor="middle" fill="#f97316" font-size="10">Partition 2'</text>
+
+          <line x1="450" y1="70" x2="568" y2="70" stroke="#f97316" stroke-width="1" stroke-opacity=".5"/>
+          <line x1="450" y1="70" x2="568" y2="115" stroke="#f97316" stroke-width="1" stroke-opacity=".5"/>
+          <line x1="450" y1="70" x2="568" y2="160" stroke="#f97316" stroke-width="1" stroke-opacity=".5"/>
+          <line x1="450" y1="115" x2="568" y2="70" stroke="#f97316" stroke-width="1" stroke-opacity=".5"/>
+          <line x1="450" y1="115" x2="568" y2="115" stroke="#f97316" stroke-width="1" stroke-opacity=".5"/>
+          <line x1="450" y1="115" x2="568" y2="160" stroke="#f97316" stroke-width="1" stroke-opacity=".5"/>
+          <line x1="450" y1="160" x2="568" y2="70" stroke="#f97316" stroke-width="1" stroke-opacity=".5"/>
+          <line x1="450" y1="160" x2="568" y2="115" stroke="#f97316" stroke-width="1" stroke-opacity=".5"/>
+          <line x1="450" y1="160" x2="568" y2="160" stroke="#f97316" stroke-width="1" stroke-opacity=".5"/>
+
+          <text x="500" y="230" text-anchor="middle" fill="#64748b" font-size="9">Network shuffle — stage boundary</text>
+        </svg>
+      </div>
+
+      <h3>Common Functions Reference</h3>
+      <div class="code-block" data-lang="python">
+        <pre><span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+
+<span class="cm"># ── String functions ──────────────────────────────</span>
+F.<span class="fn">upper</span>(<span class="str">"name"</span>)          <span class="cm"># uppercase</span>
+F.<span class="fn">lower</span>(<span class="str">"name"</span>)          <span class="cm"># lowercase</span>
+F.<span class="fn">trim</span>(<span class="str">"email"</span>)           <span class="cm"># strip whitespace</span>
+F.<span class="fn">concat</span>(<span class="str">"first"</span>, F.<span class="fn">lit</span>(<span class="str">" "</span>), <span class="str">"last"</span>)
+F.<span class="fn">regexp_replace</span>(<span class="str">"phone"</span>, <span class="str">r"[^\d]"</span>, <span class="str">""</span>)
+F.<span class="fn">split</span>(<span class="str">"tags"</span>, <span class="str">","</span>)       <span class="cm"># string → array</span>
+F.<span class="fn">length</span>(<span class="str">"text"</span>)          <span class="cm"># string length</span>
+
+<span class="cm"># ── Date / Time functions ─────────────────────────</span>
+F.<span class="fn">current_date</span>()
+F.<span class="fn">current_timestamp</span>()
+F.<span class="fn">to_date</span>(<span class="str">"dt_col"</span>, <span class="str">"yyyy-MM-dd"</span>)
+F.<span class="fn">date_diff</span>(<span class="str">"end_date"</span>, <span class="str">"start_date"</span>)
+F.<span class="fn">date_trunc</span>(<span class="str">"month"</span>, <span class="str">"event_time"</span>)
+F.<span class="fn">year</span>(<span class="str">"event_time"</span>),  F.<span class="fn">month</span>(<span class="str">"event_time"</span>)
+
+<span class="cm"># ── Aggregate functions ───────────────────────────</span>
+F.<span class="fn">count</span>(<span class="str">"*"</span>)
+F.<span class="fn">countDistinct</span>(<span class="str">"user_id"</span>)
+F.<span class="fn">sum</span>(<span class="str">"revenue"</span>)
+F.<span class="fn">avg</span>(<span class="str">"score"</span>)
+F.<span class="fn">min</span>(<span class="str">"price"</span>),  F.<span class="fn">max</span>(<span class="str">"price"</span>)
+F.<span class="fn">stddev</span>(<span class="str">"value"</span>)
+F.<span class="fn">collect_list</span>(<span class="str">"tag"</span>)    <span class="cm"># → array (keeps dups)</span>
+F.<span class="fn">collect_set</span>(<span class="str">"tag"</span>)     <span class="cm"># → array (unique)</span>
+F.<span class="fn">first</span>(<span class="str">"name"</span>)
+
+<span class="cm"># ── Window functions ──────────────────────────────</span>
+<span class="kw">from</span> pyspark.sql.window <span class="kw">import</span> Window
+
+w = Window.<span class="fn">partitionBy</span>(<span class="str">"dept"</span>).<span class="fn">orderBy</span>(F.<span class="fn">col</span>(<span class="str">"salary"</span>).<span class="fn">desc</span>())
+
+df.<span class="fn">withColumn</span>(<span class="str">"rank"</span>,       F.<span class="fn">rank</span>().<span class="fn">over</span>(w))
+df.<span class="fn">withColumn</span>(<span class="str">"dense_rank"</span>, F.<span class="fn">dense_rank</span>().<span class="fn">over</span>(w))
+df.<span class="fn">withColumn</span>(<span class="str">"row_num"</span>,    F.<span class="fn">row_number</span>().<span class="fn">over</span>(w))
+df.<span class="fn">withColumn</span>(<span class="str">"running_sum"</span>,
+    F.<span class="fn">sum</span>(<span class="str">"salary"</span>).<span class="fn">over</span>(Window.<span class="fn">partitionBy</span>(<span class="str">"dept"</span>)
+        .<span class="fn">orderBy</span>(<span class="str">"hire_date"</span>)
+        .<span class="fn">rowsBetween</span>(Window.unboundedPreceding, Window.currentRow))
+)</pre>
+      </div>
+    </div>
+
+    <!-- 7: SPARK SQL -->
+    <div class="section" id="sparksql">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <h2>Spark SQL</h2>
+      </div>
+
+      <p>Spark SQL lets you query structured data using standard SQL, mixing SQL expressions with DataFrame/Dataset operations. It uses the same execution engine, so performance is identical regardless of API used.</p>
+
+      <div class="code-block" data-lang="python">
+        <pre><span class="cm"># Register as temp view</span>
+df.<span class="fn">createOrReplaceTempView</span>(<span class="str">"employees"</span>)
+
+<span class="cm"># Run SQL queries</span>
+result = spark.<span class="fn">sql</span>(<span class="str">"""
+    SELECT
+        department,
+        COUNT(*)          AS headcount,
+        AVG(salary)       AS avg_salary,
+        MAX(salary)       AS max_salary,
+        PERCENTILE(salary, 0.5) AS median_salary
+    FROM employees
+    WHERE hire_date >= '2020-01-01'
+    GROUP BY department
+    HAVING COUNT(*) > 5
+    ORDER BY avg_salary DESC
+"""</span>)
+
+result.<span class="fn">show</span>()
+
+<span class="cm"># Global temp views (persist across sessions)</span>
+df.<span class="fn">createOrReplaceGlobalTempView</span>(<span class="str">"global_employees"</span>)
+spark.<span class="fn">sql</span>(<span class="str">"SELECT * FROM global_temp.global_employees"</span>)
+
+<span class="cm"># Caching for repeated queries</span>
+spark.<span class="fn">catalog</span>.<span class="fn">cacheTable</span>(<span class="str">"employees"</span>)
+df.<span class="fn">cache</span>()          <span class="cm"># lazy cache</span>
+df.<span class="fn">persist</span>()        <span class="cm"># alias for cache()</span>
+
+<span class="cm"># Show execution plan</span>
+result.<span class="fn">explain</span>(extended=<span class="kw">True</span>)    <span class="cm"># parsed → analyzed → optimized → physical</span></pre>
+      </div>
+
+      <h3>Catalyst Query Optimizer</h3>
+      <div class="arch-diagram">
+        <svg width="100%" viewBox="0 0 680 100" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+          <defs>
+            <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+            </marker>
+          </defs>
+          <rect x="0"   y="20" width="130" height="50" rx="5" fill="#1a2235" stroke="#f97316" stroke-width="1.2"/>
+          <text x="65"  y="42" text-anchor="middle" fill="#f97316" font-size="9" font-weight="600" letter-spacing="1">SQL / DataFrame</text>
+          <text x="65"  y="58" text-anchor="middle" fill="#64748b" font-size="8.5">Unresolved Plan</text>
+
+          <line x1="130" y1="45" x2="148" y2="45" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+          <rect x="150" y="20" width="130" height="50" rx="5" fill="#1a2235" stroke="#a78bfa" stroke-width="1.2"/>
+          <text x="215" y="42" text-anchor="middle" fill="#a78bfa" font-size="9" font-weight="600" letter-spacing="1">CATALOG</text>
+          <text x="215" y="58" text-anchor="middle" fill="#64748b" font-size="8.5">Analyzed Plan</text>
+
+          <line x1="280" y1="45" x2="298" y2="45" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+          <rect x="300" y="20" width="130" height="50" rx="5" fill="#1a2235" stroke="#38bdf8" stroke-width="1.2"/>
+          <text x="365" y="42" text-anchor="middle" fill="#38bdf8" font-size="9" font-weight="600" letter-spacing="1">OPTIMIZER</text>
+          <text x="365" y="58" text-anchor="middle" fill="#64748b" font-size="8.5">Optimized Plan</text>
+
+          <line x1="430" y1="45" x2="448" y2="45" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+          <rect x="450" y="20" width="130" height="50" rx="5" fill="#1a2235" stroke="#34d399" stroke-width="1.2"/>
+          <text x="515" y="42" text-anchor="middle" fill="#34d399" font-size="9" font-weight="600" letter-spacing="1">CODEGEN</text>
+          <text x="515" y="58" text-anchor="middle" fill="#64748b" font-size="8.5">Physical Plan + RDD</text>
+        </svg>
+      </div>
+
+      <h3>UDFs — User Defined Functions</h3>
+      <div class="code-block" data-lang="python">
+        <pre><span class="kw">from</span> pyspark.sql.functions <span class="kw">import</span> udf
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> StringType
+
+<span class="cm"># Register Python UDF (slower — crosses JVM boundary)</span>
+<span class="kw">def</span> <span class="fn">clean_phone</span>(phone):
+    <span class="kw">import</span> re
+    <span class="kw">return</span> re.<span class="fn">sub</span>(<span class="str">r"[^\d]"</span>, <span class="str">""</span>, phone) <span class="kw">if</span> phone <span class="kw">else None</span>
+
+clean_phone_udf = udf(clean_phone, StringType())
+df.<span class="fn">withColumn</span>(<span class="str">"clean_phone"</span>, <span class="fn">clean_phone_udf</span>(<span class="str">"phone_raw"</span>))
+
+<span class="cm"># Pandas UDF (vectorized — much faster)</span>
+<span class="kw">from</span> pyspark.sql.functions <span class="kw">import</span> pandas_udf
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="kw">@</span><span class="fn">pandas_udf</span>(<span class="str">"double"</span>)
+<span class="kw">def</span> <span class="fn">log_transform</span>(series: pd.Series) -> pd.Series:
+    <span class="kw">import</span> numpy <span class="kw">as</span> np
+    <span class="kw">return</span> np.<span class="fn">log1p</span>(series)
+
+df.<span class="fn">withColumn</span>(<span class="str">"log_revenue"</span>, <span class="fn">log_transform</span>(<span class="str">"revenue"</span>))
+
+<span class="cm"># Register UDF for SQL use</span>
+spark.udf.<span class="fn">register</span>(<span class="str">"clean_phone"</span>, clean_phone, StringType())
+spark.<span class="fn">sql</span>(<span class="str">"SELECT clean_phone(phone) FROM users"</span>)</pre>
+      </div>
+    </div>
+
+    <!-- 8: STREAMING -->
+    <div class="section" id="streaming">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <h2>Structured Streaming</h2>
+      </div>
+
+      <p>Structured Streaming treats a live data stream as a continuously appended table. You write the same DataFrame batch queries and Spark handles the incremental execution, state management, and exactly-once guarantees automatically.</p>
+
+      <!-- Streaming model diagram -->
+      <div class="arch-diagram">
+        <svg width="100%" viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+          <!-- Input -->
+          <text x="10" y="16" fill="#64748b" font-size="9" letter-spacing="1">INPUT STREAM (unbounded table)</text>
+          <rect x="10" y="25" width="50" height="140" rx="4" fill="#1a2235" stroke="#38bdf8" stroke-width="1"/>
+          <text x="35" y="46" text-anchor="middle" fill="#38bdf8" font-size="8">t=1</text>
+          <rect x="10" y="55" width="50" height="24" rx="3" fill="#0d2030" stroke="#38bdf8" stroke-opacity=".4" stroke-width=".8"/>
+          <text x="35" y="73" text-anchor="middle" fill="#64748b" font-size="8">row</text>
+          <rect x="10" y="82" width="50" height="24" rx="3" fill="#0d2030" stroke="#38bdf8" stroke-opacity=".4" stroke-width=".8"/>
+          <text x="35" y="100" text-anchor="middle" fill="#64748b" font-size="8">row</text>
+          <rect x="10" y="109" width="50" height="24" rx="3" fill="#1a2235" stroke="#38bdf8" stroke-opacity=".4" stroke-width=".8"/>
+          <text x="35" y="127" text-anchor="middle" fill="#38bdf8" font-size="8">new →</text>
+          <rect x="10" y="136" width="50" height="24" rx="3" fill="#1a2235" stroke="#38bdf8" stroke-opacity=".8" stroke-width="1"/>
+          <text x="35" y="154" text-anchor="middle" fill="#38bdf8" font-size="8">new →</text>
+
+          <!-- Arrow -->
+          <line x1="62" y1="95" x2="130" y2="95" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <polygon points="130,90 140,95 130,100" fill="#64748b"/>
+
+          <!-- Query box -->
+          <rect x="140" y="55" width="180" height="80" rx="6" fill="#1a2235" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="230" y="78" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="600" letter-spacing="1">STREAMING QUERY</text>
+          <text x="230" y="96" text-anchor="middle" fill="#64748b" font-size="8.5">.filter() .groupBy()</text>
+          <text x="230" y="112" text-anchor="middle" fill="#64748b" font-size="8.5">.agg() .withWatermark()</text>
+          <text x="230" y="128" text-anchor="middle" fill="#64748b" font-size="8.5">Trigger interval</text>
+
+          <!-- Arrow -->
+          <line x1="320" y1="95" x2="388" y2="95" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <polygon points="388,90 398,95 388,100" fill="#64748b"/>
+
+          <!-- Output modes -->
+          <rect x="398" y="30" width="130" height="38" rx="4" fill="#0f2018" stroke="#34d399" stroke-width="1"/>
+          <text x="463" y="46" text-anchor="middle" fill="#34d399" font-size="9" font-weight="600">Append Mode</text>
+          <text x="463" y="60" text-anchor="middle" fill="#64748b" font-size="8">new rows only</text>
+
+          <rect x="398" y="78" width="130" height="38" rx="4" fill="#1e0e00" stroke="#f97316" stroke-width="1"/>
+          <text x="463" y="94" text-anchor="middle" fill="#f97316" font-size="9" font-weight="600">Update Mode</text>
+          <text x="463" y="108" text-anchor="middle" fill="#64748b" font-size="8">changed rows only</text>
+
+          <rect x="398" y="126" width="130" height="38" rx="4" fill="#1a1530" stroke="#a78bfa" stroke-width="1"/>
+          <text x="463" y="142" text-anchor="middle" fill="#a78bfa" font-size="9" font-weight="600">Complete Mode</text>
+          <text x="463" y="156" text-anchor="middle" fill="#64748b" font-size="8">entire result table</text>
+
+          <!-- Arrow to sink -->
+          <line x1="528" y1="95" x2="588" y2="95" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <polygon points="588,90 598,95 588,100" fill="#64748b"/>
+
+          <rect x="598" y="68" width="80" height="54" rx="4" fill="#1a2235" stroke="#64748b" stroke-width="1"/>
+          <text x="638" y="90" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="600">SINK</text>
+          <text x="638" y="106" text-anchor="middle" fill="#64748b" font-size="8">Kafka / S3</text>
+          <text x="638" y="118" text-anchor="middle" fill="#64748b" font-size="8">Console / DB</text>
+        </svg>
+      </div>
+
+      <div class="code-block" data-lang="python">
+        <pre><span class="cm"># ── Read from Kafka ────────────────────────────────</span>
+stream_df = spark.readStream \
+    .format(<span class="str">"kafka"</span>) \
+    .option(<span class="str">"kafka.bootstrap.servers"</span>, <span class="str">"broker:9092"</span>) \
+    .option(<span class="str">"subscribe"</span>, <span class="str">"events"</span>) \
+    .option(<span class="str">"startingOffsets"</span>, <span class="str">"latest"</span>) \
+    .load()
+
+<span class="cm"># Deserialize JSON payload</span>
+from pyspark.sql.types import StructType, StringType, LongType
+<span class="kw">from</span> pyspark.sql.functions <span class="kw">import</span> from_json, col
+
+schema = StructType() \
+    .add(<span class="str">"user_id"</span>, LongType()) \
+    .add(<span class="str">"event"</span>,   StringType()) \
+    .add(<span class="str">"ts"</span>,      LongType())
+
+events = stream_df \
+    .selectExpr(<span class="str">"CAST(value AS STRING) as json_str"</span>) \
+    .select(<span class="fn">from_json</span>(<span class="fn">col</span>(<span class="str">"json_str"</span>), schema).<span class="fn">alias</span>(<span class="str">"data"</span>)) \
+    .select(<span class="str">"data.*"</span>)
+
+<span class="cm"># ── Aggregation with watermark ─────────────────────</span>
+from pyspark.sql.functions <span class="kw">import</span> window, count
+
+windowed = events \
+    .withWatermark(<span class="str">"event_time"</span>, <span class="str">"10 minutes"</span>) \
+    .groupBy(
+        <span class="fn">window</span>(<span class="fn">col</span>(<span class="str">"event_time"</span>), <span class="str">"5 minutes"</span>),
+        <span class="fn">col</span>(<span class="str">"event"</span>)
+    ) \
+    .agg(<span class="fn">count</span>(<span class="str">"*"</span>).<span class="fn">alias</span>(<span class="str">"event_count"</span>))
+
+<span class="cm"># ── Write stream ───────────────────────────────────</span>
+query = windowed.writeStream \
+    .outputMode(<span class="str">"update"</span>) \
+    .format(<span class="str">"parquet"</span>) \
+    .option(<span class="str">"path"</span>,       <span class="str">"s3://bucket/output/"</span>) \
+    .option(<span class="str">"checkpointLocation"</span>, <span class="str">"s3://bucket/checkpoint/"</span>) \
+    .trigger(<span class="fn">processingTime</span>=<span class="str">"30 seconds"</span>) \
+    .start()
+
+query.awaitTermination()</pre>
+      </div>
+    </div>
+
+    <!-- 9: MLLIB -->
+    <div class="section" id="mllib">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <h2>MLlib — Machine Learning</h2>
+      </div>
+
+      <p>Spark MLlib provides scalable machine learning algorithms built on top of DataFrames. The primary API is <code>pyspark.ml</code> which uses the Pipeline abstraction inspired by scikit-learn.</p>
+
+      <!-- ML pipeline flow -->
+      <div class="flow" style="flex-wrap:nowrap; overflow-x:auto; padding-bottom:8px">
+        <div class="flow-step">
+          <div class="flow-box highlight">Raw Data</div>
+          <div class="flow-label">DataFrame</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box">Transformers</div>
+          <div class="flow-label">Feature eng.</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box purple">Estimator</div>
+          <div class="flow-label">Fit model</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box blue">Model</div>
+          <div class="flow-label">Transformer</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box green">Predictions</div>
+          <div class="flow-label">DataFrame</div>
+        </div>
+      </div>
+
+      <div class="code-block" data-lang="python">
+        <pre><span class="kw">from</span> pyspark.ml <span class="kw">import</span> Pipeline
+<span class="kw">from</span> pyspark.ml.feature <span class="kw">import</span> (
+    StringIndexer, OneHotEncoder,
+    VectorAssembler, StandardScaler
+)
+<span class="kw">from</span> pyspark.ml.classification <span class="kw">import</span> RandomForestClassifier
+<span class="kw">from</span> pyspark.ml.evaluation <span class="kw">import</span> BinaryClassificationEvaluator
+<span class="kw">from</span> pyspark.ml.tuning <span class="kw">import</span> CrossValidator, ParamGridBuilder
+
+<span class="cm"># ── Feature engineering ────────────────────────────</span>
+indexer = StringIndexer(
+    inputCols=[<span class="str">"category"</span>, <span class="str">"country"</span>],
+    outputCols=[<span class="str">"category_idx"</span>, <span class="str">"country_idx"</span>]
+)
+
+encoder = OneHotEncoder(
+    inputCols=[<span class="str">"category_idx"</span>, <span class="str">"country_idx"</span>],
+    outputCols=[<span class="str">"category_ohe"</span>, <span class="str">"country_ohe"</span>]
+)
+
+assembler = VectorAssembler(
+    inputCols=[<span class="str">"age"</span>, <span class="str">"income"</span>, <span class="str">"category_ohe"</span>, <span class="str">"country_ohe"</span>],
+    outputCol=<span class="str">"raw_features"</span>
+)
+
+scaler = StandardScaler(
+    inputCol=<span class="str">"raw_features"</span>,
+    outputCol=<span class="str">"features"</span>
+)
+
+<span class="cm"># ── Classifier ────────────────────────────────────</span>
+rf = RandomForestClassifier(
+    labelCol=<span class="str">"label"</span>,
+    featuresCol=<span class="str">"features"</span>,
+    numTrees=<span class="num">100</span>,
+    maxDepth=<span class="num">10</span>
+)
+
+<span class="cm"># ── Build pipeline ────────────────────────────────</span>
+pipeline = Pipeline(stages=[indexer, encoder, assembler, scaler, rf])
+
+<span class="cm"># ── Hyperparameter tuning ─────────────────────────</span>
+param_grid = ParamGridBuilder() \
+    .addGrid(rf.numTrees,  [<span class="num">50</span>, <span class="num">100</span>, <span class="num">200</span>]) \
+    .addGrid(rf.maxDepth,  [<span class="num">5</span>,  <span class="num">10</span>]) \
+    .build()
+
+evaluator = BinaryClassificationEvaluator(metricName=<span class="str">"areaUnderROC"</span>)
+
+cv = CrossValidator(
+    estimator=pipeline,
+    estimatorParamMaps=param_grid,
+    evaluator=evaluator,
+    numFolds=<span class="num">5</span>,
+    parallelism=<span class="num">4</span>    <span class="cm"># train folds in parallel</span>
+)
+
+<span class="cm"># ── Train & evaluate ──────────────────────────────</span>
+train, test = df.randomSplit([<span class="num">0.8</span>, <span class="num">0.2</span>], seed=<span class="num">42</span>)
+model = cv.fit(train)
+predictions = model.transform(test)
+
+auc = evaluator.evaluate(predictions)
+<span class="fn">print</span>(f<span class="str">"AUC: {auc:.4f}"</span>)
+
+<span class="cm"># ── Save & load model ─────────────────────────────</span>
+model.bestModel.<span class="fn">save</span>(<span class="str">"s3://bucket/models/churn_model_v1"</span>)
+<span class="kw">from</span> pyspark.ml.pipeline <span class="kw">import</span> PipelineModel
+loaded = PipelineModel.<span class="fn">load</span>(<span class="str">"s3://bucket/models/churn_model_v1"</span>)</pre>
+      </div>
+
+      <h3>MLlib Algorithms</h3>
+      <div class="chart-wrap">
+        <div class="chart-title">MLlib Algorithm Categories</div>
+        <div class="chart-sub">Built-in algorithms by type</div>
+        <canvas id="mlChart"></canvas>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Category</th><th>Algorithms</th></tr></thead>
+          <tbody>
+            <tr><td>Classification</td><td>LogisticRegression, DecisionTree, RandomForest, GBT, NaiveBayes, SVM, MLP</td></tr>
+            <tr><td>Regression</td><td>LinearRegression, DecisionTree, RandomForest, GBT, AFTSurvivalRegression</td></tr>
+            <tr><td>Clustering</td><td>KMeans, BisectingKMeans, GaussianMixture, LDA, PowerIterationClustering</td></tr>
+            <tr><td>Recommendation</td><td>ALS (Alternating Least Squares)</td></tr>
+            <tr><td>Feature</td><td>PCA, Word2Vec, TF-IDF, ChiSqSelector, VarianceThresholdSelector</td></tr>
+            <tr><td>Frequent Patterns</td><td>FPGrowth, PrefixSpan</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 10: OPTIMIZATION -->
+    <div class="section" id="optimization">
+      <div class="section-header">
+        <span class="section-num">10</span>
+        <h2>Performance &amp; Tuning</h2>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Job Duration Breakdown</div>
+        <div class="chart-sub">Where time typically goes in a Spark job</div>
+        <canvas id="doughnutChart"></canvas>
+      </div>
+
+      <h3>Key Performance Levers</h3>
+
+      <h4>1. Partitioning Strategy</h4>
+      <div class="code-block" data-lang="python">
+        <pre><span class="cm"># Check current partitions</span>
+<span class="fn">print</span>(df.rdd.getNumPartitions())
+
+<span class="cm"># Repartition (full shuffle)</span>
+df_repartitioned = df.<span class="fn">repartition</span>(<span class="num">200</span>)
+df_by_col = df.<span class="fn">repartition</span>(<span class="num">50</span>, <span class="str">"user_id"</span>)  <span class="cm"># hash partition by col</span>
+
+<span class="cm"># Coalesce (reduce partitions, no shuffle)</span>
+df_coalesced = df.<span class="fn">coalesce</span>(<span class="num">10</span>)  <span class="cm"># only decreases partitions</span>
+
+<span class="cm"># Rule of thumb: 128 MB per partition</span>
+<span class="cm"># Total partitions = ceil(data_size_bytes / 128MB)</span></pre>
+      </div>
+
+      <h4>2. Caching & Persistence</h4>
+      <div class="code-block" data-lang="python">
+        <pre><span class="kw">from</span> pyspark import StorageLevel
+
+<span class="cm"># Cache (memory only, default)</span>
+df.<span class="fn">cache</span>()
+df.<span class="fn">persist</span>()
+
+<span class="cm"># Custom storage levels</span>
+df.<span class="fn">persist</span>(StorageLevel.MEMORY_AND_DISK)    <span class="cm"># spill to disk if needed</span>
+df.<span class="fn">persist</span>(StorageLevel.MEMORY_ONLY_SER)     <span class="cm"># serialized (less RAM)</span>
+df.<span class="fn">persist</span>(StorageLevel.DISK_ONLY)           <span class="cm"># disk only</span>
+df.<span class="fn">persist</span>(StorageLevel.MEMORY_AND_DISK_2)   <span class="cm"># replicated ×2</span>
+
+<span class="cm"># Unpersist when done</span>
+df.<span class="fn">unpersist</span>()</pre>
+      </div>
+
+      <h4>3. Broadcast Joins</h4>
+      <div class="code-block" data-lang="python">
+        <pre><span class="kw">from</span> pyspark.sql.functions <span class="kw">import</span> broadcast
+
+<span class="cm"># For small lookup tables (< 200 MB)</span>
+result = large_df.<span class="fn">join</span>(
+    <span class="fn">broadcast</span>(small_lookup_df),
+    <span class="str">"join_key"</span>
+)
+
+<span class="cm"># Auto-broadcast threshold (default: 10 MB)</span>
+spark.conf.<span class="fn">set</span>(<span class="str">"spark.sql.autoBroadcastJoinThreshold"</span>, <span class="num">50</span> * <span class="num">1024</span> * <span class="num">1024</span>)  <span class="cm"># 50 MB</span></pre>
+      </div>
+
+      <h4>4. Skew Handling</h4>
+      <div class="code-block" data-lang="python">
+        <pre><span class="cm"># Enable adaptive query execution (Spark 3.0+)</span>
+spark.conf.<span class="fn">set</span>(<span class="str">"spark.sql.adaptive.enabled"</span>, <span class="str">"true"</span>)
+spark.conf.<span class="fn">set</span>(<span class="str">"spark.sql.adaptive.skewJoin.enabled"</span>, <span class="str">"true"</span>)
+spark.conf.<span class="fn">set</span>(<span class="str">"spark.sql.adaptive.coalescePartitions.enabled"</span>, <span class="str">"true"</span>)
+
+<span class="cm"># Manual skew mitigation: salt the key</span>
+<span class="kw">import</span> pyspark.sql.functions <span class="kw">as</span> F
+<span class="kw">import</span> random
+
+SALT = <span class="num">50</span>
+df_salted = large_df.<span class="fn">withColumn</span>(
+    <span class="str">"salted_key"</span>,
+    F.<span class="fn">concat</span>(F.<span class="fn">col</span>(<span class="str">"skewed_key"</span>), F.<span class="fn">lit</span>(<span class="str">"_"</span>), (F.<span class="fn">rand</span>() * SALT).<span class="fn">cast</span>(<span class="str">"int"</span>))
+)</pre>
+      </div>
+
+      <h4>5. Configuration Reference</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Config Key</th><th>Default</th><th>Recommendation</th></tr></thead>
+          <tbody>
+            <tr><td><code>spark.executor.memory</code></td><td>1g</td><td>4g–32g depending on dataset</td></tr>
+            <tr><td><code>spark.executor.cores</code></td><td>1</td><td>4–5 (sweet spot)</td></tr>
+            <tr><td><code>spark.sql.shuffle.partitions</code></td><td>200</td><td>2–3× executor cores total</td></tr>
+            <tr><td><code>spark.memory.fraction</code></td><td>0.6</td><td>0.7–0.8 for analytics</td></tr>
+            <tr><td><code>spark.sql.adaptive.enabled</code></td><td>true (3.2+)</td><td>Always enable</td></tr>
+            <tr><td><code>spark.default.parallelism</code></td><td>2× cores</td><td>Match shuffle.partitions</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Performance bars -->
+      <h3>Optimization Impact</h3>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:28px;margin-top:16px">
+        <div class="perf-row">
+          <div class="perf-label">Broadcast Join</div>
+          <div class="perf-bar-wrap"><div class="perf-bar" style="width:95%;background:var(--accent4)"></div></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent4);width:40px;text-align:right">95%</div>
+        </div>
+        <div class="perf-row">
+          <div class="perf-label">AQE</div>
+          <div class="perf-bar-wrap"><div class="perf-bar" style="width:80%;background:var(--accent2)"></div></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent2);width:40px;text-align:right">80%</div>
+        </div>
+        <div class="perf-row">
+          <div class="perf-label">Caching</div>
+          <div class="perf-bar-wrap"><div class="perf-bar" style="width:75%;background:var(--accent3)"></div></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent3);width:40px;text-align:right">75%</div>
+        </div>
+        <div class="perf-row">
+          <div class="perf-label">Partition Tuning</div>
+          <div class="perf-bar-wrap"><div class="perf-bar" style="width:60%;background:var(--accent)"></div></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);width:40px;text-align:right">60%</div>
+        </div>
+        <div class="perf-row">
+          <div class="perf-label">Predicate Pushdown</div>
+          <div class="perf-bar-wrap"><div class="perf-bar" style="width:55%;background:#fb923c"></div></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#fb923c;width:40px;text-align:right">55%</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:14px">Typical job time reduction vs unoptimized baseline</div>
+      </div>
+    </div>
+
+    <!-- 11: DEPLOYMENT -->
+    <div class="section" id="deployment">
+      <div class="section-header">
+        <span class="section-num">11</span>
+        <h2>Cluster Deployment</h2>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Deployment Mode Comparison</div>
+        <div class="chart-sub">Capability matrix across cluster managers</div>
+        <canvas id="radarChart"></canvas>
+      </div>
+
+      <h3>Submitting Jobs</h3>
+      <div class="code-block" data-lang="shell">
+        <pre><span class="cm"># Standalone cluster</span>
+spark-submit \
+  --master spark://master:7077 \
+  --deploy-mode cluster \
+  --executor-memory 8g \
+  --executor-cores 4 \
+  --num-executors 10 \
+  --py-files dependencies.zip \
+  --conf spark.sql.shuffle.partitions=400 \
+  my_job.py --input s3://bucket/input --output s3://bucket/output
+
+<span class="cm"># YARN cluster mode</span>
+spark-submit \
+  --master yarn \
+  --deploy-mode cluster \
+  --queue production \
+  --executor-memory 16g \
+  my_job.py
+
+<span class="cm"># Kubernetes</span>
+spark-submit \
+  --master k8s://https://k8s-apiserver:6443 \
+  --deploy-mode cluster \
+  --conf spark.kubernetes.container.image=my-spark:3.5.0 \
+  --conf spark.kubernetes.namespace=spark-jobs \
+  local:///app/my_job.py</pre>
+      </div>
+
+      <h3>Deploy Modes</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Mode</th><th>Driver Location</th><th>Use Case</th></tr></thead>
+          <tbody>
+            <tr><td><code>client</code></td><td>Machine running spark-submit</td><td>Interactive / debugging</td></tr>
+            <tr><td><code>cluster</code></td><td>One of the worker nodes</td><td>Production jobs</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout tip">
+        <strong>✅ Best Practice</strong>
+        Always use <code>--deploy-mode cluster</code> in production. In client mode, if your laptop disconnects, the job fails. In cluster mode, the driver runs on the cluster independently.
+      </div>
+    </div>
+
+    <!-- 12: BEST PRACTICES -->
+    <div class="section" id="best-practices">
+      <div class="section-header">
+        <span class="section-num">12</span>
+        <h2>Best Practices</h2>
+      </div>
+
+      <h3>Do ✅</h3>
+      <div class="code-block" data-lang="python">
+        <pre><span class="cm"># ✅ Use DataFrames over RDDs for structured data</span>
+df.<span class="fn">filter</span>(F.<span class="fn">col</span>(<span class="str">"age"</span>) > <span class="num">30</span>)  <span class="cm"># pushes predicate to storage</span>
+
+<span class="cm"># ✅ Filter early — reduce data as soon as possible</span>
+spark.read.parquet(<span class="str">"huge_table/"</span>) \
+    .<span class="fn">filter</span>(<span class="str">"date = '2024-01-01'"</span>) \  <span class="cm"># partition pruning</span>
+    .<span class="fn">select</span>(<span class="str">"id"</span>, <span class="str">"value"</span>)           <span class="cm"># projection pushdown</span>
+
+<span class="cm"># ✅ Use Parquet/ORC with compression</span>
+df.<span class="fn">write</span>.<span class="fn">mode</span>(<span class="str">"overwrite"</span>).<span class="fn">parquet</span>(<span class="str">"path/"</span>)
+
+<span class="cm"># ✅ Avoid collect() on large DataFrames</span>
+df.<span class="fn">limit</span>(<span class="num">1000</span>).<span class="fn">toPandas</span>()  <span class="cm"># safer</span>
+
+<span class="cm"># ✅ Use broadcast for small lookup tables</span>
+result = big_df.<span class="fn">join</span>(<span class="fn">broadcast</span>(small_df), <span class="str">"key"</span>)
+
+<span class="cm"># ✅ Specify schema explicitly (avoid inferSchema)</span>
+df = spark.read.<span class="fn">schema</span>(my_schema).<span class="fn">csv</span>(<span class="str">"data.csv"</span>)
+
+<span class="cm"># ✅ Use Pandas UDFs instead of Python UDFs</span>
+<span class="kw">@</span><span class="fn">pandas_udf</span>(<span class="str">"double"</span>)
+<span class="kw">def</span> <span class="fn">vectorized_fn</span>(s: pd.Series) -> pd.Series: ...
+
+<span class="cm"># ✅ Enable AQE for automatic optimizations</span>
+spark.conf.<span class="fn">set</span>(<span class="str">"spark.sql.adaptive.enabled"</span>, <span class="str">"true"</span>)</pre>
+      </div>
+
+      <h3>Don't ❌</h3>
+      <div class="code-block" data-lang="python">
+        <pre><span class="cm"># ❌ Avoid collect() on large data — OOM risk</span>
+all_data = df.<span class="fn">collect</span>()  <span class="cm"># DANGEROUS on 100 GB tables</span>
+
+<span class="cm"># ❌ Don't use Python UDFs when built-in functions exist</span>
+<span class="cm"># Bad:</span>
+udf_upper = <span class="fn">udf</span>(<span class="kw">lambda</span> x: x.upper(), StringType())
+<span class="cm"># Good:</span>
+F.<span class="fn">upper</span>(<span class="str">"name"</span>)
+
+<span class="cm"># ❌ Don't repartition unnecessarily (costly shuffle)</span>
+df.<span class="fn">repartition</span>(<span class="num">200</span>).<span class="fn">repartition</span>(<span class="num">50</span>)  <span class="cm"># two shuffles!</span>
+
+<span class="cm"># ❌ Don't create too many small files</span>
+df.<span class="fn">write</span>.<span class="fn">parquet</span>(<span class="str">"path/"</span>)   <span class="cm"># may write 200 tiny files</span>
+<span class="cm"># Better:</span>
+df.<span class="fn">coalesce</span>(<span class="num">10</span>).<span class="fn">write</span>.<span class="fn">parquet</span>(<span class="str">"path/"</span>)
+
+<span class="cm"># ❌ Don't use groupByKey on RDDs — prefer reduceByKey</span>
+<span class="cm"># Bad (shuffles all data):</span>
+rdd.<span class="fn">groupByKey</span>().<span class="fn">map</span>(<span class="kw">lambda</span> k, v: (k, <span class="fn">sum</span>(v)))
+<span class="cm"># Good (pre-aggregates per partition):</span>
+rdd.<span class="fn">reduceByKey</span>(<span class="kw">lambda</span> a, b: a + b)</pre>
+      </div>
+
+      <h3>Data Format Recommendations</h3>
+      <div class="chart-wrap">
+        <div class="chart-title">File Format Read Performance</div>
+        <div class="chart-sub">Relative read throughput on 100 GB dataset (higher = faster)</div>
+        <canvas id="formatChart"></canvas>
+      </div>
+
+      <div class="callout tip">
+        <strong>💡 Format Guide</strong>
+        Use <strong>Parquet</strong> for analytical workloads — columnar storage, predicate pushdown, and excellent compression. Use <strong>Delta Lake</strong> when you need ACID transactions, time travel, or schema enforcement on top of Parquet.
+      </div>
+
+      <!-- Quick ref card -->
+      <h3>Quick Reference Cheatsheet</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Task</th><th>Code</th></tr></thead>
+          <tbody>
+            <tr><td>Create session</td><td><code>SparkSession.builder.getOrCreate()</code></td></tr>
+            <tr><td>Read parquet</td><td><code>spark.read.parquet("path/")</code></td></tr>
+            <tr><td>Filter rows</td><td><code>df.filter(col("x") > 0)</code></td></tr>
+            <tr><td>Add column</td><td><code>df.withColumn("c", expr)</code></td></tr>
+            <tr><td>Group & agg</td><td><code>df.groupBy("k").agg(sum("v"))</code></td></tr>
+            <tr><td>Window rank</td><td><code>rank().over(Window.partitionBy(...))</code></td></tr>
+            <tr><td>Broadcast join</td><td><code>df.join(broadcast(small), "key")</code></td></tr>
+            <tr><td>Cache DF</td><td><code>df.cache()</code> / <code>df.persist(level)</code></td></tr>
+            <tr><td>Show plan</td><td><code>df.explain(extended=True)</code></td></tr>
+            <tr><td>Write parquet</td><td><code>df.write.mode("overwrite").parquet("path/")</code></td></tr>
+            <tr><td>Register view</td><td><code>df.createOrReplaceTempView("name")</code></td></tr>
+            <tr><td>Run SQL</td><td><code>spark.sql("SELECT ...")</code></td></tr>
+            <tr><td>Count rows</td><td><code>df.count()</code></td></tr>
+            <tr><td>Sample data</td><td><code>df.sample(0.1, seed=42)</code></td></tr>
+            <tr><td>Stop session</td><td><code>spark.stop()</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// Chart.js global defaults
+Chart.defaults.color = '#64748b';
+Chart.defaults.borderColor = '#1e2d45';
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size = 11;
+
+const chartBg = (color, alpha=0.15) => color.replace(')', `,${alpha})`).replace('rgb', 'rgba');
+
+// 1. Ecosystem bar chart
+new Chart(document.getElementById('ecosystemChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Spark SQL / DataFrames', 'Structured Streaming', 'MLlib', 'GraphFrames', 'Spark R', 'RDD API'],
+    datasets: [{
+      label: 'Usage %',
+      data: [91, 62, 48, 22, 15, 34],
+      backgroundColor: ['#f97316cc','#38bdf8cc','#a78bfacc','#34d399cc','#fb923ccc','#94a3b8cc'],
+      borderColor:     ['#f97316',  '#38bdf8',  '#a78bfa',  '#34d399',  '#fb923c',  '#94a3b8'],
+      borderWidth: 1,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#1e2d45' }, ticks: { callback: v => v+'%' }, max: 100 },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// 2. Performance comparison
+new Chart(document.getElementById('perfChart'), {
+  type: 'bar',
+  data: {
+    labels: ['MapReduce (disk)', 'Spark (disk)', 'Spark (memory)', 'Spark (Tungsten)'],
+    datasets: [{
+      label: 'Relative Speed',
+      data: [1, 10, 100, 140],
+      backgroundColor: ['#64748b88','#38bdf866','#f9731688','#34d39988'],
+      borderColor:     ['#64748b',  '#38bdf8',  '#f97316',  '#34d399'],
+      borderWidth: 1,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { grid: { color: '#1e2d45' }, type: 'logarithmic', ticks: { callback: v => v+'×' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// 3. ML algorithms doughnut
+new Chart(document.getElementById('mlChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Classification', 'Regression', 'Clustering', 'Feature', 'Recommendation', 'Frequent Patterns'],
+    datasets: [{
+      data: [7, 5, 5, 12, 1, 2],
+      backgroundColor: ['#f9731688','#38bdf888','#a78bfa88','#34d39988','#fb923c88','#94a3b888'],
+      borderColor:     ['#f97316',  '#38bdf8',  '#a78bfa',  '#34d399',  '#fb923c',  '#94a3b8'],
+      borderWidth: 1,
+    }]
+  },
+  options: {
+    cutout: '60%',
+    plugins: {
+      legend: { position: 'right', labels: { boxWidth: 12, padding: 16 } }
+    }
+  }
+});
+
+// 4. Job time doughnut
+new Chart(document.getElementById('doughnutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Shuffle / Network', 'Computation', 'Serialization', 'GC', 'I/O Wait', 'Scheduling'],
+    datasets: [{
+      data: [38, 27, 14, 10, 7, 4],
+      backgroundColor: ['#f9731688','#38bdf888','#a78bfa88','#34d39988','#fb923c88','#94a3b888'],
+      borderColor:     ['#f97316',  '#38bdf8',  '#a78bfa',  '#34d399',  '#fb923c',  '#94a3b8'],
+      borderWidth: 1,
+    }]
+  },
+  options: {
+    cutout: '55%',
+    plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 16 } } }
+  }
+});
+
+// 5. Radar chart for deployment
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['Ease of Setup', 'Resource Isolation', 'Scalability', 'Auto-scaling', 'Cost Efficiency', 'Ecosystem'],
+    datasets: [
+      { label: 'Standalone', data: [9, 5, 7, 4, 8, 5],  borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,.1)',  pointBackgroundColor: '#f97316', borderWidth: 2 },
+      { label: 'YARN',       data: [5, 8, 9, 7, 7, 9],  borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,.1)',  pointBackgroundColor: '#38bdf8', borderWidth: 2 },
+      { label: 'Kubernetes', data: [4, 9, 10, 9, 8, 8], borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,.1)', pointBackgroundColor: '#a78bfa', borderWidth: 2 },
+    ]
+  },
+  options: {
+    scales: {
+      r: {
+        grid: { color: '#1e2d45' },
+        angleLines: { color: '#1e2d45' },
+        pointLabels: { font: { size: 10 }, color: '#94a3b8' },
+        ticks: { display: false },
+        min: 0, max: 10
+      }
+    },
+    plugins: { legend: { position: 'bottom', labels: { padding: 16, boxWidth: 12 } } }
+  }
+});
+
+// 6. File format bar
+new Chart(document.getElementById('formatChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Delta Lake', 'Parquet + Snappy', 'ORC', 'Avro', 'JSON', 'CSV'],
+    datasets: [{
+      label: 'Read Speed (GB/s)',
+      data: [4.8, 4.5, 4.2, 2.8, 1.1, 0.9],
+      backgroundColor: ['#34d39988','#f9731688','#38bdf888','#a78bfa88','#fb923c88','#94a3b888'],
+      borderColor:     ['#34d399',  '#f97316',  '#38bdf8',  '#a78bfa',  '#fb923c',  '#94a3b8'],
+      borderWidth: 1,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { grid: { color: '#1e2d45' }, ticks: { callback: v => v+' GB/s' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Sidebar active link on scroll
+const sections = document.querySelectorAll('.section[id]');
+const navLinks = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const match = document.querySelector(`.nav-item[href="#${entry.target.id}"]`);
+      if (match) match.classList.add('active');
+    }
+  });
+}, { threshold: 0.3, rootMargin: '-60px 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
