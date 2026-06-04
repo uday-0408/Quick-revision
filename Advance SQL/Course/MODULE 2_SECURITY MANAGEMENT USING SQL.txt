@@ -1,0 +1,773 @@
+MODULE 2: SECURITY MANAGEMENT USING SQL
+Comprehensive Course Material with Real-World Examples
+Duration	10-12 Hours
+Prerequisites	Basic SQL knowledge, Module 1 completion recommended
+Learning Objectives	• Create and manage database users and schemas
+• Implement system and object privileges
+• Design role-based access control (RBAC)
+• Apply data protection mechanisms
+• Monitor and audit database activities
+Table of Contents
+Introduction to Database Security
+User and Schema Management
+Privilege Management
+Role-Based Access Control (RBAC)
+Data Protection Mechanisms
+Security Data Dictionary Views
+Real-World Case Study: Banking Application
+Hands-On Lab Exercises
+Module Summary
+1. Introduction to Database Security
+1.1 Why Database Security Matters
+Database security is critical because databases contain an organization's most valuable assets: customer data, financial records, intellectual property, and business-critical information. A security breach can result in:
+
+Financial Loss: Direct theft, regulatory fines, litigation costs
+Reputation Damage: Loss of customer trust, brand damage
+Legal Consequences: GDPR, HIPAA, PCI-DSS violations
+Operational Disruption: System downtime, recovery costs
+Real-World Security Breaches
+Year	Company	Records Exposed	Cause
+2017	Equifax	147 million	Unpatched vulnerability
+2019	Capital One	100 million	Misconfigured firewall
+2020	Marriott	5.2 million	Compromised credentials
+2021	Facebook	533 million	Data scraping vulnerability
+1.2 Defense in Depth Strategy
+Database security follows a layered approach:
+
+┌─────────────────────────────────────────────────────────────┐
+│                    Network Security                          │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │                 Application Security                   │  │
+│  │  ┌─────────────────────────────────────────────────┐  │  │
+│  │  │              Database Security                   │  │  │
+│  │  │  ┌─────────────────────────────────────────┐    │  │  │
+│  │  │  │            Data Security                 │    │  │  │
+│  │  │  │  • Encryption                           │    │  │  │
+│  │  │  │  • Masking                              │    │  │  │
+│  │  │  │  • Access Controls                      │    │  │  │
+│  │  │  └─────────────────────────────────────────┘    │  │  │
+│  │  │  • Authentication  • Authorization              │  │  │
+│  │  │  • Auditing        • Privileges                 │  │  │
+│  │  └─────────────────────────────────────────────────┘  │  │
+│  └───────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+1.3 Core Security Principles
+Principle	Description	Database Implementation
+Least Privilege	Grant minimum permissions needed	Specific object privileges
+Separation of Duties	Split critical functions	Different roles for different tasks
+Defense in Depth	Multiple security layers	Authentication + Authorization + Auditing
+Need to Know	Access only required data	Row-level security, VPD
+Accountability	Track all actions	Comprehensive auditing
+2. User and Schema Management
+2.1 Understanding Users vs Schemas
+In Oracle, a user and a schema are closely related but distinct concepts:
+
+Concept	Definition	Analogy
+User	A database account that can connect and perform actions	A person with a key to enter a building
+Schema	A collection of database objects owned by a user	The office/room that person owns inside
+💡 Key Insight: When you create a user, Oracle automatically creates a schema with the same name.
+
+2.2 Creating Database Users
+Basic User Creation
+-- Syntax
+CREATE USER username IDENTIFIED BY password;
+
+-- Real-World Example: Creating an application user
+CREATE USER ecommerce_app IDENTIFIED BY "Str0ng_P@ssw0rd!2024"
+    DEFAULT TABLESPACE users
+    TEMPORARY TABLESPACE temp
+    QUOTA 500M ON users
+    QUOTA 100M ON app_data
+    ACCOUNT UNLOCK;
+User Creation with All Options
+-- Complete user creation for a banking application
+CREATE USER banking_user IDENTIFIED BY "B@nk$ecure#2024"
+    DEFAULT TABLESPACE banking_data          -- Where user's objects are stored
+    TEMPORARY TABLESPACE temp                 -- For sort operations
+    QUOTA 1G ON banking_data                  -- Space limit on tablespace
+    QUOTA UNLIMITED ON banking_indexes        -- No limit for indexes
+    PROFILE banking_security_profile          -- Password and resource policies
+    PASSWORD EXPIRE                           -- Force password change on first login
+    ACCOUNT UNLOCK;                           -- Account is active
+
+-- Verify user creation
+SELECT username, account_status, default_tablespace, 
+       temporary_tablespace, created
+FROM dba_users
+WHERE username = 'BANKING_USER';
+Real-World Scenario: E-Commerce Platform Users
+/*
+ * E-COMMERCE PLATFORM USER SETUP
+ * 
+ * We need different types of users:
+ * 1. Application Service Account - for the web application
+ * 2. Reporting User - for business intelligence
+ * 3. Admin User - for database maintenance
+ * 4. Developer User - for development work
+ */
+
+-- 1. Application Service Account (connects from web server)
+CREATE USER ecom_app_svc IDENTIFIED BY "App$vc#Pr0d2024"
+    DEFAULT TABLESPACE ecom_data
+    TEMPORARY TABLESPACE temp
+    QUOTA UNLIMITED ON ecom_data
+    PROFILE app_service_profile;
+
+-- 2. Reporting User (read-only access for BI tools)
+CREATE USER ecom_reports IDENTIFIED BY "R3p0rt$2024"
+    DEFAULT TABLESPACE users
+    TEMPORARY TABLESPACE temp
+    QUOTA 100M ON users
+    PROFILE readonly_profile;
+
+-- 3. Admin User (DBA activities)
+CREATE USER ecom_admin IDENTIFIED BY "Adm1n#Secur3!2024"
+    DEFAULT TABLESPACE system
+    TEMPORARY TABLESPACE temp
+    PROFILE admin_profile;
+
+-- 4. Developer User (development and testing)
+CREATE USER ecom_dev IDENTIFIED BY "D3v#T3st2024"
+    DEFAULT TABLESPACE dev_data
+    TEMPORARY TABLESPACE temp
+    QUOTA 2G ON dev_data
+    PROFILE developer_profile;
+2.3 Password Policies and Profiles
+Profiles control password policies and resource limits.
+
+Creating Security Profiles
+-- Production Security Profile (strict)
+CREATE PROFILE prod_security_profile LIMIT
+    -- Password Parameters
+    PASSWORD_LIFE_TIME 90                -- Password expires in 90 days
+    PASSWORD_REUSE_TIME 365              -- Can't reuse password for 1 year
+    PASSWORD_REUSE_MAX 12                -- Must use 12 different passwords before reusing
+    PASSWORD_VERIFY_FUNCTION ora12c_verify_function  -- Password complexity check
+    PASSWORD_LOCK_TIME 1                 -- Lock account for 1 day after failures
+    PASSWORD_GRACE_TIME 7                -- 7 days grace period after expiry
+    FAILED_LOGIN_ATTEMPTS 5              -- Lock after 5 failed attempts
+    
+    -- Resource Parameters
+    SESSIONS_PER_USER 3                  -- Max 3 concurrent sessions
+    CPU_PER_SESSION UNLIMITED            -- No CPU limit per session
+    CPU_PER_CALL 60000                   -- Max 60 seconds CPU per call
+    CONNECT_TIME 480                     -- Max 8 hours connection time
+    IDLE_TIME 30                         -- Disconnect after 30 min idle
+    LOGICAL_READS_PER_SESSION UNLIMITED;
+
+-- Development Profile (relaxed for convenience)
+CREATE PROFILE dev_profile LIMIT
+    PASSWORD_LIFE_TIME 180
+    PASSWORD_REUSE_TIME 30
+    PASSWORD_REUSE_MAX 3
+    FAILED_LOGIN_ATTEMPTS 10
+    PASSWORD_LOCK_TIME UNLIMITED/1440    -- Lock for 1 minute
+    SESSIONS_PER_USER 10
+    IDLE_TIME 120;
+
+-- Service Account Profile (no password expiry)
+CREATE PROFILE service_account_profile LIMIT
+    PASSWORD_LIFE_TIME UNLIMITED         -- Never expires
+    FAILED_LOGIN_ATTEMPTS 3              -- Very strict on failures
+    PASSWORD_LOCK_TIME 1/24              -- Lock for 1 hour
+    SESSIONS_PER_USER 50;                -- Allow many connections
+2.4 Managing User Accounts
+Account Maintenance Operations
+-- Change user password
+ALTER USER ecom_app_svc IDENTIFIED BY "N3w$ecureP@ss2024";
+
+-- Lock an account (employee leaves or security concern)
+ALTER USER former_employee ACCOUNT LOCK;
+
+-- Unlock an account
+ALTER USER ecom_user ACCOUNT UNLOCK;
+
+-- Expire password (force change on next login)
+ALTER USER contractor_user PASSWORD EXPIRE;
+
+-- Change default tablespace
+ALTER USER ecom_user DEFAULT TABLESPACE new_tablespace;
+
+-- Modify quota
+ALTER USER ecom_user QUOTA 2G ON ecom_data;
+
+-- Change profile
+ALTER USER ecom_user PROFILE prod_security_profile;
+
+-- Drop a user (CAUTION!)
+DROP USER test_user CASCADE;
+Real-World Scenario: Employee Lifecycle
+/*
+ * EMPLOYEE ONBOARDING
+ * New employee John Smith joins as a Sales Analyst
+ */
+
+-- Step 1: Create user account
+CREATE USER jsmith IDENTIFIED BY "W3lc0me#2024"
+    DEFAULT TABLESPACE users
+    TEMPORARY TABLESPACE temp
+    QUOTA 100M ON users
+    PROFILE prod_security_profile
+    PASSWORD EXPIRE;  -- Force password change on first login
+
+-- Step 2: Grant appropriate role
+GRANT sales_analyst_role TO jsmith;
+
+-- Step 3: Grant connect privilege
+GRANT CREATE SESSION TO jsmith;
+
+/*
+ * EMPLOYEE ROLE CHANGE
+ * John Smith promoted to Sales Manager
+ */
+
+-- Revoke old role
+REVOKE sales_analyst_role FROM jsmith;
+
+-- Grant new role with additional privileges
+GRANT sales_manager_role TO jsmith;
+
+-- Increase quota for larger reports
+ALTER USER jsmith QUOTA 500M ON users;
+
+/*
+ * EMPLOYEE OFFBOARDING
+ * John Smith leaves the company
+ */
+
+-- Step 1: Immediately lock the account
+ALTER USER jsmith ACCOUNT LOCK;
+
+-- Step 2: Revoke all roles and privileges
+REVOKE ALL PRIVILEGES FROM jsmith;
+REVOKE sales_manager_role FROM jsmith;
+
+-- Step 3: Log the action for compliance
+INSERT INTO security_audit_log (action, username, performed_by, action_date, notes)
+VALUES ('USER_OFFBOARDED', 'JSMITH', USER, SYSDATE, 'Employee separation - voluntary');
+COMMIT;
+3. Privilege Management
+3.1 Understanding Privilege Types
+Oracle has two categories of privileges:
+
+Category	Description	Example
+System Privileges	Allow actions on ANY object of a type	CREATE TABLE, SELECT ANY TABLE
+Object Privileges	Allow actions on SPECIFIC objects	SELECT ON hr.employees
+3.2 System Privileges
+System privileges control what types of actions a user can perform.
+
+Common System Privileges
+Privilege	Description	Risk Level
+CREATE SESSION
+Connect to database	Low
+CREATE TABLE
+Create tables in own schema	Low
+CREATE VIEW
+Create views in own schema	Low
+CREATE PROCEDURE
+Create PL/SQL programs	Medium
+CREATE ANY TABLE
+Create tables in any schema	High
+ALTER ANY TABLE
+Modify any table structure	High
+DROP ANY TABLE
+Delete any table	Critical
+SELECT ANY TABLE
+Query any table	Critical
+GRANT ANY PRIVILEGE
+Grant any system privilege	Critical
+Granting System Privileges
+-- Basic system privileges for an application developer
+GRANT CREATE SESSION TO dev_user;
+GRANT CREATE TABLE TO dev_user;
+GRANT CREATE VIEW TO dev_user;
+GRANT CREATE PROCEDURE TO dev_user;
+GRANT CREATE SEQUENCE TO dev_user;
+
+-- Allow user to grant these privileges to others
+GRANT CREATE SESSION TO team_lead WITH ADMIN OPTION;
+
+-- Revoke system privileges
+REVOKE CREATE TABLE FROM former_developer;
+3.3 Object Privileges
+Object privileges control access to specific database objects.
+
+Object Privilege Types
+Privilege	Applies To	Description
+SELECT
+Tables, Views, Sequences	Read data
+INSERT
+Tables, Views	Add new rows
+UPDATE
+Tables, Views	Modify existing rows
+DELETE
+Tables, Views	Remove rows
+ALTER
+Tables, Sequences	Modify structure
+INDEX
+Tables	Create indexes
+REFERENCES
+Tables	Create foreign keys
+EXECUTE
+Procedures, Functions, Packages	Run code
+Granting Object Privileges
+-- Grant SELECT on a specific table
+GRANT SELECT ON hr.employees TO reporting_user;
+
+-- Grant multiple privileges
+GRANT SELECT, INSERT, UPDATE ON sales.orders TO sales_app;
+
+-- Grant with ability to pass privilege to others
+GRANT SELECT ON hr.employees TO manager_user WITH GRANT OPTION;
+
+-- Column-level privileges (fine-grained access)
+GRANT SELECT (employee_id, first_name, last_name, email, department_id) 
+    ON hr.employees TO public_portal;
+
+-- Only allow updating specific columns
+GRANT UPDATE (phone_number, email) ON hr.employees TO self_service_app;
+
+-- Grant EXECUTE on procedures/functions
+GRANT EXECUTE ON hr.calculate_bonus TO payroll_app;
+Real-World Scenario: Hospital Information System
+/*
+ * HOSPITAL INFORMATION SYSTEM
+ * Different users need different access to patient data
+ */
+
+-- RECEPTIONIST: Can see patient contact info, schedule appointments
+CREATE USER receptionist IDENTIFIED BY "R3cept#2024";
+GRANT CREATE SESSION TO receptionist;
+
+-- Limited column access - NO SSN, NO medical info
+GRANT SELECT (patient_id, first_name, last_name, phone, email, address) 
+    ON hospital.patients TO receptionist;
+GRANT UPDATE (phone, email, address, emergency_contact)
+    ON hospital.patients TO receptionist;
+
+-- NURSE: Can see more patient info including allergies
+CREATE USER nurse_user IDENTIFIED BY "Nurs3#2024";
+GRANT CREATE SESSION TO nurse_user;
+
+GRANT SELECT (patient_id, first_name, last_name, date_of_birth, 
+              blood_type, allergies, emergency_contact, phone)
+    ON hospital.patients TO nurse_user;
+GRANT SELECT ON hospital.medical_records TO nurse_user;
+GRANT INSERT, UPDATE ON hospital.medical_records TO nurse_user;
+
+-- DOCTOR: Full access to patient and medical records
+CREATE USER doctor_user IDENTIFIED BY "D0ct0r#2024";
+GRANT CREATE SESSION TO doctor_user;
+
+GRANT SELECT ON hospital.patients TO doctor_user;
+GRANT SELECT, INSERT, UPDATE ON hospital.medical_records TO doctor_user;
+
+-- BILLING STAFF: Access to billing and limited patient info (no medical)
+CREATE USER billing_staff IDENTIFIED BY "B1ll1ng#2024";
+GRANT CREATE SESSION TO billing_staff;
+
+GRANT SELECT (patient_id, first_name, last_name, address, insurance_id)
+    ON hospital.patients TO billing_staff;
+GRANT SELECT, INSERT, UPDATE ON hospital.billing TO billing_staff;
+3.4 WITH GRANT OPTION vs WITH ADMIN OPTION
+-- WITH GRANT OPTION (Object Privileges)
+-- Allows grantee to grant the same object privilege to others
+GRANT SELECT ON hr.employees TO manager WITH GRANT OPTION;
+-- Now manager can do:
+-- GRANT SELECT ON hr.employees TO subordinate;
+
+-- If you revoke from manager, subordinate also loses access (CASCADE)
+REVOKE SELECT ON hr.employees FROM manager;  -- Affects subordinate too!
+
+-- WITH ADMIN OPTION (System Privileges & Roles)
+-- Allows grantee to grant the system privilege or role to others
+GRANT CREATE TABLE TO developer WITH ADMIN OPTION;
+
+-- Revoking from developer does NOT affect others
+REVOKE CREATE TABLE FROM developer;  -- Others keep it!
+4. Role-Based Access Control (RBAC)
+4.1 Why Use Roles?
+Managing individual privileges for each user becomes unmanageable at scale. Roles group privileges together for easier management.
+
+4.2 Creating and Managing Roles
+Creating Roles
+-- Simple role
+CREATE ROLE read_only_role;
+
+-- Role with password protection
+CREATE ROLE sensitive_data_role IDENTIFIED BY "R0l3P@ss#2024";
+Granting Privileges to Roles
+-- Create a comprehensive sales role
+CREATE ROLE sales_role;
+
+-- Grant system privileges
+GRANT CREATE SESSION TO sales_role;
+
+-- Grant object privileges
+GRANT SELECT ON sales.customers TO sales_role;
+GRANT SELECT ON sales.products TO sales_role;
+GRANT SELECT, INSERT, UPDATE ON sales.orders TO sales_role;
+GRANT EXECUTE ON sales.calculate_discount TO sales_role;
+
+-- Create a reporting role
+CREATE ROLE reporting_role;
+
+GRANT CREATE SESSION TO reporting_role;
+GRANT SELECT ON sales.customers TO reporting_role;
+GRANT SELECT ON sales.orders TO reporting_role;
+GRANT SELECT ON hr.employees TO reporting_role;
+Role Hierarchies
+/*
+ * ROLE HIERARCHY FOR A RETAIL COMPANY
+ */
+
+-- Base role for all employees
+CREATE ROLE employee_base_role;
+GRANT CREATE SESSION TO employee_base_role;
+GRANT SELECT ON company.announcements TO employee_base_role;
+
+-- Sales role includes employee base
+CREATE ROLE sales_role;
+GRANT employee_base_role TO sales_role;  -- Inherit base role
+GRANT SELECT, INSERT ON sales.customers TO sales_role;
+GRANT SELECT, INSERT, UPDATE ON sales.orders TO sales_role;
+
+-- Manager role includes sales role
+CREATE ROLE manager_role;
+GRANT sales_role TO manager_role;
+GRANT SELECT ON hr.employees TO manager_role;
+GRANT SELECT ON finance.budgets TO manager_role;
+
+-- Admin role includes everything
+CREATE ROLE admin_role IDENTIFIED BY "Adm1n#S3cur3";
+GRANT manager_role TO admin_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES TO admin_role;
+Granting Roles to Users
+-- Grant single role
+GRANT sales_role TO john_smith;
+
+-- Grant multiple roles
+GRANT sales_role, reporting_role TO jane_doe;
+
+-- Grant with admin option (user can grant this role to others)
+GRANT manager_role TO department_head WITH ADMIN OPTION;
+
+-- Set default roles (active upon login)
+ALTER USER john_smith DEFAULT ROLE sales_role, employee_base_role;
+
+-- No default roles (must enable manually)
+ALTER USER secure_user DEFAULT ROLE NONE;
+Enabling and Disabling Roles
+-- User with password-protected role must enable it
+SET ROLE admin_role IDENTIFIED BY "Adm1n#S3cur3";
+
+-- Enable all granted roles
+SET ROLE ALL;
+
+-- Disable all roles
+SET ROLE NONE;
+
+-- Enable specific roles only
+SET ROLE sales_role, reporting_role;
+5. Data Protection Mechanisms
+5.1 Security Views
+Views can act as a security layer by hiding sensitive columns and filtering rows.
+
+Column-Level Security with Views
+-- Full employees table (contains sensitive data)
+CREATE TABLE hr.employees (
+    employee_id         NUMBER PRIMARY KEY,
+    first_name          VARCHAR2(50),
+    last_name           VARCHAR2(50),
+    email               VARCHAR2(100),
+    phone               VARCHAR2(20),
+    hire_date           DATE,
+    job_id              VARCHAR2(10),
+    salary              NUMBER(10,2),      -- Sensitive!
+    ssn                 VARCHAR2(11),      -- Highly Sensitive!
+    bank_account        VARCHAR2(20),      -- Highly Sensitive!
+    manager_id          NUMBER,
+    department_id       NUMBER
+);
+
+-- Public directory view (no sensitive data)
+CREATE OR REPLACE VIEW hr.employee_directory AS
+SELECT 
+    employee_id,
+    first_name,
+    last_name,
+    email,
+    phone,
+    job_id,
+    department_id
+FROM hr.employees;
+
+GRANT SELECT ON hr.employee_directory TO public_portal_role;
+Row-Level Security with Views
+/*
+ * MULTI-TENANT SaaS APPLICATION
+ * Each company can only see their own data
+ */
+
+-- Secure view that filters by tenant
+CREATE OR REPLACE VIEW saas.my_customers AS
+SELECT customer_id, customer_name, email, created_date
+FROM saas.customers
+WHERE tenant_id = SYS_CONTEXT('tenant_ctx', 'tenant_id');
+5.2 Virtual Private Database (VPD)
+VPD automatically adds WHERE clauses to queries, providing row-level security.
+
+How VPD Works
+User Query:                  What Oracle Executes:
+SELECT * FROM orders    →    SELECT * FROM orders
+                             WHERE customer_id = <user's customer_id>
+Implementing VPD
+-- Create context for user information
+CREATE OR REPLACE CONTEXT sales_ctx USING sales.security_pkg;
+
+-- VPD Policy Function
+CREATE OR REPLACE FUNCTION sales.customer_policy (
+    p_schema  IN VARCHAR2,
+    p_object  IN VARCHAR2
+) RETURN VARCHAR2 AS
+    v_role VARCHAR2(50);
+BEGIN
+    v_role := SYS_CONTEXT('sales_ctx', 'role');
+    
+    IF v_role = 'SALES_REP' THEN
+        RETURN 'assigned_rep_id = SYS_CONTEXT(''sales_ctx'', ''employee_id'')';
+    ELSIF v_role = 'SALES_MANAGER' THEN
+        RETURN 'assigned_rep_id IN (SELECT employee_id FROM sales.employees 
+                WHERE manager_id = SYS_CONTEXT(''sales_ctx'', ''employee_id''))';
+    ELSIF v_role = 'VP_SALES' THEN
+        RETURN '1=1';  -- See everything
+    ELSE
+        RETURN '1=0';  -- See nothing
+    END IF;
+END;
+/
+
+-- Apply VPD policy
+BEGIN
+    DBMS_RLS.ADD_POLICY(
+        object_schema   => 'SALES',
+        object_name     => 'CUSTOMERS',
+        policy_name     => 'CUSTOMER_ACCESS_POLICY',
+        function_schema => 'SALES',
+        policy_function => 'CUSTOMER_POLICY',
+        statement_types => 'SELECT, INSERT, UPDATE, DELETE',
+        update_check    => TRUE,
+        enable          => TRUE
+    );
+END;
+/
+5.3 Data Masking and Redaction
+Oracle Data Redaction protects sensitive data by transforming it during query execution.
+
+Data Redaction Types
+Type	Description	Example
+FULL
+Replace entire value	
+****-****-****-****
+PARTIAL
+Mask part of value	
+****-****-****-9012
+RANDOM
+Replace with random value	Random characters
+REGEX
+Pattern-based masking	
+j***@email.com
+Implementing Data Redaction
+-- Redact SSN (show only last 4 digits)
+BEGIN
+    DBMS_REDACT.ADD_POLICY(
+        object_schema       => 'HR',
+        object_name         => 'EMPLOYEES',
+        column_name         => 'SSN',
+        policy_name         => 'SSN_REDACT_POLICY',
+        function_type       => DBMS_REDACT.PARTIAL,
+        function_parameters => 'VVVFVVFVVVV,VVV-VV-VVVV,X,1,5',
+        expression          => 'SYS_CONTEXT(''USERENV'', ''SESSION_USER'') != ''HR_ADMIN'''
+    );
+END;
+/
+-- Result: Non-admins see: XXX-XX-6789
+5.4 Auditing
+Auditing tracks who did what, when, and how in the database.
+
+Unified Auditing (12c+)
+-- Audit policy for sensitive data access
+CREATE AUDIT POLICY sensitive_data_access_policy
+    ACTIONS 
+        SELECT ON finance.transactions,
+        SELECT ON hr.employee_salaries;
+
+AUDIT POLICY sensitive_data_access_policy;
+
+-- Audit all DDL changes
+CREATE AUDIT POLICY ddl_changes_policy
+    ACTIONS 
+        CREATE TABLE, ALTER TABLE, DROP TABLE,
+        CREATE INDEX, DROP INDEX;
+
+AUDIT POLICY ddl_changes_policy;
+
+-- Audit login activity
+CREATE AUDIT POLICY login_policy
+    ACTIONS LOGON, LOGOFF;
+
+AUDIT POLICY login_policy;
+
+-- Query unified audit trail
+SELECT event_timestamp, dbusername, action_name, 
+       object_schema, object_name, sql_text
+FROM unified_audit_trail
+WHERE event_timestamp > SYSDATE - 7
+ORDER BY event_timestamp DESC;
+Fine-Grained Auditing (FGA)
+-- Audit high-value transactions
+BEGIN
+    DBMS_FGA.ADD_POLICY(
+        object_schema   => 'FINANCE',
+        object_name     => 'TRANSACTIONS',
+        policy_name     => 'HIGH_VALUE_TRANSACTION_AUDIT',
+        audit_condition => 'amount > 100000',
+        audit_column    => 'AMOUNT',
+        statement_types => 'SELECT, INSERT, UPDATE'
+    );
+END;
+/
+6. Security Data Dictionary Views
+6.1 User and Account Information
+-- All database users
+SELECT username, account_status, lock_date, expiry_date,
+       default_tablespace, created
+FROM dba_users
+ORDER BY created DESC;
+
+-- Currently connected users
+SELECT username, sid, serial#, status, logon_time, program
+FROM v$session
+WHERE type = 'USER';
+6.2 Privilege Information
+-- System privileges granted to users
+SELECT grantee, privilege, admin_option
+FROM dba_sys_privs
+WHERE grantee = 'SALES_USER';
+
+-- Object privileges granted to users
+SELECT grantee, owner, table_name, privilege, grantable
+FROM dba_tab_privs
+WHERE grantee = 'SALES_USER';
+
+-- Column-level privileges
+SELECT grantee, owner, table_name, column_name, privilege
+FROM dba_col_privs
+WHERE grantee = 'SALES_USER';
+6.3 Role Information
+-- All roles in database
+SELECT role, password_required, authentication_type
+FROM dba_roles;
+
+-- Roles granted to a user
+SELECT grantee, granted_role, admin_option, default_role
+FROM dba_role_privs
+WHERE grantee = 'SALES_USER';
+
+-- Privileges granted to a role
+SELECT role, privilege FROM role_sys_privs WHERE role = 'SALES_ROLE'
+UNION ALL
+SELECT role, owner || '.' || table_name || ' - ' || privilege
+FROM role_tab_privs WHERE role = 'SALES_ROLE';
+7. Real-World Case Study: Banking Application
+7.1 Scenario Description
+A regional bank needs to implement database security with:
+
+Tellers (basic transactions)
+Personal Bankers (customer management)
+Branch Managers (full branch access)
+Regional Managers (multiple branch access)
+Compliance Officers (read-only audit access)
+System Administrators (technical management)
+7.2 Implementation Summary
+-- Create security profiles
+CREATE PROFILE banking_employee_profile LIMIT
+    PASSWORD_LIFE_TIME 60
+    FAILED_LOGIN_ATTEMPTS 3
+    PASSWORD_LOCK_TIME 1/24
+    SESSIONS_PER_USER 2
+    IDLE_TIME 15;
+
+-- Create role hierarchy
+CREATE ROLE banking_base_role;
+CREATE ROLE teller_role;
+CREATE ROLE personal_banker_role;
+CREATE ROLE branch_manager_role;
+CREATE ROLE regional_manager_role;
+CREATE ROLE compliance_role;
+CREATE ROLE banking_sysadmin_role IDENTIFIED BY "Sy$Adm1n#B@nk";
+
+-- Implement VPD for branch-level access
+-- Implement data redaction for SSN and account numbers
+-- Enable comprehensive auditing
+
+-- Create users with appropriate roles
+CREATE USER teller_john IDENTIFIED BY "T3ll3r#2024"
+    PROFILE banking_employee_profile;
+GRANT teller_role TO teller_john;
+8. Hands-On Lab Exercises
+Lab 1: User Management (30 min)
+Create users and profiles for a retail company.
+
+Lab 2: Privilege Management (45 min)
+Grant appropriate privileges based on job functions.
+
+Lab 3: Role-Based Access Control (45 min)
+Convert individual privileges to role-based model.
+
+Lab 4: Data Protection (60 min)
+Implement VPD and auditing for sensitive data.
+
+Lab 5: Security Audit (30 min)
+Perform a security assessment of the database.
+
+9. Module Summary
+9.1 Key Concepts
+Topic	Key Points
+Users/Schemas	Users are accounts; schemas are object collections
+Profiles	Control password policies and resource limits
+System Privileges	Control what actions users can perform
+Object Privileges	Control access to specific objects
+Roles	Group privileges for easier management
+Views	Provide column and row-level security
+VPD	Automatic row-level security
+Data Redaction	Dynamic data masking
+Auditing	Track all database activities
+9.2 Security Best Practices
+Follow least privilege principle
+Use roles instead of direct grants
+Implement comprehensive auditing
+Mask sensitive data
+Regularly review and revoke unused privileges
+Use strong password policies
+9.3 Quick Reference
+-- User Management
+CREATE USER username IDENTIFIED BY password;
+ALTER USER username ACCOUNT LOCK;
+DROP USER username CASCADE;
+
+-- Privilege Management
+GRANT privilege TO user;
+REVOKE privilege FROM user;
+
+-- Role Management
+CREATE ROLE rolename;
+GRANT role TO user;
+SET ROLE rolename;
+
+-- Auditing
+CREATE AUDIT POLICY policy_name ACTIONS ...;
+AUDIT POLICY policy_name;
+— End of Module 2: Security Management Using SQL —
+
+Next Module: Module 3: Object-Oriented SQL (OOPS in SQL)

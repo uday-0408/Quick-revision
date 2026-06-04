@@ -1,0 +1,1799 @@
+MODULE 7: CONCURRENCY & LOCKING
+Understanding Oracle's Multi-User Architecture
+Duration	6-8 Hours
+Prerequisites	Module 5-6: PL/SQL Fundamentals & Database Objects
+Learning Objectives	• Understand Oracle's locking architecture and mechanisms
+• Differentiate between locks and latches
+• Identify, prevent, and resolve deadlocks
+• Master SELECT FOR UPDATE patterns
+• Implement appropriate isolation levels
+• Diagnose and resolve blocking sessions
+Table of Contents
+Introduction to Concurrency Control
+Locks vs Latches
+Oracle Lock Types and Modes
+Deadlocks
+SELECT FOR UPDATE
+Isolation Levels and Read Consistency
+Blocking and Waiting Sessions
+Real-World Case Studies
+Monitoring and Diagnostics
+Lab Exercises
+Module Summary
+1. Introduction to Concurrency Control
+1.1 Why Concurrency Matters
+In a multi-user database environment, multiple sessions may attempt to:
+
+Read the same data simultaneously
+Modify the same rows concurrently
+Access shared resources at the same time
+Without proper concurrency control, we face:
+
+Problem	Description	Example
+Lost Updates	One transaction overwrites another's changes	Two users update same account balance
+Dirty Reads	Reading uncommitted data from another transaction	Seeing a transfer before it's committed
+Non-Repeatable Reads	Same query returns different results within a transaction	Balance changes between two SELECTs
+Phantom Reads	New rows appear in repeated queries	New orders appear during report generation
+1.2 Oracle's Concurrency Philosophy
+┌─────────────────────────────────────────────────────────────────┐
+│              ORACLE'S CONCURRENCY PRINCIPLES                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  1. READERS NEVER BLOCK WRITERS                                  │
+│     • SELECT statements never wait for DML                       │
+│     • Achieved through multi-version read consistency            │
+│                                                                  │
+│  2. WRITERS NEVER BLOCK READERS                                  │
+│     • DML never blocks SELECT statements                         │
+│     • Readers see data as of their query start time              │
+│                                                                  │
+│  3. WRITERS ONLY BLOCK OTHER WRITERS                             │
+│     • Only when modifying the SAME rows                          │
+│     • Row-level locking minimizes contention                     │
+│                                                                  │
+│  4. LOCKS ARE HELD UNTIL COMMIT/ROLLBACK                         │
+│     • No automatic lock escalation                               │
+│     • Predictable behavior for developers                        │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+1.3 Multi-Version Concurrency Control (MVCC)
+Oracle uses undo segments to maintain multiple versions of data:
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    MVCC IN ACTION                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Time T1: Session A starts query (SCN 1000)                      │
+│           ┌──────────────────┐                                   │
+│           │ Salary = $50,000 │ ← Current block                   │
+│           └──────────────────┘                                   │
+│                                                                  │
+│  Time T2: Session B updates salary to $55,000                    │
+│           ┌──────────────────┐    ┌──────────────────┐          │
+│           │ Salary = $55,000 │ ──►│ Salary = $50,000 │          │
+│           └──────────────────┘    └──────────────────┘          │
+│                Current              Undo (SCN 1000)              │
+│                                                                  │
+│  Time T3: Session A still sees $50,000 (consistent read)         │
+│           Session A reconstructs from undo using SCN             │
+│                                                                  │
+│  Time T4: Session B commits                                      │
+│                                                                  │
+│  Time T5: Session A's NEW query sees $55,000                     │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+2. Locks vs Latches
+2.1 Conceptual Differences
+Aspect	Locks	Latches
+Purpose	Protect user data (rows, tables)	Protect internal memory structures
+Duration	Transaction duration	Very brief (microseconds)
+Scope	Logical (business data)	Physical (SGA structures)
+Visibility	Application-level	Internal to Oracle
+Queueing	FIFO queue for waiters	No guaranteed ordering
+Deadlock Detection	Oracle detects and resolves	Latches use timeouts
+User Control	Can be explicitly requested	No user control
+2.2 Locks (Enqueues)
+/*
+ * LOCKS protect database objects and user data
+ * - Also called "enqueues"
+ * - Managed through enqueue mechanism
+ * - Have modes (Share, Exclusive, etc.)
+ */
+
+-- View current locks in the database
+SELECT 
+    s.sid,
+    s.serial#,
+    s.username,
+    l.type,
+    DECODE(l.lmode,
+        0, 'None',
+        1, 'Null',
+        2, 'Row-S (SS)',
+        3, 'Row-X (SX)',
+        4, 'Share (S)',
+        5, 'S/Row-X (SSX)',
+        6, 'Exclusive (X)') AS lock_mode,
+    DECODE(l.request,
+        0, 'None',
+        1, 'Null',
+        2, 'Row-S (SS)',
+        3, 'Row-X (SX)',
+        4, 'Share (S)',
+        5, 'S/Row-X (SSX)',
+        6, 'Exclusive (X)') AS request_mode,
+    l.block,
+    o.object_name
+FROM v$lock l
+JOIN v$session s ON l.sid = s.sid
+LEFT JOIN dba_objects o ON l.id1 = o.object_id
+WHERE s.username IS NOT NULL
+ORDER BY s.sid;
+Lock Types
+Lock Type	Code	Description
+TX	Transaction	Row-level lock for DML
+TM	DML/Table	Table-level lock for DML
+UL	User Lock	Application-defined lock (DBMS_LOCK)
+MR	Media Recovery	Recovery operations
+ST	Space Transaction	Space management
+2.3 Latches
+/*
+ * LATCHES protect internal Oracle memory structures
+ * - Low-level serialization mechanism
+ * - Held for very short periods
+ * - No deadlock detection (use spin/sleep)
+ */
+
+-- View latch statistics
+SELECT 
+    name,
+    gets,
+    misses,
+    ROUND(misses/NULLIF(gets, 0) * 100, 2) AS miss_ratio,
+    sleeps,
+    spin_gets
+FROM v$latch
+WHERE gets > 0
+ORDER BY misses DESC
+FETCH FIRST 10 ROWS ONLY;
+
+-- Common latches and their purposes
+/*
+ * cache buffers chains  - Protects buffer cache hash chains
+ * shared pool           - Protects shared pool memory
+ * library cache         - Protects parsed SQL/PLSQL
+ * redo allocation       - Protects redo log buffer
+ * redo copy             - Copying redo entries
+ */
+Latch Contention Indicators
+-- Check for latch contention
+SELECT 
+    event,
+    total_waits,
+    time_waited,
+    ROUND(time_waited/NULLIF(total_waits, 0), 2) AS avg_wait_ms
+FROM v$system_event
+WHERE event LIKE 'latch%'
+  AND total_waits > 0
+ORDER BY time_waited DESC;
+2.4 Visual Comparison
+┌─────────────────────────────────────────────────────────────────┐
+│                    LOCKS vs LATCHES                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  LOCKS (User Data Protection)                                    │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │  Session 1                    Session 2                  │    │
+│  │     │                            │                       │    │
+│  │     ▼                            ▼                       │    │
+│  │  UPDATE emp                   UPDATE emp                 │    │
+│  │  SET sal=5000                 SET sal=6000               │    │
+│  │  WHERE id=100;                WHERE id=100;              │    │
+│  │     │                            │                       │    │
+│  │     ▼                            ▼                       │    │
+│  │  [TX Lock on Row 100]         [WAITS for TX Lock]        │    │
+│  │     │                            │                       │    │
+│  │  COMMIT; ─────────────────────►  Proceeds                │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                  │
+│  LATCHES (Memory Structure Protection)                           │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                                                          │    │
+│  │    Process A          Shared Pool          Process B     │    │
+│  │        │              ┌────────┐               │         │    │
+│  │        │──── spin ───►│ Latch  │◄─── spin ────│         │    │
+│  │        │              └────────┘               │         │    │
+│  │        ▼                  │                    ▼         │    │
+│  │    [Gets latch]      [Protected]         [Spins/Sleeps]  │    │
+│  │        │              Memory                   │         │    │
+│  │    [Releases]             │              [Gets latch]    │    │
+│  │                           ▼                              │    │
+│  │                     Microseconds                         │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+3. Oracle Lock Types and Modes
+3.1 Row-Level Locks (TX)
+/*
+ * Row-level locks are the most granular
+ * - Acquired automatically during DML
+ * - Lock only the affected rows
+ * - Released on COMMIT/ROLLBACK
+ */
+
+-- Session 1: Lock a specific row
+UPDATE employees 
+SET salary = 50000 
+WHERE employee_id = 100;
+-- Row 100 is now locked
+
+-- Session 2: Can update OTHER rows freely
+UPDATE employees 
+SET salary = 60000 
+WHERE employee_id = 101;  -- Succeeds immediately
+
+-- Session 2: Updating SAME row waits
+UPDATE employees 
+SET salary = 55000 
+WHERE employee_id = 100;  -- Waits for Session 1
+3.2 Table-Level Locks (TM)
+Mode	Name	Allows	Conflicts With
+2	Row Share (RS/SS)	Concurrent DML	Exclusive
+3	Row Exclusive (RX/SX)	Concurrent DML	Share, Exclusive
+4	Share (S)	Read, Share locks	Row Exclusive, Exclusive
+5	Share Row Exclusive (SRX/SSX)	Read only	All except Row Share
+6	Exclusive (X)	Nothing	All modes
+/*
+ * Table locks are acquired implicitly with DML
+ * - DML acquires Row-X (RX) mode on table
+ * - DDL acquires Exclusive (X) mode
+ */
+
+-- See table locks
+SELECT 
+    s.sid,
+    s.username,
+    o.object_name,
+    DECODE(l.lmode,
+        2, 'Row-S',
+        3, 'Row-X',
+        4, 'Share',
+        5, 'S/Row-X',
+        6, 'Exclusive') AS lock_mode
+FROM v$lock l
+JOIN v$session s ON l.sid = s.sid
+JOIN dba_objects o ON l.id1 = o.object_id
+WHERE l.type = 'TM'
+  AND s.username IS NOT NULL;
+3.3 Lock Compatibility Matrix
+┌─────────────────────────────────────────────────────────────────┐
+│                 LOCK COMPATIBILITY MATRIX                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Requested →    RS    RX    S    SRX    X                       │
+│  Held ↓                                                          │
+│  ─────────────────────────────────────────                       │
+│  Row Share      ✓     ✓     ✓     ✓     ✗                       │
+│  Row Exclusive  ✓     ✓     ✗     ✗     ✗                       │
+│  Share          ✓     ✗     ✓     ✗     ✗                       │
+│  Share Row Exc  ✓     ✗     ✗     ✗     ✗                       │
+│  Exclusive      ✗     ✗     ✗     ✗     ✗                       │
+│                                                                  │
+│  ✓ = Compatible (both can be held)                              │
+│  ✗ = Conflict (requester must wait)                             │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+3.4 Explicit Table Locking
+/*
+ * LOCK TABLE statement for explicit locking
+ * Use when you need predictable locking behavior
+ */
+
+-- Lock table in share mode (allows reads, blocks writes)
+LOCK TABLE employees IN SHARE MODE;
+
+-- Lock table in exclusive mode (blocks everything)
+LOCK TABLE employees IN EXCLUSIVE MODE;
+
+-- Lock with NOWAIT (fail immediately if can't lock)
+LOCK TABLE employees IN EXCLUSIVE MODE NOWAIT;
+
+-- Lock with timeout
+LOCK TABLE employees IN EXCLUSIVE MODE WAIT 10;  -- Wait up to 10 seconds
+
+/*
+ * REAL-WORLD: Batch update requiring exclusive access
+ */
+DECLARE
+    e_lock_failed EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_lock_failed, -54);
+BEGIN
+    -- Try to get exclusive lock
+    EXECUTE IMMEDIATE 'LOCK TABLE salary_adjustments IN EXCLUSIVE MODE NOWAIT';
+    
+    -- Perform batch update
+    UPDATE employees e
+    SET salary = salary * (1 + (
+        SELECT adjustment_pct FROM salary_adjustments sa
+        WHERE sa.department_id = e.department_id
+    ))
+    WHERE department_id IN (SELECT department_id FROM salary_adjustments);
+    
+    COMMIT;
+    
+EXCEPTION
+    WHEN e_lock_failed THEN
+        DBMS_OUTPUT.PUT_LINE('Table is locked by another session');
+END;
+/
+4. Deadlocks
+4.1 What is a Deadlock?
+A deadlock occurs when two or more sessions are waiting for resources held by each other, creating a circular wait condition that cannot be resolved without intervention.
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    DEADLOCK SCENARIO                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Time    Session 1                    Session 2                  │
+│  ────    ─────────                    ─────────                  │
+│                                                                  │
+│  T1      UPDATE accounts              UPDATE accounts            │
+│          SET balance = 1000           SET balance = 2000         │
+│          WHERE id = 100;              WHERE id = 200;            │
+│          [Locks row 100]              [Locks row 200]            │
+│                                                                  │
+│  T2      UPDATE accounts              UPDATE accounts            │
+│          SET balance = 1500           SET balance = 2500         │
+│          WHERE id = 200;              WHERE id = 100;            │
+│          [Waits for 200]              [Waits for 100]            │
+│                                                                  │
+│                     ┌──────────────────┐                         │
+│                     │    DEADLOCK!     │                         │
+│                     │                  │                         │
+│          Session 1 ─┼─► wants 200      │                         │
+│              ▲      │       │          │                         │
+│              │      │       ▼          │                         │
+│          holds 100 ◄┼── Session 2      │                         │
+│                     │   wants 100      │                         │
+│                     │   holds 200      │                         │
+│                     └──────────────────┘                         │
+│                                                                  │
+│  T3      ORA-00060: deadlock detected   [Continues after        │
+│          [Transaction rolled back]       Session 1 rollback]     │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+4.2 How Oracle Detects Deadlocks
+/*
+ * Oracle's deadlock detection:
+ * - Background process checks for deadlock cycles
+ * - Detection typically within seconds
+ * - One session receives ORA-00060
+ * - That session's statement is rolled back (not entire transaction!)
+ * - Other session proceeds
+ */
+
+-- Simulate deadlock (run in two sessions)
+
+-- SESSION 1:
+UPDATE employees SET salary = 50000 WHERE employee_id = 100;
+-- Wait a moment, then:
+UPDATE employees SET salary = 60000 WHERE employee_id = 200;
+
+-- SESSION 2:
+UPDATE employees SET salary = 55000 WHERE employee_id = 200;
+-- Wait a moment, then:
+UPDATE employees SET salary = 65000 WHERE employee_id = 100;
+
+-- One session will get:
+-- ORA-00060: deadlock detected while waiting for resource
+4.3 Deadlock Trace Files
+/*
+ * When deadlock occurs, Oracle writes trace file with details
+ * Location: USER_DUMP_DEST or DIAGNOSTIC_DEST
+ */
+
+-- Find deadlock trace files
+SELECT value FROM v$parameter WHERE name = 'diagnostic_dest';
+
+-- Trace file contains:
+/*
+ * DEADLOCK DETECTED ( ORA-00060 )
+ * 
+ * [Transaction Deadlock]
+ * 
+ * Current SQL statement for this session:
+ * UPDATE employees SET salary = 60000 WHERE employee_id = 200
+ * 
+ * The following deadlock is not an ORACLE error. It is a
+ * temporary condition caused by multiple applications locking 
+ * data in different order.
+ * 
+ * Deadlock graph:
+ *                    ---------Blocker(s)--------  ---------Waiter(s)---------
+ * Resource Name      process session holds waits  process session holds waits
+ * TX-00010016-00001a    23     142     X           24     156           X
+ * TX-0001001b-000019    24     156     X           23     142           X
+ */
+4.4 Preventing Deadlocks
+Strategy 1: Consistent Lock Ordering
+/*
+ * ALWAYS access resources in the same order
+ * Example: Always lock by account_id ascending
+ */
+CREATE OR REPLACE PROCEDURE transfer_funds_safe(
+    p_from_account  IN NUMBER,
+    p_to_account    IN NUMBER,
+    p_amount        IN NUMBER
+)
+IS
+    v_first_account  NUMBER;
+    v_second_account NUMBER;
+    v_balance        NUMBER;
+BEGIN
+    -- Determine lock order (always lock lower ID first)
+    IF p_from_account < p_to_account THEN
+        v_first_account := p_from_account;
+        v_second_account := p_to_account;
+    ELSE
+        v_first_account := p_to_account;
+        v_second_account := p_from_account;
+    END IF;
+    
+    -- Lock in consistent order
+    SELECT balance INTO v_balance
+    FROM accounts WHERE account_id = v_first_account
+    FOR UPDATE;
+    
+    SELECT balance INTO v_balance
+    FROM accounts WHERE account_id = v_second_account
+    FOR UPDATE;
+    
+    -- Now perform the transfer
+    UPDATE accounts SET balance = balance - p_amount
+    WHERE account_id = p_from_account;
+    
+    UPDATE accounts SET balance = balance + p_amount
+    WHERE account_id = p_to_account;
+    
+    COMMIT;
+END;
+/
+Strategy 2: Lock All Resources Upfront
+/*
+ * Lock all required rows at the beginning of transaction
+ */
+CREATE OR REPLACE PROCEDURE batch_update_safe(
+    p_employee_ids  IN SYS.ODCINUMBERLIST
+)
+IS
+    CURSOR c_employees IS
+        SELECT employee_id, salary
+        FROM employees
+        WHERE employee_id IN (SELECT column_value FROM TABLE(p_employee_ids))
+        ORDER BY employee_id  -- Consistent order!
+        FOR UPDATE;
+BEGIN
+    -- Lock all rows first
+    FOR emp IN c_employees LOOP
+        NULL;  -- Just acquiring locks
+    END LOOP;
+    
+    -- Now safe to update
+    FOR emp IN c_employees LOOP
+        UPDATE employees
+        SET salary = emp.salary * 1.10
+        WHERE employee_id = emp.employee_id;
+    END LOOP;
+    
+    COMMIT;
+END;
+/
+Strategy 3: Use NOWAIT with Retry
+/*
+ * Try to acquire locks, retry if busy
+ */
+CREATE OR REPLACE PROCEDURE update_with_retry(
+    p_employee_id  IN NUMBER,
+    p_new_salary   IN NUMBER,
+    p_max_retries  IN NUMBER DEFAULT 3
+)
+IS
+    v_retries NUMBER := 0;
+    v_done    BOOLEAN := FALSE;
+    
+    e_resource_busy EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_resource_busy, -54);
+    
+    e_deadlock EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_deadlock, -60);
+BEGIN
+    WHILE NOT v_done AND v_retries < p_max_retries LOOP
+        BEGIN
+            -- Try to lock with NOWAIT
+            UPDATE employees
+            SET salary = p_new_salary
+            WHERE employee_id = p_employee_id;
+            
+            COMMIT;
+            v_done := TRUE;
+            
+        EXCEPTION
+            WHEN e_resource_busy OR e_deadlock THEN
+                ROLLBACK;
+                v_retries := v_retries + 1;
+                -- Exponential backoff
+                DBMS_LOCK.SLEEP(POWER(2, v_retries) * 0.1);
+        END;
+    END LOOP;
+    
+    IF NOT v_done THEN
+        RAISE_APPLICATION_ERROR(-20001, 
+            'Failed to update after ' || p_max_retries || ' retries');
+    END IF;
+END;
+/
+Strategy 4: Shorten Transaction Duration
+/*
+ * Keep transactions short to reduce deadlock window
+ */
+
+-- BAD: Long transaction holding locks
+BEGIN
+    UPDATE accounts SET status = 'PROCESSING' WHERE account_id = 100;
+    
+    -- Long-running external call
+    send_notification_to_external_system(...);  -- Takes 30 seconds!
+    
+    UPDATE accounts SET status = 'COMPLETED' WHERE account_id = 100;
+    COMMIT;
+END;
+
+-- GOOD: Minimize lock duration
+BEGIN
+    -- Quick status update
+    UPDATE accounts SET status = 'PROCESSING' WHERE account_id = 100;
+    COMMIT;
+    
+    -- External call (no locks held)
+    send_notification_to_external_system(...);
+    
+    -- Quick final update
+    UPDATE accounts SET status = 'COMPLETED' WHERE account_id = 100;
+    COMMIT;
+END;
+4.5 Handling Deadlocks in Application Code
+/*
+ * Robust deadlock handling pattern
+ */
+CREATE OR REPLACE PROCEDURE process_order(p_order_id IN NUMBER)
+IS
+    e_deadlock EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_deadlock, -60);
+    
+    c_max_retries CONSTANT PLS_INTEGER := 3;
+    v_retry_count PLS_INTEGER := 0;
+    v_success BOOLEAN := FALSE;
+BEGIN
+    WHILE NOT v_success AND v_retry_count < c_max_retries LOOP
+        BEGIN
+            -- Start fresh transaction
+            SAVEPOINT before_processing;
+            
+            -- Lock order and items
+            UPDATE orders SET status = 'PROCESSING'
+            WHERE order_id = p_order_id;
+            
+            UPDATE order_items SET reserved = 'Y'
+            WHERE order_id = p_order_id;
+            
+            -- Update inventory (potential deadlock point)
+            UPDATE inventory i
+            SET quantity = quantity - (
+                SELECT quantity FROM order_items oi
+                WHERE oi.order_id = p_order_id
+                  AND oi.product_id = i.product_id
+            )
+            WHERE product_id IN (
+                SELECT product_id FROM order_items
+                WHERE order_id = p_order_id
+            );
+            
+            -- Finalize
+            UPDATE orders SET status = 'COMPLETED'
+            WHERE order_id = p_order_id;
+            
+            COMMIT;
+            v_success := TRUE;
+            
+        EXCEPTION
+            WHEN e_deadlock THEN
+                ROLLBACK TO before_processing;
+                v_retry_count := v_retry_count + 1;
+                
+                -- Log the deadlock
+                log_error('Deadlock on order ' || p_order_id || 
+                         ', retry ' || v_retry_count);
+                
+                -- Wait before retry (with jitter)
+                DBMS_LOCK.SLEEP(DBMS_RANDOM.VALUE(0.1, 0.5) * v_retry_count);
+        END;
+    END LOOP;
+    
+    IF NOT v_success THEN
+        RAISE_APPLICATION_ERROR(-20001, 
+            'Order processing failed after ' || c_max_retries || ' retries');
+    END IF;
+END;
+/
+5. SELECT FOR UPDATE
+5.1 Basic Syntax and Usage
+/*
+ * SELECT FOR UPDATE locks selected rows for subsequent modification
+ * - Prevents other sessions from modifying the rows
+ * - Rows remain locked until COMMIT/ROLLBACK
+ */
+
+-- Basic SELECT FOR UPDATE
+SELECT employee_id, salary
+FROM employees
+WHERE department_id = 60
+FOR UPDATE;
+
+-- Lock specific columns only
+SELECT employee_id, salary, commission_pct
+FROM employees
+WHERE department_id = 60
+FOR UPDATE OF salary;  -- Only salary column is relevant for lock
+
+-- Multiple tables
+SELECT e.employee_id, e.salary, d.department_name
+FROM employees e
+JOIN departments d ON e.department_id = d.department_id
+WHERE e.department_id = 60
+FOR UPDATE OF e.salary;  -- Lock only employees table
+5.2 FOR UPDATE Options
+NOWAIT
+/*
+ * NOWAIT: Fail immediately if rows are locked
+ * Returns ORA-00054: resource busy
+ */
+DECLARE
+    CURSOR c_emp IS
+        SELECT employee_id, salary
+        FROM employees
+        WHERE department_id = 60
+        FOR UPDATE NOWAIT;
+    
+    e_locked EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_locked, -54);
+BEGIN
+    FOR emp IN c_emp LOOP
+        UPDATE employees
+        SET salary = emp.salary * 1.10
+        WHERE employee_id = emp.employee_id;
+    END LOOP;
+    COMMIT;
+EXCEPTION
+    WHEN e_locked THEN
+        DBMS_OUTPUT.PUT_LINE('Rows are locked by another session');
+END;
+/
+WAIT n
+/*
+ * WAIT n: Wait up to n seconds before failing
+ * Returns ORA-30006: resource busy; acquire with WAIT timeout expired
+ */
+DECLARE
+    CURSOR c_emp IS
+        SELECT employee_id, salary
+        FROM employees
+        WHERE department_id = 60
+        FOR UPDATE WAIT 5;  -- Wait up to 5 seconds
+    
+    e_timeout EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_timeout, -30006);
+BEGIN
+    FOR emp IN c_emp LOOP
+        UPDATE employees
+        SET salary = emp.salary * 1.10
+        WHERE employee_id = emp.employee_id;
+    END LOOP;
+    COMMIT;
+EXCEPTION
+    WHEN e_timeout THEN
+        DBMS_OUTPUT.PUT_LINE('Timeout waiting for locks');
+END;
+/
+SKIP LOCKED
+/*
+ * SKIP LOCKED: Skip rows that are locked by other sessions
+ * Perfect for queue processing with multiple workers
+ */
+
+-- Job queue table
+CREATE TABLE job_queue (
+    job_id      NUMBER PRIMARY KEY,
+    job_type    VARCHAR2(50),
+    payload     CLOB,
+    status      VARCHAR2(20) DEFAULT 'PENDING',
+    priority    NUMBER DEFAULT 5,
+    created_dt  TIMESTAMP DEFAULT SYSTIMESTAMP,
+    processed_dt TIMESTAMP,
+    worker_id   VARCHAR2(50)
+);
+
+-- Worker process that claims and processes jobs
+CREATE OR REPLACE PROCEDURE process_jobs(
+    p_worker_id  IN VARCHAR2,
+    p_batch_size IN NUMBER DEFAULT 10
+)
+IS
+    CURSOR c_jobs IS
+        SELECT job_id, job_type, payload
+        FROM job_queue
+        WHERE status = 'PENDING'
+        ORDER BY priority, created_dt
+        FOR UPDATE SKIP LOCKED  -- Skip jobs being processed by others
+        FETCH FIRST p_batch_size ROWS ONLY;
+    
+    TYPE job_tab IS TABLE OF c_jobs%ROWTYPE;
+    v_jobs job_tab;
+BEGIN
+    OPEN c_jobs;
+    FETCH c_jobs BULK COLLECT INTO v_jobs;
+    CLOSE c_jobs;
+    
+    IF v_jobs.COUNT = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No jobs available');
+        RETURN;
+    END IF;
+    
+    -- Mark jobs as processing
+    FORALL i IN 1..v_jobs.COUNT
+        UPDATE job_queue
+        SET status = 'PROCESSING',
+            worker_id = p_worker_id
+        WHERE job_id = v_jobs(i).job_id;
+    COMMIT;
+    
+    -- Process each job
+    FOR i IN 1..v_jobs.COUNT LOOP
+        BEGIN
+            -- Actual job processing
+            process_single_job(v_jobs(i).job_id, v_jobs(i).payload);
+            
+            UPDATE job_queue
+            SET status = 'COMPLETED',
+                processed_dt = SYSTIMESTAMP
+            WHERE job_id = v_jobs(i).job_id;
+            
+        EXCEPTION
+            WHEN OTHERS THEN
+                UPDATE job_queue
+                SET status = 'FAILED',
+                    processed_dt = SYSTIMESTAMP
+                WHERE job_id = v_jobs(i).job_id;
+        END;
+        COMMIT;
+    END LOOP;
+END;
+/
+
+/*
+ * Multiple workers can run simultaneously:
+ * Worker 1: Gets jobs 1, 2, 3
+ * Worker 2: Gets jobs 4, 5, 6 (skips 1, 2, 3)
+ * Worker 3: Gets jobs 7, 8, 9 (skips 1-6)
+ */
+5.3 WHERE CURRENT OF
+/*
+ * WHERE CURRENT OF updates/deletes the current cursor row
+ * - More efficient than re-querying by primary key
+ * - Only works with FOR UPDATE cursors
+ */
+DECLARE
+    CURSOR c_employees IS
+        SELECT employee_id, salary, commission_pct
+        FROM employees
+        WHERE department_id = 80
+        FOR UPDATE OF salary;
+BEGIN
+    FOR emp IN c_employees LOOP
+        IF emp.commission_pct IS NOT NULL THEN
+            UPDATE employees
+            SET salary = emp.salary * (1 + emp.commission_pct)
+            WHERE CURRENT OF c_employees;  -- Update this exact row
+        END IF;
+    END LOOP;
+    COMMIT;
+END;
+/
+5.4 Real-World Patterns
+Pattern 1: Pessimistic Locking for Critical Updates
+/*
+ * SCENARIO: Bank account balance update
+ * Must ensure no race conditions
+ */
+CREATE OR REPLACE FUNCTION withdraw_funds(
+    p_account_id IN NUMBER,
+    p_amount     IN NUMBER
+) RETURN BOOLEAN
+IS
+    v_current_balance NUMBER;
+    e_insufficient EXCEPTION;
+BEGIN
+    -- Lock the account row
+    SELECT balance INTO v_current_balance
+    FROM accounts
+    WHERE account_id = p_account_id
+    FOR UPDATE;
+    
+    -- Check balance
+    IF v_current_balance < p_amount THEN
+        RAISE e_insufficient;
+    END IF;
+    
+    -- Deduct amount
+    UPDATE accounts
+    SET balance = balance - p_amount,
+        last_transaction = SYSTIMESTAMP
+    WHERE account_id = p_account_id;
+    
+    -- Record transaction
+    INSERT INTO transactions (account_id, amount, txn_type, txn_date)
+    VALUES (p_account_id, -p_amount, 'WITHDRAWAL', SYSTIMESTAMP);
+    
+    COMMIT;
+    RETURN TRUE;
+    
+EXCEPTION
+    WHEN e_insufficient THEN
+        ROLLBACK;
+        RETURN FALSE;
+END;
+/
+Pattern 2: Inventory Reservation
+/*
+ * SCENARIO: E-commerce inventory reservation
+ * Multiple users trying to purchase limited stock
+ */
+CREATE OR REPLACE PROCEDURE reserve_inventory(
+    p_product_id IN NUMBER,
+    p_quantity   IN NUMBER,
+    p_order_id   IN NUMBER,
+    p_success    OUT BOOLEAN,
+    p_message    OUT VARCHAR2
+)
+IS
+    v_available NUMBER;
+    e_timeout EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_timeout, -30006);
+BEGIN
+    p_success := FALSE;
+    
+    -- Try to lock with short timeout
+    BEGIN
+        SELECT quantity_available INTO v_available
+        FROM inventory
+        WHERE product_id = p_product_id
+        FOR UPDATE WAIT 3;
+    EXCEPTION
+        WHEN e_timeout THEN
+            p_message := 'Product is being updated by another user. Please retry.';
+            RETURN;
+    END;
+    
+    -- Check availability
+    IF v_available < p_quantity THEN
+        p_message := 'Insufficient inventory. Available: ' || v_available;
+        ROLLBACK;
+        RETURN;
+    END IF;
+    
+    -- Reserve inventory
+    UPDATE inventory
+    SET quantity_available = quantity_available - p_quantity,
+        quantity_reserved = quantity_reserved + p_quantity
+    WHERE product_id = p_product_id;
+    
+    -- Create reservation record
+    INSERT INTO inventory_reservations 
+    (reservation_id, product_id, order_id, quantity, reserved_at, expires_at)
+    VALUES 
+    (reservation_seq.NEXTVAL, p_product_id, p_order_id, p_quantity, 
+     SYSTIMESTAMP, SYSTIMESTAMP + INTERVAL '30' MINUTE);
+    
+    COMMIT;
+    p_success := TRUE;
+    p_message := 'Inventory reserved successfully';
+END;
+/
+6. Isolation Levels and Read Consistency
+6.1 Oracle's Default: Read Committed
+/*
+ * READ COMMITTED (Default):
+ * - Each query sees only committed data as of query start
+ * - Different queries in same transaction may see different data
+ * - No dirty reads, but non-repeatable reads possible
+ */
+
+-- Session 1: Start transaction
+SELECT balance FROM accounts WHERE account_id = 100;  -- Returns 1000
+
+-- Session 2: Update and commit
+UPDATE accounts SET balance = 1500 WHERE account_id = 100;
+COMMIT;
+
+-- Session 1: Same query, different result
+SELECT balance FROM accounts WHERE account_id = 100;  -- Returns 1500!
+6.2 Serializable Isolation
+/*
+ * SERIALIZABLE:
+ * - Transaction sees snapshot of database as of transaction start
+ * - All queries see consistent data throughout transaction
+ * - May receive ORA-08177 if concurrent changes conflict
+ */
+
+-- Set isolation level
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+-- Or in PL/SQL
+BEGIN
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    
+    -- All queries now see data as of this point
+    SELECT balance FROM accounts WHERE account_id = 100;  -- Returns 1000
+    
+    -- Even if another session updates and commits...
+    
+    SELECT balance FROM accounts WHERE account_id = 100;  -- Still returns 1000!
+    
+    COMMIT;
+END;
+/
+
+/*
+ * Serialization failure example
+ */
+DECLARE
+    e_serialization EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_serialization, -8177);
+BEGIN
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    
+    -- Read some data
+    SELECT ... FROM some_table;
+    
+    -- Try to update (another session modified this row since we started)
+    UPDATE some_table SET ...;  -- ORA-08177!
+    
+    COMMIT;
+EXCEPTION
+    WHEN e_serialization THEN
+        ROLLBACK;
+        -- Retry the entire transaction
+END;
+/
+6.3 Read Consistency Illustration
+┌─────────────────────────────────────────────────────────────────┐
+│                    READ CONSISTENCY                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  READ COMMITTED (Statement-level consistency)                    │
+│  ────────────────────────────────────────────                    │
+│                                                                  │
+│  Time   Session A                    Session B                   │
+│  ────   ─────────                    ─────────                   │
+│  T1     SELECT sum(balance)          UPDATE accounts             │
+│         FROM accounts;               SET balance = balance + 100 │
+│         [Starts scan...]             WHERE id = 1000;            │
+│                                                                  │
+│  T2     [Still scanning...]          COMMIT;                     │
+│                                                                  │
+│  T3     [Query reads row 1000]                                   │
+│         → Sees OLD value (before T1)                             │
+│         → Consistent within THIS query                           │
+│                                                                  │
+│  T4     SELECT sum(balance)                                      │
+│         FROM accounts;                                           │
+│         → Sees NEW value                                         │
+│         → New query, new snapshot                                │
+│                                                                  │
+│                                                                  │
+│  SERIALIZABLE (Transaction-level consistency)                    │
+│  ────────────────────────────────────────────                    │
+│                                                                  │
+│  T1     SET TRANSACTION                                          │
+│         ISOLATION LEVEL SERIALIZABLE;                            │
+│         SELECT sum(balance)          UPDATE accounts             │
+│         FROM accounts;               SET balance = balance + 100 │
+│         → 10,000                     WHERE id = 1000;            │
+│                                      COMMIT;                     │
+│                                                                  │
+│  T2     SELECT sum(balance)                                      │
+│         FROM accounts;                                           │
+│         → Still 10,000!                                          │
+│         → Sees snapshot from T1                                  │
+│                                                                  │
+│  T3     COMMIT;                                                  │
+│         SELECT sum(balance)                                      │
+│         → 10,100 (new transaction)                               │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+6.4 ORA-01555: Snapshot Too Old
+/*
+ * ORA-01555 occurs when:
+ * - Long-running query needs old data from undo
+ * - But undo has been overwritten
+ * 
+ * Prevention strategies:
+ */
+
+-- 1. Increase undo retention
+ALTER SYSTEM SET undo_retention = 3600;  -- 1 hour
+
+-- 2. Use RETENTION GUARANTEE
+ALTER TABLESPACE undotbs1 RETENTION GUARANTEE;
+
+-- 3. For long reports, use flashback query
+SELECT * FROM large_table AS OF TIMESTAMP (SYSTIMESTAMP - INTERVAL '1' HOUR);
+
+-- 4. Break up long-running queries
+DECLARE
+    v_start_scn NUMBER;
+BEGIN
+    v_start_scn := DBMS_FLASHBACK.GET_SYSTEM_CHANGE_NUMBER;
+    
+    -- Process in chunks, all seeing same SCN
+    FOR chunk IN (
+        SELECT ROWID rid FROM large_table 
+        WHERE MOD(ORA_HASH(id), 10) = 0  -- First chunk
+    )
+    LOOP
+        -- Process using AS OF SCN for consistency
+        SELECT * FROM large_table AS OF SCN v_start_scn
+        WHERE ROWID = chunk.rid;
+    END LOOP;
+END;
+/
+6.5 When to Use Each Isolation Level
+Use Case	Isolation Level	Reason
+General OLTP	READ COMMITTED	Best concurrency, default behavior
+Financial reports	SERIALIZABLE	Consistent point-in-time view
+Audit queries	SERIALIZABLE	Must see consistent data
+High-volume inserts	READ COMMITTED	Avoid serialization failures
+Balance calculations	SERIALIZABLE	Prevent phantom reads
+7. Blocking and Waiting Sessions
+7.1 Understanding Blocking
+┌─────────────────────────────────────────────────────────────────┐
+│                    BLOCKING CHAIN                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Session 100 (BLOCKER)                                           │
+│       │                                                          │
+│       │ Holds lock on row 1                                      │
+│       ▼                                                          │
+│  Session 200 (WAITER/BLOCKER)                                    │
+│       │ Waiting for row 1                                        │
+│       │ Holds lock on row 2                                      │
+│       ▼                                                          │
+│  Session 300 (WAITER)                                            │
+│         Waiting for row 2                                        │
+│                                                                  │
+│  ROOT BLOCKER: Session 100                                       │
+│  Chain depth: 3 sessions                                         │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+7.2 Identifying Blocking Sessions
+/*
+ * Query to find blocking sessions
+ */
+SELECT 
+    'Session ' || s1.sid || ' (' || s1.username || ')' AS blocked_session,
+    'is blocked by Session ' || s2.sid || ' (' || s2.username || ')' AS blocker,
+    s1.sql_id AS blocked_sql,
+    s1.event AS wait_event,
+    s1.seconds_in_wait AS wait_seconds,
+    o.object_name AS locked_object
+FROM v$session s1
+JOIN v$session s2 ON s1.blocking_session = s2.sid
+LEFT JOIN v$lock l ON s1.sid = l.sid AND l.request > 0
+LEFT JOIN dba_objects o ON l.id1 = o.object_id
+WHERE s1.blocking_session IS NOT NULL;
+
+/*
+ * Detailed blocking analysis
+ */
+SELECT 
+    level,
+    LPAD(' ', (level-1)*2) || sid AS sid_hierarchy,
+    serial#,
+    username,
+    status,
+    sql_id,
+    event,
+    seconds_in_wait,
+    blocking_session
+FROM v$session
+START WITH blocking_session IS NULL
+    AND sid IN (SELECT blocking_session FROM v$session WHERE blocking_session IS NOT NULL)
+CONNECT BY PRIOR sid = blocking_session;
+
+/*
+ * Find the root blocker
+ */
+SELECT 
+    sid,
+    serial#,
+    username,
+    program,
+    sql_id,
+    event,
+    (SELECT sql_text FROM v$sql WHERE sql_id = s.sql_id AND ROWNUM = 1) AS current_sql
+FROM v$session s
+WHERE sid IN (
+    SELECT blocking_session 
+    FROM v$session 
+    WHERE blocking_session IS NOT NULL
+)
+AND blocking_session IS NULL;  -- Not blocked by anyone = root blocker
+7.3 What is the Blocker Doing?
+/*
+ * Get details about what the blocking session is executing
+ */
+SELECT 
+    s.sid,
+    s.serial#,
+    s.username,
+    s.program,
+    s.machine,
+    s.logon_time,
+    s.status,
+    s.sql_id AS current_sql_id,
+    sq.sql_text AS current_sql,
+    s.prev_sql_id,
+    psq.sql_text AS previous_sql,
+    t.start_time AS txn_start_time,
+    t.used_ublk AS undo_blocks_used
+FROM v$session s
+LEFT JOIN v$sql sq ON s.sql_id = sq.sql_id AND sq.child_number = 0
+LEFT JOIN v$sql psq ON s.prev_sql_id = psq.sql_id AND psq.child_number = 0
+LEFT JOIN v$transaction t ON s.taddr = t.addr
+WHERE s.sid = &blocking_sid;
+
+/*
+ * See what rows are locked
+ */
+SELECT 
+    o.owner,
+    o.object_name,
+    o.object_type,
+    s.sid,
+    s.serial#,
+    s.username,
+    l.type,
+    DECODE(l.lmode, 0,'None', 1,'Null', 2,'Row-S', 3,'Row-X', 4,'Share', 5,'S/Row-X', 6,'Exclusive') AS held_mode,
+    DECODE(l.request, 0,'None', 1,'Null', 2,'Row-S', 3,'Row-X', 4,'Share', 5,'S/Row-X', 6,'Exclusive') AS requested_mode
+FROM v$lock l
+JOIN v$session s ON l.sid = s.sid
+JOIN dba_objects o ON l.id1 = o.object_id
+WHERE l.type = 'TM'
+  AND s.sid = &blocking_sid;
+7.4 Resolving Blocking
+Option 1: Wait for Blocker to Complete
+-- Monitor the blocking session
+SELECT sid, status, sql_id, seconds_in_wait
+FROM v$session
+WHERE sid = &blocking_sid;
+Option 2: Contact the User
+-- Get user/machine info
+SELECT 
+    username,
+    osuser,
+    machine,
+    program,
+    module,
+    action
+FROM v$session
+WHERE sid = &blocking_sid;
+Option 3: Kill the Blocking Session
+/*
+ * CAUTION: Only use when necessary
+ * This will rollback the blocker's transaction
+ */
+
+-- Get SID and SERIAL#
+SELECT sid, serial#, username, status
+FROM v$session
+WHERE sid = &blocking_sid;
+
+-- Kill the session
+ALTER SYSTEM KILL SESSION '&sid,&serial#';
+
+-- Or kill immediately (no rollback wait)
+ALTER SYSTEM KILL SESSION '&sid,&serial#' IMMEDIATE;
+
+-- For RAC, include instance
+ALTER SYSTEM KILL SESSION '&sid,&serial#,@&instance_id';
+Option 4: Cancel the Blocking SQL
+/*
+ * Cancel specific SQL without killing session (12c+)
+ */
+ALTER SYSTEM CANCEL SQL '&sid,&serial#';
+7.5 Preventing Long-Term Blocking
+/*
+ * Set session-level lock timeout
+ */
+ALTER SESSION SET ddl_lock_timeout = 10;  -- DDL waits max 10 seconds
+
+/*
+ * Use application-level timeouts
+ */
+DECLARE
+    e_timeout EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_timeout, -30006);
+BEGIN
+    -- Will fail after 5 seconds if blocked
+    UPDATE employees SET salary = 50000
+    WHERE employee_id = 100
+    AND ROWID = (
+        SELECT ROWID FROM employees
+        WHERE employee_id = 100
+        FOR UPDATE WAIT 5
+    );
+EXCEPTION
+    WHEN e_timeout THEN
+        -- Handle timeout
+        log_error('Update timed out - row may be locked');
+        RAISE;
+END;
+/
+7.6 Automated Blocking Alert
+/*
+ * Create a monitoring job that alerts on long blocking
+ */
+CREATE OR REPLACE PROCEDURE check_blocking_sessions
+IS
+    v_threshold_seconds NUMBER := 300;  -- 5 minutes
+BEGIN
+    FOR blocked IN (
+        SELECT 
+            s1.sid AS blocked_sid,
+            s1.username AS blocked_user,
+            s2.sid AS blocker_sid,
+            s2.username AS blocker_user,
+            s1.seconds_in_wait
+        FROM v$session s1
+        JOIN v$session s2 ON s1.blocking_session = s2.sid
+        WHERE s1.seconds_in_wait > v_threshold_seconds
+    )
+    LOOP
+        -- Send alert
+        send_alert_email(
+            'Blocking Alert',
+            'Session ' || blocked.blocker_sid || ' (' || blocked.blocker_user || 
+            ') has been blocking session ' || blocked.blocked_sid || 
+            ' for ' || blocked.seconds_in_wait || ' seconds.'
+        );
+    END LOOP;
+END;
+/
+
+-- Schedule to run every minute
+BEGIN
+    DBMS_SCHEDULER.CREATE_JOB(
+        job_name        => 'CHECK_BLOCKING_JOB',
+        job_type        => 'STORED_PROCEDURE',
+        job_action      => 'check_blocking_sessions',
+        repeat_interval => 'FREQ=MINUTELY;INTERVAL=1',
+        enabled         => TRUE
+    );
+END;
+/
+8. Real-World Case Studies
+8.1 Case Study: E-Commerce Flash Sale
+Scenario: Thousands of users trying to purchase limited inventory simultaneously.
+
+/*
+ * Problem: Traditional approach causes massive blocking
+ */
+-- BAD: Everyone blocks on the same row
+UPDATE products 
+SET quantity = quantity - 1 
+WHERE product_id = 100 AND quantity > 0;
+
+/*
+ * Solution: Use optimistic locking with version control
+ */
+CREATE TABLE products (
+    product_id    NUMBER PRIMARY KEY,
+    product_name  VARCHAR2(100),
+    quantity      NUMBER,
+    version       NUMBER DEFAULT 1,
+    last_updated  TIMESTAMP
+);
+
+CREATE OR REPLACE FUNCTION purchase_product(
+    p_product_id IN NUMBER,
+    p_quantity   IN NUMBER,
+    p_user_id    IN NUMBER
+) RETURN VARCHAR2
+IS
+    v_current_qty     NUMBER;
+    v_current_version NUMBER;
+    v_rows_updated    NUMBER;
+    c_max_retries     CONSTANT NUMBER := 3;
+    v_retry           NUMBER := 0;
+BEGIN
+    WHILE v_retry < c_max_retries LOOP
+        -- Read current state (no lock)
+        SELECT quantity, version
+        INTO v_current_qty, v_current_version
+        FROM products
+        WHERE product_id = p_product_id;
+        
+        -- Check availability
+        IF v_current_qty < p_quantity THEN
+            RETURN 'INSUFFICIENT_STOCK';
+        END IF;
+        
+        -- Optimistic update with version check
+        UPDATE products
+        SET quantity = quantity - p_quantity,
+            version = version + 1,
+            last_updated = SYSTIMESTAMP
+        WHERE product_id = p_product_id
+          AND version = v_current_version  -- Only if unchanged
+          AND quantity >= p_quantity;
+        
+        v_rows_updated := SQL%ROWCOUNT;
+        
+        IF v_rows_updated = 1 THEN
+            -- Success! Create order
+            INSERT INTO orders (order_id, user_id, product_id, quantity, order_date)
+            VALUES (order_seq.NEXTVAL, p_user_id, p_product_id, p_quantity, SYSTIMESTAMP);
+            
+            COMMIT;
+            RETURN 'SUCCESS';
+        END IF;
+        
+        -- Version changed, retry
+        v_retry := v_retry + 1;
+        DBMS_LOCK.SLEEP(0.01 * v_retry);  -- Small backoff
+    END LOOP;
+    
+    RETURN 'RETRY_EXHAUSTED';
+END;
+/
+8.2 Case Study: Banking Batch Processing
+Scenario: Nightly interest calculation affecting millions of accounts while online banking is still active.
+
+/*
+ * Solution: Process in small batches with minimal locking
+ */
+CREATE OR REPLACE PROCEDURE apply_daily_interest
+IS
+    c_batch_size CONSTANT NUMBER := 1000;
+    v_processed  NUMBER := 0;
+    
+    CURSOR c_accounts IS
+        SELECT account_id, balance, interest_rate
+        FROM accounts
+        WHERE account_type = 'SAVINGS'
+          AND status = 'ACTIVE'
+          AND last_interest_date < TRUNC(SYSDATE)
+        ORDER BY account_id;  -- Consistent ordering prevents deadlocks
+    
+    TYPE account_tab IS TABLE OF c_accounts%ROWTYPE;
+    v_accounts account_tab;
+BEGIN
+    OPEN c_accounts;
+    
+    LOOP
+        FETCH c_accounts BULK COLLECT INTO v_accounts LIMIT c_batch_size;
+        EXIT WHEN v_accounts.COUNT = 0;
+        
+        -- Process batch
+        FOR i IN 1..v_accounts.COUNT LOOP
+            BEGIN
+                -- Short transaction per account
+                UPDATE accounts
+                SET balance = balance + (balance * interest_rate / 365),
+                    last_interest_date = TRUNC(SYSDATE)
+                WHERE account_id = v_accounts(i).account_id
+                  AND last_interest_date < TRUNC(SYSDATE);  -- Idempotent
+                
+                IF SQL%ROWCOUNT = 1 THEN
+                    INSERT INTO interest_log 
+                    VALUES (v_accounts(i).account_id, 
+                            v_accounts(i).balance * v_accounts(i).interest_rate / 365,
+                            SYSDATE);
+                END IF;
+                
+            EXCEPTION
+                WHEN OTHERS THEN
+                    -- Log error but continue with other accounts
+                    log_error('Interest failed for account ' || v_accounts(i).account_id);
+            END;
+        END LOOP;
+        
+        COMMIT;  -- Commit each batch
+        v_processed := v_processed + v_accounts.COUNT;
+        
+        -- Brief pause to allow online transactions
+        DBMS_LOCK.SLEEP(0.1);
+    END LOOP;
+    
+    CLOSE c_accounts;
+    
+    DBMS_OUTPUT.PUT_LINE('Processed ' || v_processed || ' accounts');
+END;
+/
+8.3 Case Study: Report vs OLTP Conflict
+Scenario: Long-running reports blocking OLTP transactions.
+
+/*
+ * Solution: Use flashback query for reports
+ */
+CREATE OR REPLACE PROCEDURE generate_daily_report(
+    p_report_date IN DATE
+)
+IS
+    v_scn NUMBER;
+BEGIN
+    -- Get SCN from the start of the day
+    SELECT timestamp_to_scn(p_report_date) INTO v_scn FROM dual;
+    
+    -- All report queries use this consistent SCN
+    INSERT INTO daily_sales_report
+    SELECT 
+        product_id,
+        SUM(quantity),
+        SUM(amount)
+    FROM sales AS OF SCN v_scn  -- Historical snapshot
+    WHERE sale_date = p_report_date
+    GROUP BY product_id;
+    
+    INSERT INTO daily_customer_report
+    SELECT 
+        customer_id,
+        COUNT(*) AS order_count,
+        SUM(total_amount) AS total_spend
+    FROM orders AS OF SCN v_scn  -- Same consistent view
+    WHERE order_date = p_report_date
+    GROUP BY customer_id;
+    
+    COMMIT;
+END;
+/
+9. Monitoring and Diagnostics
+9.1 Essential Monitoring Queries
+/*
+ * 1. Current locks in the database
+ */
+SELECT 
+    s.sid,
+    s.serial#,
+    s.username,
+    s.program,
+    l.type AS lock_type,
+    o.object_name,
+    DECODE(l.lmode, 0,'None', 1,'Null', 2,'Row-S', 3,'Row-X', 
+                    4,'Share', 5,'S/Row-X', 6,'Exclusive') AS lock_mode,
+    DECODE(l.request, 0,'Holding', 1,'Null', 2,'Row-S', 3,'Row-X', 
+                      4,'Share', 5,'S/Row-X', 6,'Exclusive') AS request,
+    l.ctime AS lock_duration_sec
+FROM v$lock l
+JOIN v$session s ON l.sid = s.sid
+LEFT JOIN dba_objects o ON l.id1 = o.object_id
+WHERE s.username IS NOT NULL
+  AND l.type IN ('TX', 'TM')
+ORDER BY l.ctime DESC;
+
+/*
+ * 2. Blocking tree hierarchy
+ */
+WITH blocking_tree AS (
+    SELECT 
+        sid,
+        serial#,
+        username,
+        blocking_session,
+        sql_id,
+        event,
+        seconds_in_wait,
+        LEVEL AS depth
+    FROM v$session
+    START WITH blocking_session IS NULL
+        AND sid IN (SELECT blocking_session FROM v$session WHERE blocking_session IS NOT NULL)
+    CONNECT BY PRIOR sid = blocking_session
+)
+SELECT 
+    LPAD(' ', (depth-1)*2) || sid AS session_hierarchy,
+    serial#,
+    username,
+    sql_id,
+    event,
+    seconds_in_wait,
+    CASE WHEN blocking_session IS NULL THEN 'ROOT BLOCKER' ELSE 'WAITING' END AS status
+FROM blocking_tree
+ORDER BY CONNECT_BY_ROOT sid, depth;
+
+/*
+ * 3. Wait events summary
+ */
+SELECT 
+    event,
+    total_waits,
+    time_waited / 100 AS time_waited_sec,
+    average_wait / 100 AS avg_wait_sec
+FROM v$system_event
+WHERE wait_class NOT IN ('Idle', 'Other')
+  AND event LIKE '%lock%' OR event LIKE '%enq%'
+ORDER BY time_waited DESC
+FETCH FIRST 20 ROWS ONLY;
+
+/*
+ * 4. Lock wait history (AWR)
+ */
+SELECT 
+    snap_id,
+    instance_number,
+    event,
+    total_waits,
+    time_waited_micro / 1000000 AS time_waited_sec
+FROM dba_hist_system_event
+WHERE event LIKE '%enq%'
+ORDER BY snap_id DESC, time_waited_micro DESC
+FETCH FIRST 50 ROWS ONLY;
+9.2 Real-Time Monitoring Dashboard
+/*
+ * Create a monitoring procedure for DBA use
+ */
+CREATE OR REPLACE PROCEDURE show_lock_status
+IS
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('=== CURRENT BLOCKING SESSIONS ===');
+    DBMS_OUTPUT.PUT_LINE('');
+    
+    FOR r IN (
+        SELECT 
+            s1.sid AS blocked,
+            s1.username AS blocked_user,
+            s2.sid AS blocker,
+            s2.username AS blocker_user,
+            s1.seconds_in_wait AS wait_sec,
+            s1.sql_id
+        FROM v$session s1
+        JOIN v$session s2 ON s1.blocking_session = s2.sid
+        ORDER BY s1.seconds_in_wait DESC
+    )
+    LOOP
+        DBMS_OUTPUT.PUT_LINE(
+            'Blocked: ' || r.blocked || ' (' || r.blocked_user || ') ' ||
+            'by: ' || r.blocker || ' (' || r.blocker_user || ') ' ||
+            'for ' || r.wait_sec || 's'
+        );
+    END LOOP;
+    
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('=== TOP LOCK HOLDERS ===');
+    DBMS_OUTPUT.PUT_LINE('');
+    
+    FOR r IN (
+        SELECT 
+            s.sid,
+            s.username,
+            COUNT(*) AS locks_held,
+            MAX(l.ctime) AS longest_lock_sec
+        FROM v$lock l
+        JOIN v$session s ON l.sid = s.sid
+        WHERE l.lmode > 0 AND s.username IS NOT NULL
+        GROUP BY s.sid, s.username
+        ORDER BY locks_held DESC
+        FETCH FIRST 10 ROWS ONLY
+    )
+    LOOP
+        DBMS_OUTPUT.PUT_LINE(
+            'SID: ' || r.sid || ' (' || r.username || ') ' ||
+            'Locks: ' || r.locks_held || ' ' ||
+            'Longest: ' || r.longest_lock_sec || 's'
+        );
+    END LOOP;
+END;
+/
+10. Lab Exercises
+Lab 1: Deadlock Simulation and Resolution (30 min)
+Objective: Experience and resolve a deadlock scenario.
+
+/*
+ * Setup
+ */
+CREATE TABLE lab_accounts (
+    account_id NUMBER PRIMARY KEY,
+    balance    NUMBER
+);
+
+INSERT INTO lab_accounts VALUES (1, 1000);
+INSERT INTO lab_accounts VALUES (2, 2000);
+COMMIT;
+
+/*
+ * Exercise: Run these in two separate sessions
+ */
+
+-- SESSION 1:
+UPDATE lab_accounts SET balance = balance - 100 WHERE account_id = 1;
+-- Wait 5 seconds, then:
+UPDATE lab_accounts SET balance = balance + 100 WHERE account_id = 2;
+
+-- SESSION 2:
+UPDATE lab_accounts SET balance = balance - 200 WHERE account_id = 2;
+-- Wait 5 seconds, then:
+UPDATE lab_accounts SET balance = balance + 200 WHERE account_id = 1;
+
+/*
+ * Questions:
+ * 1. Which session received ORA-00060?
+ * 2. Find the trace file and examine the deadlock graph
+ * 3. Rewrite the code to prevent the deadlock
+ */
+Lab 2: SKIP LOCKED Queue Processing (45 min)
+Objective: Implement a multi-worker job queue.
+
+/*
+ * Create and populate job queue
+ */
+CREATE TABLE lab_job_queue (
+    job_id      NUMBER PRIMARY KEY,
+    payload     VARCHAR2(100),
+    status      VARCHAR2(20) DEFAULT 'PENDING',
+    worker_id   NUMBER,
+    started_at  TIMESTAMP,
+    completed_at TIMESTAMP
+);
+
+-- Insert 100 jobs
+BEGIN
+    FOR i IN 1..100 LOOP
+        INSERT INTO lab_job_queue (job_id, payload)
+        VALUES (i, 'Job payload ' || i);
+    END LOOP;
+    COMMIT;
+END;
+/
+
+/*
+ * Exercise: Create worker procedure that:
+ * 1. Claims a batch of jobs using SKIP LOCKED
+ * 2. Processes them (simulate with DBMS_LOCK.SLEEP)
+ * 3. Marks them complete
+ * 4. Run multiple workers simultaneously and verify no conflicts
+ */
+
+-- Your solution here:
+CREATE OR REPLACE PROCEDURE process_jobs_lab(p_worker_id NUMBER) IS
+BEGIN
+    -- Implement worker logic
+    NULL;
+END;
+/
+Lab 3: Isolation Level Comparison (30 min)
+Objective: Observe differences between READ COMMITTED and SERIALIZABLE.
+
+/*
+ * Setup
+ */
+CREATE TABLE lab_inventory (
+    product_id NUMBER PRIMARY KEY,
+    quantity   NUMBER
+);
+INSERT INTO lab_inventory VALUES (1, 100);
+COMMIT;
+
+/*
+ * Exercise 1: READ COMMITTED behavior
+ * Run in two sessions and observe results
+ */
+
+-- SESSION 1:
+SELECT quantity FROM lab_inventory WHERE product_id = 1;  -- Note value
+-- Wait for Session 2 to update and commit
+SELECT quantity FROM lab_inventory WHERE product_id = 1;  -- Compare
+
+-- SESSION 2:
+UPDATE lab_inventory SET quantity = quantity - 10 WHERE product_id = 1;
+COMMIT;
+
+/*
+ * Exercise 2: SERIALIZABLE behavior
+ * Repeat with SERIALIZABLE isolation
+ */
+
+-- SESSION 1:
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+SELECT quantity FROM lab_inventory WHERE product_id = 1;
+-- Wait for Session 2
+SELECT quantity FROM lab_inventory WHERE product_id = 1;  -- Same as before!
+COMMIT;
+
+/*
+ * Questions:
+ * 1. Why does READ COMMITTED show different values?
+ * 2. When would you choose SERIALIZABLE?
+ * 3. What happens if Session 1 tries to UPDATE in SERIALIZABLE mode?
+ */
+Lab 4: Blocking Session Analysis (45 min)
+Objective: Diagnose and resolve a blocking scenario.
+
+/*
+ * Create blocking scenario
+ */
+
+-- SESSION 1 (run first):
+UPDATE employees SET salary = 99999 WHERE employee_id = 100;
+-- DO NOT COMMIT - leave session open
+
+-- SESSION 2:
+UPDATE employees SET salary = 88888 WHERE employee_id = 100;
+-- This will block
+
+/*
+ * Exercise: Using only V$ views, find:
+ * 1. Which session is blocked
+ * 2. Which session is the blocker
+ * 3. What SQL the blocker executed
+ * 4. How long the block has been occurring
+ * 5. What object is involved
+ * 
+ * Then resolve the blocking appropriately.
+ */
+11. Module Summary
+11.1 Key Concepts
+Concept	Description
+Locks	Protect user data; transaction duration; user-visible
+Latches	Protect memory structures; microseconds; internal
+Deadlock	Circular wait; Oracle auto-detects and resolves
+FOR UPDATE	Explicit row locking for subsequent modification
+NOWAIT/WAIT	Control lock acquisition timeout
+SKIP LOCKED	Process only unlocked rows (queue pattern)
+READ COMMITTED	Statement-level consistency (default)
+SERIALIZABLE	Transaction-level consistency
+Blocking	One session waiting for another's locks
+11.2 Quick Reference
+-- Explicit locking
+SELECT ... FOR UPDATE [NOWAIT | WAIT n | SKIP LOCKED];
+LOCK TABLE table IN {SHARE | EXCLUSIVE} MODE [NOWAIT];
+
+-- Isolation levels
+SET TRANSACTION ISOLATION LEVEL {READ COMMITTED | SERIALIZABLE};
+
+-- Find blockers
+SELECT * FROM v$session WHERE blocking_session IS NOT NULL;
+
+-- Kill session
+ALTER SYSTEM KILL SESSION 'sid,serial#' [IMMEDIATE];
+
+-- Key views
+v$lock       -- Current locks
+v$session    -- Session info including blocking_session
+v$transaction -- Active transactions
+v$locked_object -- Locked objects
+11.3 Best Practices
+Practice	Description
+Lock in consistent order	Prevents deadlocks
+Keep transactions short	Reduces blocking duration
+Use NOWAIT/WAIT	Avoid indefinite waits
+Use SKIP LOCKED for queues	Enables parallel processing
+Monitor blocking regularly	Catch issues early
+Use optimistic locking	For high-concurrency scenarios
+Commit frequently	Release locks promptly
+Avoid long-running transactions	Reduces ORA-01555 risk
+11.4 Common Errors
+Error	Cause	Solution
+ORA-00060	Deadlock detected	Retry transaction; fix lock order
+ORA-00054	Resource busy (NOWAIT)	Retry or wait
+ORA-30006	WAIT timeout expired	Increase timeout or retry
+ORA-01555	Snapshot too old	Increase undo; shorter queries
+ORA-08177	Serialization failure	Retry transaction
+— End of Module 7: Concurrency & Locking —

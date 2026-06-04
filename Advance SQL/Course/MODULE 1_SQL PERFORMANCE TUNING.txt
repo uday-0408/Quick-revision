@@ -1,0 +1,989 @@
+MODULE 1: SQL PERFORMANCE TUNING
+Comprehensive Course Material for Oracle, Snowflake & Databricks
+Duration	12-15 Hours
+Prerequisites	Basic SQL knowledge, Understanding of cloud data platforms
+Platforms Covered	Oracle Database, Snowflake, Databricks (Spark SQL)
+Learning Objectives	• Understand query optimization across different platforms
+• Read and interpret execution plans
+• Design effective indexing/clustering strategies
+• Optimize queries for each platform's architecture
+• Apply platform-specific tuning techniques
+Table of Contents
+Introduction to SQL Performance Tuning
+Oracle Performance Tuning
+Snowflake Performance Tuning
+Databricks Performance Tuning
+Cross-Platform Comparison
+Hands-On Lab Exercises
+Module Summary
+1. Introduction to SQL Performance Tuning
+1.1 Why Performance Tuning Matters
+SQL Performance Tuning optimizes queries and data structures for faster execution and efficient resource use. While the goal is universal, each platform has unique architectures requiring different approaches:
+
+Platform	Architecture	Key Tuning Focus
+Oracle	Traditional RDBMS with B-tree indexes	Indexes, statistics, hints
+Snowflake	Cloud-native, micro-partitions, no indexes	Clustering, warehouse sizing, caching
+Databricks	Distributed Spark, Delta Lake	Partitioning, Z-ordering, file optimization
+1.2 Universal Performance Principles
+Regardless of platform, these principles apply:
+
+Reduce Data Scanned - Filter early, select only needed columns
+Optimize Joins - Join order, join types, data locality
+Leverage Caching - Reuse computed results when possible
+Understand Execution Plans - Know what the engine is doing
+Keep Statistics Current - Help the optimizer make good decisions
+2. Oracle Performance Tuning
+2.1 The Cost-Based Optimizer (CBO)
+Oracle's Cost-Based Optimizer evaluates multiple execution paths and selects the one with lowest estimated cost based on statistics.
+
+How CBO Works
+SQL Statement → Parse → Transform → Generate Plans → Estimate Costs → Select Best Plan → Execute
+Viewing Execution Plans
+-- Method 1: EXPLAIN PLAN
+EXPLAIN PLAN FOR
+SELECT e.employee_name, d.department_name, e.salary
+FROM employees e
+JOIN departments d ON e.department_id = d.department_id
+WHERE e.salary > 50000
+  AND d.location_id = 1700;
+
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+-- Method 2: AUTOTRACE (SQL*Plus)
+SET AUTOTRACE ON EXPLAIN STATISTICS
+SELECT * FROM employees WHERE department_id = 10;
+
+-- Method 3: Real-time SQL Monitoring (Enterprise Edition)
+SELECT DBMS_SQLTUNE.REPORT_SQL_MONITOR(
+    sql_id => 'abc123xyz',
+    type => 'TEXT'
+) FROM dual;
+Sample Execution Plan Output
+------------------------------------------------------------------------------------------
+| Id  | Operation                     | Name           | Rows  | Bytes | Cost  | Time   |
+------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT              |                |    15 |  1200 |    8  | 00:00:01|
+|   1 |  NESTED LOOPS                 |                |    15 |  1200 |    8  | 00:00:01|
+|   2 |   TABLE ACCESS BY INDEX ROWID | DEPARTMENTS    |     1 |    30 |    2  | 00:00:01|
+|*  3 |    INDEX RANGE SCAN           | DEPT_LOC_IDX   |     1 |       |    1  | 00:00:01|
+|*  4 |   TABLE ACCESS BY INDEX ROWID | EMPLOYEES      |    15 |   750 |    6  | 00:00:01|
+|*  5 |    INDEX RANGE SCAN           | EMP_DEPT_IDX   |    20 |       |    1  | 00:00:01|
+------------------------------------------------------------------------------------------
+
+Predicate Information:
+   3 - access("D"."LOCATION_ID"=1700)
+   4 - filter("E"."SALARY">50000)
+   5 - access("E"."DEPARTMENT_ID"="D"."DEPARTMENT_ID")
+2.2 Oracle Index Types
+B-Tree Index (Default)
+-- Standard B-Tree index
+CREATE INDEX emp_lastname_idx ON employees(last_name);
+
+-- Composite index (column order matters!)
+CREATE INDEX emp_dept_job_idx ON employees(department_id, job_id);
+
+-- Query uses index (filters on leading column)
+SELECT * FROM employees WHERE department_id = 10;  -- ✓ Uses index
+
+-- Query CANNOT use index efficiently (missing leading column)
+SELECT * FROM employees WHERE job_id = 'CLERK';    -- ✗ Full scan or skip scan
+Unique Index
+-- Enforce uniqueness
+CREATE UNIQUE INDEX emp_email_uk ON employees(email);
+
+-- Automatic with primary key
+ALTER TABLE employees ADD CONSTRAINT emp_pk PRIMARY KEY (employee_id);
+Function-Based Index
+-- Problem: Function prevents index usage
+SELECT * FROM employees WHERE UPPER(last_name) = 'SMITH';  -- Full scan!
+
+-- Solution: Function-based index
+CREATE INDEX emp_upper_name_idx ON employees(UPPER(last_name));
+
+-- Now uses index
+SELECT * FROM employees WHERE UPPER(last_name) = 'SMITH';  -- Index range scan
+
+-- Other examples
+CREATE INDEX emp_year_idx ON employees(EXTRACT(YEAR FROM hire_date));
+CREATE INDEX emp_salary_calc_idx ON employees(salary * 12 + NVL(commission_pct, 0));
+Bitmap Index (Data Warehouse Only)
+-- Ideal for low-cardinality columns in DW environments
+CREATE BITMAP INDEX emp_gender_bidx ON employees(gender);
+CREATE BITMAP INDEX emp_status_bidx ON employees(status);
+
+-- Excellent for combining multiple conditions
+SELECT COUNT(*) FROM employees
+WHERE gender = 'F' 
+  AND status = 'ACTIVE' 
+  AND region = 'WEST';
+-- Oracle performs efficient bitmap AND operations
+⚠️ Warning: Never use bitmap indexes in OLTP systems - they cause severe locking issues during DML operations.
+
+Reverse Key Index
+-- Problem: Sequential values cause "hot block" contention
+CREATE INDEX order_id_idx ON orders(order_id);  -- All inserts hit rightmost leaf
+
+-- Solution: Reverse key distributes inserts
+CREATE INDEX order_id_ridx ON orders(order_id) REVERSE;
+
+-- Limitation: Cannot use for range scans
+SELECT * FROM orders WHERE order_id BETWEEN 1000 AND 2000;  -- Full scan!
+2.3 Oracle Query Anti-Patterns
+Anti-Pattern 1: Functions on Indexed Columns
+-- ❌ BAD: Prevents index usage
+SELECT * FROM orders WHERE TRUNC(order_date) = DATE '2024-01-15';
+
+-- ✓ GOOD: Rewrite as range
+SELECT * FROM orders 
+WHERE order_date >= DATE '2024-01-15' 
+  AND order_date < DATE '2024-01-16';
+Anti-Pattern 2: Implicit Type Conversion
+-- ❌ BAD: phone_number is VARCHAR2, comparing with number
+SELECT * FROM employees WHERE phone_number = 5551234;
+-- Oracle converts: TO_NUMBER(phone_number) for EVERY row!
+
+-- ✓ GOOD: Match data types
+SELECT * FROM employees WHERE phone_number = '5551234';
+Anti-Pattern 3: Leading Wildcards
+-- ❌ BAD: Cannot use B-tree index
+SELECT * FROM employees WHERE last_name LIKE '%SMITH%';
+
+-- ✓ GOOD: Trailing wildcard uses index
+SELECT * FROM employees WHERE last_name LIKE 'SMITH%';
+
+-- ✓ ALTERNATIVE: Oracle Text for full-text search
+CREATE INDEX emp_name_ctx ON employees(last_name) INDEXTYPE IS CTXSYS.CONTEXT;
+SELECT * FROM employees WHERE CONTAINS(last_name, '%SMITH%') > 0;
+2.4 Oracle Statistics Management
+-- Gather table statistics
+EXEC DBMS_STATS.GATHER_TABLE_STATS(
+    ownname => 'HR',
+    tabname => 'EMPLOYEES',
+    estimate_percent => DBMS_STATS.AUTO_SAMPLE_SIZE,
+    method_opt => 'FOR ALL COLUMNS SIZE AUTO',
+    cascade => TRUE
+);
+
+-- Gather schema statistics
+EXEC DBMS_STATS.GATHER_SCHEMA_STATS('HR');
+
+-- Check statistics freshness
+SELECT table_name, num_rows, last_analyzed,
+       ROUND((SYSDATE - last_analyzed), 1) days_old
+FROM user_tables
+ORDER BY last_analyzed NULLS FIRST;
+
+-- Create histogram for skewed data
+EXEC DBMS_STATS.GATHER_TABLE_STATS(
+    ownname => 'HR',
+    tabname => 'EMPLOYEES', 
+    method_opt => 'FOR COLUMNS SIZE 254 department_id'
+);
+3. Snowflake Performance Tuning
+3.1 Snowflake Architecture Overview
+Snowflake uses a unique architecture that differs fundamentally from traditional databases:
+
+┌─────────────────────────────────────────────────────────────┐
+│                    Cloud Services Layer                      │
+│         (Query Optimization, Metadata, Security)             │
+├─────────────────────────────────────────────────────────────┤
+│                    Virtual Warehouses                        │
+│              (Compute - Scalable Independently)              │
+├─────────────────────────────────────────────────────────────┤
+│                    Storage Layer                             │
+│         (Micro-partitions, Compressed, Immutable)            │
+└─────────────────────────────────────────────────────────────┘
+Key Concepts:
+
+No Traditional Indexes - Snowflake automatically manages data organization
+Micro-partitions - Data stored in 50-500MB compressed chunks
+Automatic Clustering - Data naturally organized by insert order
+Pruning - Optimizer skips irrelevant micro-partitions
+3.2 Understanding Snowflake Query Profile
+-- Run a query
+SELECT c.c_name, SUM(o.o_totalprice) total_orders
+FROM customer c
+JOIN orders o ON c.c_custkey = o.o_custkey
+WHERE o.o_orderdate BETWEEN '2024-01-01' AND '2024-03-31'
+GROUP BY c.c_name
+ORDER BY total_orders DESC
+LIMIT 100;
+
+-- View query profile in Snowflake UI:
+-- 1. Go to Query History
+-- 2. Click on the query
+-- 3. Select "Query Profile" tab
+
+-- Or get query ID programmatically
+SELECT LAST_QUERY_ID();
+
+-- View execution details
+SELECT *
+FROM TABLE(INFORMATION_SCHEMA.QUERY_HISTORY_BY_USER())
+WHERE QUERY_ID = '<query_id>'
+ORDER BY START_TIME DESC;
+Key Query Profile Metrics
+Metric	Description	What to Look For
+Partitions Scanned	Number of micro-partitions read	Lower is better - indicates good pruning
+Partitions Total	Total partitions in table	Compare with scanned
+Bytes Scanned	Data volume processed	Minimize with filtering/clustering
+Spillage to Local/Remote	Data overflow from memory	Indicates warehouse too small
+Queue Time	Time waiting for resources	Consider larger warehouse
+3.3 Clustering Keys
+Snowflake's alternative to indexes - organizes data within micro-partitions for better pruning.
+
+When to Use Clustering Keys
+-- Check current clustering info
+SELECT TABLE_NAME, CLUSTERING_KEY, 
+       TOTAL_CONSTANT_PARTITION_COUNT,
+       AVERAGE_OVERLAPS,
+       AVERAGE_DEPTH
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_NAME = 'ORDERS';
+
+-- View clustering depth (lower is better, 1-2 is ideal)
+SELECT SYSTEM$CLUSTERING_DEPTH('orders');
+
+-- Check clustering information for specific columns
+SELECT SYSTEM$CLUSTERING_INFORMATION('orders', '(o_orderdate)');
+Creating Clustering Keys
+-- Add clustering key to existing table
+ALTER TABLE orders CLUSTER BY (o_orderdate);
+
+-- Create table with clustering key
+CREATE TABLE sales (
+    sale_id NUMBER,
+    sale_date DATE,
+    region VARCHAR(50),
+    product_id NUMBER,
+    amount DECIMAL(18,2)
+) CLUSTER BY (sale_date, region);
+
+-- Multiple columns for common query patterns
+ALTER TABLE orders CLUSTER BY (o_orderdate, o_orderstatus);
+
+-- Expression-based clustering
+ALTER TABLE events CLUSTER BY (TO_DATE(event_timestamp));
+Clustering Best Practices
+-- ✓ GOOD: Cluster on frequently filtered columns
+ALTER TABLE orders CLUSTER BY (order_date);  -- Date ranges common
+
+-- ✓ GOOD: Cluster on join columns for large-large joins
+ALTER TABLE lineitem CLUSTER BY (l_orderkey);
+
+-- ❌ BAD: High cardinality columns alone
+ALTER TABLE orders CLUSTER BY (order_id);  -- Too unique
+
+-- ✓ BETTER: Combine with lower cardinality
+ALTER TABLE orders CLUSTER BY (order_date, customer_id);
+
+-- Check if clustering is helping
+SELECT SYSTEM$CLUSTERING_INFORMATION('orders', '(order_date)');
+-- Look for: average_depth close to 1, low overlap
+3.4 Snowflake Query Optimization Techniques
+Technique 1: Partition Pruning
+-- ❌ BAD: No pruning possible (function on column)
+SELECT * FROM orders 
+WHERE DATE_TRUNC('month', o_orderdate) = '2024-01-01';
+
+-- ✓ GOOD: Enables partition pruning
+SELECT * FROM orders
+WHERE o_orderdate >= '2024-01-01' 
+  AND o_orderdate < '2024-02-01';
+
+-- Check pruning effectiveness in Query Profile
+-- Look for: "Partitions scanned" vs "Partitions total"
+Technique 2: Warehouse Sizing
+-- Create warehouses for different workloads
+CREATE WAREHOUSE analytics_wh
+    WAREHOUSE_SIZE = 'LARGE'
+    AUTO_SUSPEND = 300
+    AUTO_RESUME = TRUE
+    MIN_CLUSTER_COUNT = 1
+    MAX_CLUSTER_COUNT = 4
+    SCALING_POLICY = 'STANDARD';
+
+-- Resize based on query needs
+ALTER WAREHOUSE analytics_wh SET WAREHOUSE_SIZE = 'XLARGE';
+
+-- For complex queries with spillage, scale up
+-- For many concurrent queries, scale out (multi-cluster)
+Technique 3: Caching Strategies
+-- Snowflake has 3 cache layers:
+-- 1. Query Result Cache (24 hours, automatic)
+-- 2. Local Disk Cache (warehouse SSD)
+-- 3. Remote Disk Cache (S3/Azure/GCS)
+
+-- Force fresh execution (bypass result cache)
+ALTER SESSION SET USE_CACHED_RESULT = FALSE;
+SELECT * FROM large_table WHERE date_col = CURRENT_DATE();
+ALTER SESSION SET USE_CACHED_RESULT = TRUE;
+
+-- Leverage result cache for repeated queries
+-- Same query + same user + same role = instant results
+SELECT COUNT(*) FROM orders WHERE year = 2024;  -- First run: 5 seconds
+SELECT COUNT(*) FROM orders WHERE year = 2024;  -- Second run: instant
+
+-- Check if result came from cache
+SELECT QUERY_ID, QUERY_TEXT, BYTES_SCANNED, 
+       PERCENTAGE_SCANNED_FROM_CACHE
+FROM TABLE(INFORMATION_SCHEMA.QUERY_HISTORY())
+ORDER BY START_TIME DESC
+LIMIT 10;
+Technique 4: Materialized Views
+-- Create materialized view for expensive aggregations
+CREATE MATERIALIZED VIEW mv_daily_sales AS
+SELECT 
+    sale_date,
+    region,
+    COUNT(*) as num_sales,
+    SUM(amount) as total_amount,
+    AVG(amount) as avg_amount
+FROM sales
+GROUP BY sale_date, region;
+
+-- Snowflake automatically maintains and uses MV
+SELECT * FROM mv_daily_sales WHERE region = 'WEST';
+
+-- Check materialized view status
+SHOW MATERIALIZED VIEWS;
+
+-- Force refresh if needed
+ALTER MATERIALIZED VIEW mv_daily_sales REFRESH;
+Technique 5: Search Optimization Service
+-- Enable for point lookups on large tables (Enterprise Edition)
+ALTER TABLE customers ADD SEARCH OPTIMIZATION;
+
+-- Check search optimization status
+SHOW TABLES LIKE 'customers';
+SELECT SYSTEM$ESTIMATE_SEARCH_OPTIMIZATION_COSTS('customers');
+
+-- Optimizes these query patterns:
+SELECT * FROM customers WHERE customer_id = 12345;       -- Equality
+SELECT * FROM customers WHERE email = 'john@email.com';  -- Equality on string
+SELECT * FROM customers WHERE tags LIKE '%premium%';     -- Substring
+SELECT * FROM customers WHERE ARRAY_CONTAINS(interests, 'sports');  -- Semi-structured
+3.5 Snowflake-Specific Anti-Patterns
+Anti-Pattern 1: SELECT *
+-- ❌ BAD: Scans all columns
+SELECT * FROM wide_table WHERE date_col = '2024-01-01';
+
+-- ✓ GOOD: Select only needed columns
+SELECT id, name, amount FROM wide_table WHERE date_col = '2024-01-01';
+-- Snowflake is columnar - fewer columns = less data scanned
+Anti-Pattern 2: ORDER BY Without LIMIT
+-- ❌ BAD: Sorts entire result set
+SELECT * FROM orders WHERE year = 2024 ORDER BY order_date DESC;
+
+-- ✓ GOOD: Limit results when possible
+SELECT * FROM orders WHERE year = 2024 ORDER BY order_date DESC LIMIT 1000;
+Anti-Pattern 3: Exploding Joins
+-- ❌ BAD: Cartesian-like explosion
+SELECT a.*, b.*
+FROM table_a a
+JOIN table_b b ON a.category = b.category  -- Low cardinality join key
+WHERE a.status = 'active';
+
+-- ✓ GOOD: Add more selective conditions
+SELECT a.*, b.*
+FROM table_a a
+JOIN table_b b ON a.category = b.category 
+              AND a.date_col = b.date_col  -- Additional join condition
+WHERE a.status = 'active';
+Anti-Pattern 4: UDFs in WHERE Clauses
+-- ❌ BAD: UDF prevents pruning
+SELECT * FROM orders WHERE my_udf(order_date) = 'Q1-2024';
+
+-- ✓ GOOD: Use native functions
+SELECT * FROM orders WHERE QUARTER(order_date) = 1 AND YEAR(order_date) = 2024;
+
+-- ✓ BETTER: Range predicate for best pruning
+SELECT * FROM orders 
+WHERE order_date >= '2024-01-01' AND order_date < '2024-04-01';
+4. Databricks Performance Tuning
+4.1 Databricks/Spark Architecture
+Databricks runs on Apache Spark, a distributed computing engine:
+
+┌────────────────────────────────────────────────────────────────┐
+│                        Driver Node                              │
+│            (Coordinates, Query Planning, Optimization)          │
+├────────────────────────────────────────────────────────────────┤
+│     Worker 1      │      Worker 2      │      Worker N         │
+│   ┌──────────┐   │   ┌──────────┐     │   ┌──────────┐       │
+│   │ Executor │   │   │ Executor │     │   │ Executor │       │
+│   │ (Tasks)  │   │   │ (Tasks)  │     │   │ (Tasks)  │       │
+│   └──────────┘   │   └──────────┘     │   └──────────┘       │
+├────────────────────────────────────────────────────────────────┤
+│                    Delta Lake Storage                           │
+│        (Parquet files + Transaction Log + Metadata)             │
+└────────────────────────────────────────────────────────────────┘
+Key Concepts:
+
+Delta Lake - ACID transactions on data lake
+Partitioning - Physical data organization by column values
+Z-Ordering - Multi-dimensional clustering within partitions
+Data Skipping - Statistics-based file pruning
+4.2 Understanding Spark Execution Plans
+Viewing Query Plans
+-- Method 1: EXPLAIN command
+EXPLAIN SELECT * FROM orders WHERE order_date = '2024-01-15';
+
+-- Method 2: Extended explain with statistics
+EXPLAIN EXTENDED 
+SELECT c.name, SUM(o.amount)
+FROM customers c
+JOIN orders o ON c.id = o.customer_id
+GROUP BY c.name;
+
+-- Method 3: Cost-based explain
+EXPLAIN COST
+SELECT * FROM orders WHERE region = 'WEST';
+
+-- Method 4: Formatted explain (easier to read)
+EXPLAIN FORMATTED
+SELECT * FROM large_table WHERE date_col = '2024-01-15';
+Sample Spark Execution Plan
+== Physical Plan ==
+*(2) HashAggregate(keys=[name#10], functions=[sum(amount#25)])
++- Exchange hashpartitioning(name#10, 200)
+   +- *(1) HashAggregate(keys=[name#10], functions=[partial_sum(amount#25)])
+      +- *(1) Project [name#10, amount#25]
+         +- *(1) BroadcastHashJoin [id#5], [customer_id#20], Inner, BuildLeft
+            :- BroadcastExchange HashedRelationBroadcastMode(List(input[0, int, false]))
+            :  +- *(1) Filter isnotnull(id#5)
+            :     +- *(1) Scan parquet customers [id#5, name#10]
+            +- *(1) Filter isnotnull(customer_id#20)
+               +- *(1) Scan parquet orders [customer_id#20, amount#25]
+
+-- Key indicators:
+-- Exchange = Shuffle (expensive!)
+-- BroadcastHashJoin = Small table broadcast (efficient)
+-- Scan parquet with pushdown = Good filtering
+Using Spark UI
+# In Databricks notebook, click "Spark Jobs" after query execution
+# Navigate to: SQL tab → Query details → DAG Visualization
+
+# Programmatically get query metrics
+spark.sql("SELECT * FROM orders WHERE date = '2024-01-15'")
+# Check Spark UI for:
+# - Stage durations
+# - Shuffle read/write
+# - Task distribution
+# - Spill to disk
+4.3 Delta Lake Optimization
+Partitioning
+-- Create partitioned table
+CREATE TABLE sales (
+    sale_id BIGINT,
+    sale_date DATE,
+    customer_id BIGINT,
+    product_id BIGINT,
+    region STRING,
+    amount DECIMAL(18,2)
+) 
+USING DELTA
+PARTITIONED BY (sale_date);
+
+-- Query leverages partition pruning
+SELECT * FROM sales WHERE sale_date = '2024-01-15';
+-- Only reads partition: sale_date=2024-01-15/
+
+-- Check partitions
+SHOW PARTITIONS sales;
+
+-- Partitioning guidelines:
+-- ✓ GOOD: Date columns (daily/monthly granularity)
+-- ✓ GOOD: Columns with < 10,000 distinct values
+-- ❌ BAD: High-cardinality columns (creates too many small files)
+Z-Ordering (Multi-Dimensional Clustering)
+-- Z-Order for columns frequently used together in filters
+OPTIMIZE sales ZORDER BY (customer_id, product_id);
+
+-- How it works:
+-- - Colocates related data in same files
+-- - Enables data skipping via file-level statistics
+-- - Best for columns with high cardinality
+
+-- Example: Before Z-ORDER
+-- customer_id=100 scattered across 1000 files
+
+-- After Z-ORDER on customer_id
+-- customer_id=100 concentrated in ~10 files
+
+-- Combine with partitioning
+CREATE TABLE events (
+    event_id BIGINT,
+    event_date DATE,
+    user_id BIGINT,
+    event_type STRING,
+    properties MAP<STRING, STRING>
+)
+USING DELTA
+PARTITIONED BY (event_date);
+
+-- Then Z-ORDER within partitions
+OPTIMIZE events WHERE event_date >= '2024-01-01' ZORDER BY (user_id);
+OPTIMIZE and VACUUM
+-- Compact small files (improves read performance)
+OPTIMIZE orders;
+
+-- Optimize specific partition
+OPTIMIZE orders WHERE order_date >= '2024-01-01';
+
+-- Remove old files (saves storage)
+VACUUM orders RETAIN 168 HOURS;  -- Keep 7 days of history
+
+-- Check table details
+DESCRIBE DETAIL orders;
+-- Shows: numFiles, sizeInBytes, numPartitions
+
+-- View file statistics
+DESCRIBE HISTORY orders;
+Auto Optimize (Databricks)
+-- Enable auto-optimization for a table
+ALTER TABLE orders SET TBLPROPERTIES (
+    'delta.autoOptimize.optimizeWrite' = 'true',
+    'delta.autoOptimize.autoCompact' = 'true'
+);
+
+-- Or set at session level
+SET spark.databricks.delta.optimizeWrite.enabled = true;
+SET spark.databricks.delta.autoCompact.enabled = true;
+4.4 Databricks Query Optimization Techniques
+Technique 1: Broadcast Joins
+-- Small table automatically broadcast (< 10MB default)
+SELECT /*+ BROADCAST(d) */ 
+    e.name, d.dept_name
+FROM employees e
+JOIN departments d ON e.dept_id = d.dept_id;
+
+-- Increase broadcast threshold for larger dimension tables
+SET spark.sql.autoBroadcastJoinThreshold = 100m;  -- 100MB
+
+-- Force broadcast hint
+SELECT /*+ BROADCAST(small_table) */ *
+FROM large_table l
+JOIN small_table s ON l.key = s.key;
+
+-- Check join strategy in explain plan
+EXPLAIN SELECT * FROM large JOIN small ON large.id = small.id;
+-- Look for: BroadcastHashJoin (good) vs SortMergeJoin (more expensive)
+Technique 2: Predicate Pushdown
+-- ✓ GOOD: Filter pushes to data source
+SELECT * FROM parquet.`/path/to/data` WHERE date = '2024-01-15';
+
+-- Verify pushdown in plan
+EXPLAIN SELECT * FROM orders WHERE order_date = '2024-01-15';
+-- Look for: PushedFilters: [EqualTo(order_date, 2024-01-15)]
+
+-- Delta Lake file skipping
+SELECT * FROM delta_table WHERE id = 12345;
+-- Delta uses min/max statistics to skip files where id NOT BETWEEN min AND max
+Technique 3: Column Pruning
+-- ❌ BAD: Reads all columns
+SELECT * FROM wide_table WHERE date = '2024-01-15';
+
+-- ✓ GOOD: Reads only needed columns
+SELECT id, name, amount FROM wide_table WHERE date = '2024-01-15';
+
+-- Parquet/Delta are columnar - fewer columns = faster queries
+Technique 4: Caching
+-- Cache frequently accessed table
+CACHE TABLE customers;
+
+-- Cache with specific storage level
+CACHE TABLE orders OPTIONS ('storageLevel' 'MEMORY_AND_DISK');
+
+-- Cache query result
+CACHE SELECT * FROM orders WHERE year = 2024;
+
+-- Check what's cached
+SELECT * FROM cached_tables;
+
+-- Clear cache
+UNCACHE TABLE customers;
+CLEAR CACHE;
+Technique 5: Adaptive Query Execution (AQE)
+-- Enable AQE (default in Databricks Runtime 7.3+)
+SET spark.sql.adaptive.enabled = true;
+
+-- AQE features:
+SET spark.sql.adaptive.coalescePartitions.enabled = true;  -- Combine small partitions
+SET spark.sql.adaptive.skewJoin.enabled = true;            -- Handle skewed joins
+SET spark.sql.adaptive.localShuffleReader.enabled = true;  -- Optimize shuffles
+
+-- AQE automatically:
+-- 1. Converts sort-merge joins to broadcast joins at runtime
+-- 2. Coalesces small shuffle partitions
+-- 3. Handles skewed partition joins
+Technique 6: Bloom Filters (Delta Lake)
+-- Create bloom filter index for point lookups
+CREATE BLOOMFILTER INDEX ON TABLE orders FOR COLUMNS (order_id);
+
+-- Works well for:
+-- - Columns with high cardinality
+-- - Equality predicates (=, IN)
+-- - NOT for range queries
+
+-- Check bloom filter usage
+SET spark.databricks.io.skipping.bloomFilter.enabled = true;
+4.5 Databricks-Specific Anti-Patterns
+Anti-Pattern 1: Too Many Small Files
+-- Problem: Thousands of small files (< 128MB each)
+-- Symptoms: Slow reads, high metadata overhead
+
+-- Check file count
+DESCRIBE DETAIL my_table;
+
+-- Solution: OPTIMIZE
+OPTIMIZE my_table;
+
+-- Prevention: Use auto-optimize
+ALTER TABLE my_table SET TBLPROPERTIES (
+    'delta.autoOptimize.optimizeWrite' = 'true'
+);
+Anti-Pattern 2: Over-Partitioning
+-- ❌ BAD: Too granular partitioning
+CREATE TABLE events
+PARTITIONED BY (year, month, day, hour, user_id);  -- Creates millions of partitions!
+
+-- ✓ GOOD: Reasonable partitioning
+CREATE TABLE events
+PARTITIONED BY (event_date);  -- Daily partitions
+
+-- Then use Z-ORDER for additional columns
+OPTIMIZE events ZORDER BY (user_id);
+Anti-Pattern 3: Cartesian Products
+-- ❌ BAD: Accidental cross join
+SELECT * FROM table_a, table_b;  -- Cartesian product!
+
+SELECT * FROM table_a 
+JOIN table_b ON table_a.category = table_b.category;  
+-- If category has low cardinality, still quasi-cartesian
+
+-- ✓ GOOD: Ensure join keys are selective
+SELECT * FROM table_a a
+JOIN table_b b ON a.id = b.foreign_id;
+Anti-Pattern 4: Collect() on Large Datasets
+# ❌ BAD: Brings all data to driver (OOM risk)
+all_data = spark.sql("SELECT * FROM huge_table").collect()
+
+# ✓ GOOD: Limit data brought to driver
+sample = spark.sql("SELECT * FROM huge_table LIMIT 1000").collect()
+
+# ✓ GOOD: Process in distributed manner
+spark.sql("""
+    SELECT region, SUM(amount) 
+    FROM huge_table 
+    GROUP BY region
+""").write.parquet("/output/path")
+Anti-Pattern 5: UDFs Instead of Built-in Functions
+# ❌ BAD: Python UDF (slow, no optimization)
+from pyspark.sql.functions import udf
+@udf
+def my_upper(s):
+    return s.upper() if s else None
+
+df.withColumn("upper_name", my_upper("name"))
+
+# ✓ GOOD: Built-in function (optimized)
+from pyspark.sql.functions import upper
+df.withColumn("upper_name", upper("name"))
+
+# If UDF needed, use Pandas UDF for better performance
+from pyspark.sql.functions import pandas_udf
+@pandas_udf("string")
+def pandas_upper(s: pd.Series) -> pd.Series:
+    return s.str.upper()
+5. Cross-Platform Comparison
+5.1 Feature Comparison Matrix
+Feature	Oracle	Snowflake	Databricks
+Traditional Indexes	✓ B-Tree, Bitmap, etc.	✗ Not supported	✗ Not supported
+Clustering	Index-Organized Tables	Clustering Keys	Z-Ordering
+Partitioning	Range, List, Hash	Micro-partitions (auto)	Delta partitions
+Statistics	DBMS_STATS (manual/auto)	Automatic	ANALYZE TABLE
+Execution Plans	EXPLAIN PLAN	Query Profile	EXPLAIN
+Caching	Buffer cache	Result cache + warehouse	Spark cache
+Materialized Views	✓	✓ (auto-refresh)	✗ (use Delta tables)
+Query Hints	✓ Extensive	Limited	✓ Join hints
+5.2 Equivalent Operations
+Index-like Optimization
+-- ORACLE: Create index
+CREATE INDEX emp_dept_idx ON employees(department_id);
+
+-- SNOWFLAKE: Clustering key
+ALTER TABLE employees CLUSTER BY (department_id);
+
+-- DATABRICKS: Z-Order
+OPTIMIZE employees ZORDER BY (department_id);
+Statistics Gathering
+-- ORACLE
+EXEC DBMS_STATS.GATHER_TABLE_STATS('HR', 'EMPLOYEES');
+
+-- SNOWFLAKE (automatic, but can force)
+-- No manual command needed - statistics maintained automatically
+
+-- DATABRICKS
+ANALYZE TABLE employees COMPUTE STATISTICS;
+ANALYZE TABLE employees COMPUTE STATISTICS FOR COLUMNS department_id, salary;
+Query Plan Analysis
+-- ORACLE
+EXPLAIN PLAN FOR SELECT * FROM employees WHERE department_id = 10;
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+-- SNOWFLAKE
+-- Use Query Profile in UI, or:
+SELECT * FROM TABLE(INFORMATION_SCHEMA.QUERY_HISTORY())
+WHERE QUERY_ID = LAST_QUERY_ID();
+
+-- DATABRICKS
+EXPLAIN FORMATTED SELECT * FROM employees WHERE department_id = 10;
+5.3 When to Use Each Platform
+Scenario	Best Platform	Reason
+OLTP with complex transactions	Oracle	ACID, row-level locking, mature optimizer
+Ad-hoc analytics on large data	Snowflake	Auto-scaling, zero management, fast
+ML/Data Science workloads	Databricks	Spark ML, notebooks, Python ecosystem
+Real-time streaming	Databricks	Structured Streaming, Delta Live Tables
+Simple data warehousing	Snowflake	Easy, cost-effective, minimal tuning
+Mixed workload (OLTP + Analytics)	Oracle	Single platform, RAC for scaling
+6. Hands-On Lab Exercises
+Exercise 1: Oracle Index Optimization
+Scenario: A slow-running sales report needs optimization.
+
+-- Setup
+CREATE TABLE sales_oracle (
+    sale_id NUMBER PRIMARY KEY,
+    sale_date DATE,
+    customer_id NUMBER,
+    product_id NUMBER,
+    region VARCHAR2(50),
+    amount NUMBER(18,2)
+);
+
+-- Insert 1 million rows (use PL/SQL loop or bulk insert)
+INSERT INTO sales_oracle
+SELECT level,
+       TRUNC(SYSDATE) - MOD(level, 365),
+       MOD(level, 10000),
+       MOD(level, 500),
+       CASE MOD(level, 4) WHEN 0 THEN 'NORTH' WHEN 1 THEN 'SOUTH' 
+                         WHEN 2 THEN 'EAST' ELSE 'WEST' END,
+       ROUND(DBMS_RANDOM.VALUE(10, 1000), 2)
+FROM dual CONNECT BY level <= 1000000;
+
+-- Problem Query
+SELECT region, SUM(amount) total_sales
+FROM sales_oracle
+WHERE TRUNC(sale_date) = DATE '2024-06-15'
+  AND region IN ('NORTH', 'SOUTH')
+GROUP BY region;
+
+-- Tasks:
+-- 1. Analyze execution plan (identify full table scan)
+-- 2. Rewrite query to avoid TRUNC() on column
+-- 3. Create appropriate index(es)
+-- 4. Compare before/after performance
+Exercise 2: Snowflake Clustering Optimization
+Scenario: Optimize a large fact table for common query patterns.
+
+-- Setup
+CREATE OR REPLACE TABLE sales_snowflake (
+    sale_id NUMBER,
+    sale_date DATE,
+    customer_id NUMBER,
+    product_id NUMBER,
+    region VARCHAR(50),
+    amount DECIMAL(18,2)
+);
+
+-- Insert sample data
+INSERT INTO sales_snowflake
+SELECT 
+    SEQ4(),
+    DATEADD('day', -MOD(SEQ4(), 365), CURRENT_DATE()),
+    MOD(SEQ4(), 10000),
+    MOD(SEQ4(), 500),
+    CASE MOD(SEQ4(), 4) WHEN 0 THEN 'NORTH' WHEN 1 THEN 'SOUTH'
+                        WHEN 2 THEN 'EAST' ELSE 'WEST' END,
+    UNIFORM(10, 1000, RANDOM())::DECIMAL(18,2)
+FROM TABLE(GENERATOR(ROWCOUNT => 10000000));
+
+-- Common queries
+-- Q1: Daily sales by region
+SELECT sale_date, region, SUM(amount)
+FROM sales_snowflake
+WHERE sale_date BETWEEN '2024-01-01' AND '2024-01-31'
+GROUP BY sale_date, region;
+
+-- Q2: Customer purchase history
+SELECT * FROM sales_snowflake WHERE customer_id = 12345;
+
+-- Tasks:
+-- 1. Check current clustering depth
+-- 2. Analyze query profile for Q1 (partitions scanned vs total)
+-- 3. Add clustering key for Q1 optimization
+-- 4. Consider search optimization for Q2
+-- 5. Compare query performance before/after
+Exercise 3: Databricks Delta Optimization
+Scenario: Optimize a Delta table for mixed workloads.
+
+-- Setup
+CREATE TABLE sales_delta (
+    sale_id BIGINT,
+    sale_date DATE,
+    customer_id BIGINT,
+    product_id BIGINT,
+    region STRING,
+    amount DECIMAL(18,2)
+)
+USING DELTA
+PARTITIONED BY (sale_date);
+
+-- Insert sample data
+INSERT INTO sales_delta
+SELECT 
+    id,
+    DATE_SUB(CURRENT_DATE(), CAST(id % 365 AS INT)),
+    id % 10000,
+    id % 500,
+    CASE id % 4 WHEN 0 THEN 'NORTH' WHEN 1 THEN 'SOUTH'
+                WHEN 2 THEN 'EAST' ELSE 'WEST' END,
+    ROUND(RAND() * 1000, 2)
+FROM RANGE(10000000);
+
+-- Problem: Many small files after streaming inserts
+-- Simulate by doing many small inserts
+
+-- Tasks:
+-- 1. Check table detail (file count, size)
+DESCRIBE DETAIL sales_delta;
+
+-- 2. Run OPTIMIZE
+OPTIMIZE sales_delta;
+
+-- 3. Add Z-ORDER for customer lookups
+OPTIMIZE sales_delta ZORDER BY (customer_id);
+
+-- 4. Compare query performance:
+SELECT * FROM sales_delta WHERE customer_id = 5000;
+
+-- 5. Enable auto-optimize for future
+ALTER TABLE sales_delta SET TBLPROPERTIES (
+    'delta.autoOptimize.optimizeWrite' = 'true'
+);
+Exercise 4: Cross-Platform Query Comparison
+Scenario: Compare the same analytical query across all three platforms.
+
+-- Query: Top 10 customers by sales in Q1 2024
+
+-- ORACLE
+SELECT * FROM (
+    SELECT c.customer_name, SUM(s.amount) total_sales
+    FROM customers c
+    JOIN sales s ON c.customer_id = s.customer_id
+    WHERE s.sale_date >= DATE '2024-01-01'
+      AND s.sale_date < DATE '2024-04-01'
+    GROUP BY c.customer_name
+    ORDER BY total_sales DESC
+) WHERE ROWNUM <= 10;
+
+-- SNOWFLAKE
+SELECT c.customer_name, SUM(s.amount) total_sales
+FROM customers c
+JOIN sales s ON c.customer_id = s.customer_id
+WHERE s.sale_date >= '2024-01-01'
+  AND s.sale_date < '2024-04-01'
+GROUP BY c.customer_name
+ORDER BY total_sales DESC
+LIMIT 10;
+
+-- DATABRICKS
+SELECT c.customer_name, SUM(s.amount) total_sales
+FROM customers c
+JOIN sales s ON c.customer_id = s.customer_id
+WHERE s.sale_date >= '2024-01-01'
+  AND s.sale_date < '2024-04-01'
+GROUP BY c.customer_name
+ORDER BY total_sales DESC
+LIMIT 10;
+
+-- Tasks:
+-- 1. Document execution plan for each platform
+-- 2. Identify join strategy used by each
+-- 3. Note any automatic optimizations applied
+-- 4. List platform-specific optimizations you could apply
+7. Module Summary
+7.1 Key Takeaways by Platform
+Oracle
+Indexes are critical - B-Tree, Bitmap, Function-based, Reverse Key
+Statistics matter - Keep DBMS_STATS current
+Avoid function on indexed columns - Prevents index usage
+Use EXPLAIN PLAN - Understand what optimizer is doing
+Snowflake
+No indexes - Use clustering keys instead
+Warehouse sizing - Scale up for complex queries, out for concurrency
+Partition pruning - Write queries that enable micro-partition skipping
+Leverage caching - Result cache is automatic and powerful
+Databricks
+Partitioning + Z-Ordering - Physical data organization is key
+OPTIMIZE regularly - Compact small files
+Use AQE - Adaptive Query Execution handles many optimizations
+Broadcast joins - Leverage for small-large table joins
+7.2 Quick Reference Cheat Sheet
+Task	Oracle	Snowflake	Databricks
+View execution plan	
+EXPLAIN PLAN FOR + DBMS_XPLAN.DISPLAY
+Query Profile UI	
+EXPLAIN FORMATTED
+Create "index" equivalent	
+CREATE INDEX
+ALTER TABLE CLUSTER BY
+OPTIMIZE ZORDER BY
+Gather statistics	
+DBMS_STATS.GATHER_*
+Automatic	
+ANALYZE TABLE
+Optimize storage	Rebuild indexes	Automatic reclustering	
+OPTIMIZE
+Cache data	Buffer cache (auto)	
+USE_CACHED_RESULT
+CACHE TABLE
+Point lookup optimization	Unique index	Search Optimization	Bloom filter
+7.3 Performance Tuning Checklist
+Universal Checks
+ Query returns only needed columns (no SELECT *)
+ Filters are on clustered/indexed/partitioned columns
+ Joins use appropriate keys with matching data types
+ Statistics/metadata are current
+ No functions on filter columns that prevent optimization
+ Results are limited when full dataset not needed
+Oracle-Specific
+ Indexes exist on frequently filtered columns
+ Composite index column order matches query patterns
+ No implicit type conversions
+ Statistics gathered within last 7 days
+ Bitmap indexes only on DW/DSS systems
+Snowflake-Specific
+ Clustering keys defined for large tables
+ Warehouse size appropriate for workload
+ Partition pruning verified in Query Profile
+ Materialized views for expensive aggregations
+ Search optimization for point lookups (if Enterprise)
+Databricks-Specific
+ Tables partitioned by appropriate column (usually date)
+ Z-ORDER applied for additional filter columns
+ OPTIMIZE run regularly (or auto-optimize enabled)
+ Small files compacted (< 1000 files per partition)
+ Broadcast hints for small table joins
+ AQE enabled for automatic optimization
+Additional Resources
+Oracle
+Oracle Database Performance Tuning Guide
+Oracle SQL Tuning Guide
+Snowflake
+Snowflake Performance Optimization
+Understanding Query Profile
+Databricks
+Delta Lake Optimization
+Spark SQL Performance Tuning
+End of Module 1 — Next: Module 2: Security Management Using SQL

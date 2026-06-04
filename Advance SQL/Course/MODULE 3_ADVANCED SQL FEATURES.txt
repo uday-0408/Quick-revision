@@ -1,0 +1,2124 @@
+MODULE 4: ADVANCED SQL FEATURES
+Comprehensive Course Material with Real-World Examples
+Duration	8-10 Hours
+Prerequisites	Basic SQL knowledge, Modules 1-3 recommended
+Learning Objectives	• Master analytical/window functions for complex calculations
+• Query hierarchical data structures effectively
+• Write optimized subqueries and CTEs
+• Perform advanced DML operations (MERGE, multi-table INSERT)
+• Create pivot reports and multi-dimensional aggregations
+Table of Contents
+Analytical Functions
+Hierarchical Queries
+Advanced Subqueries
+Advanced DML Operations
+Pivoting and Matrix Reports
+Real-World Case Study: Sales Analytics Dashboard
+Hands-On Lab Exercises
+Module Summary
+1. Analytical Functions
+1.1 Introduction to Window Functions
+Window functions perform calculations across a set of rows that are related to the current row, without collapsing the result set like GROUP BY does.
+
+┌─────────────────────────────────────────────────────────────────┐
+│              AGGREGATE vs WINDOW FUNCTIONS                       │
+├────────────────────────────┬────────────────────────────────────┤
+│      GROUP BY (Aggregate)  │        WINDOW FUNCTION             │
+├────────────────────────────┼────────────────────────────────────┤
+│ Collapses rows             │ Preserves all rows                 │
+│ One row per group          │ Adds calculation to each row       │
+│ Cannot see individual rows │ Can access surrounding rows        │
+│ Simple totals/averages     │ Running totals, rankings, etc.     │
+└────────────────────────────┴────────────────────────────────────┘
+Basic Syntax
+function_name(arguments) OVER (
+    [PARTITION BY partition_expression]
+    [ORDER BY sort_expression [ASC|DESC]]
+    [window_frame_clause]
+)
+Sample Data for Examples
+-- Create sample sales data
+CREATE TABLE sales_data (
+    sale_id         NUMBER PRIMARY KEY,
+    sale_date       DATE,
+    region          VARCHAR2(20),
+    salesperson     VARCHAR2(50),
+    product         VARCHAR2(50),
+    quantity        NUMBER,
+    amount          NUMBER(10,2)
+);
+
+INSERT ALL
+    INTO sales_data VALUES (1, DATE '2024-01-05', 'North', 'Alice', 'Laptop', 2, 2400)
+    INTO sales_data VALUES (2, DATE '2024-01-08', 'North', 'Alice', 'Mouse', 10, 200)
+    INTO sales_data VALUES (3, DATE '2024-01-10', 'North', 'Bob', 'Laptop', 1, 1200)
+    INTO sales_data VALUES (4, DATE '2024-01-12', 'South', 'Carol', 'Laptop', 3, 3600)
+    INTO sales_data VALUES (5, DATE '2024-01-15', 'South', 'Carol', 'Keyboard', 5, 250)
+    INTO sales_data VALUES (6, DATE '2024-01-18', 'North', 'Bob', 'Monitor', 2, 600)
+    INTO sales_data VALUES (7, DATE '2024-01-20', 'South', 'David', 'Laptop', 2, 2400)
+    INTO sales_data VALUES (8, DATE '2024-01-22', 'North', 'Alice', 'Monitor', 3, 900)
+    INTO sales_data VALUES (9, DATE '2024-01-25', 'South', 'David', 'Mouse', 15, 300)
+    INTO sales_data VALUES (10, DATE '2024-01-28', 'North', 'Bob', 'Laptop', 2, 2400)
+SELECT * FROM dual;
+COMMIT;
+1.2 Ranking Functions: ROW_NUMBER, RANK, DENSE_RANK
+ROW_NUMBER()
+Assigns a unique sequential number to each row:
+
+/*
+ * REAL-WORLD SCENARIO: Find top 3 sales per region
+ */
+SELECT *
+FROM (
+    SELECT 
+        region,
+        salesperson,
+        amount,
+        ROW_NUMBER() OVER (
+            PARTITION BY region 
+            ORDER BY amount DESC
+        ) AS rank_in_region
+    FROM sales_data
+)
+WHERE rank_in_region <= 3;
+
+/*
+Result:
+REGION  SALESPERSON  AMOUNT  RANK_IN_REGION
+------  -----------  ------  --------------
+North   Alice        2400    1
+North   Bob          2400    2
+North   Bob          1200    3
+South   Carol        3600    1
+South   David        2400    2
+South   David        300     3
+*/
+RANK() vs DENSE_RANK()
+/*
+ * RANK: Leaves gaps after ties
+ * DENSE_RANK: No gaps after ties
+ */
+SELECT 
+    salesperson,
+    amount,
+    RANK() OVER (ORDER BY amount DESC) AS rank_with_gaps,
+    DENSE_RANK() OVER (ORDER BY amount DESC) AS rank_no_gaps,
+    ROW_NUMBER() OVER (ORDER BY amount DESC) AS unique_number
+FROM sales_data;
+
+/*
+Result:
+SALESPERSON  AMOUNT  RANK_WITH_GAPS  RANK_NO_GAPS  UNIQUE_NUMBER
+-----------  ------  --------------  ------------  -------------
+Carol        3600    1               1             1
+Alice        2400    2               2             2
+Bob          2400    2               2             3
+David        2400    2               2             4
+Bob          1200    5               3             5    <- RANK skips to 5!
+Alice        900     6               4             6
+...
+*/
+Real-World Example: Employee Salary Rankings
+/*
+ * HR SCENARIO: Rank employees by salary within department
+ * Show where each employee stands compared to peers
+ */
+SELECT 
+    department_id,
+    employee_name,
+    salary,
+    RANK() OVER (
+        PARTITION BY department_id 
+        ORDER BY salary DESC
+    ) AS dept_rank,
+    RANK() OVER (
+        ORDER BY salary DESC
+    ) AS company_rank,
+    ROUND(
+        PERCENT_RANK() OVER (
+            PARTITION BY department_id 
+            ORDER BY salary
+        ) * 100, 1
+    ) AS percentile_in_dept
+FROM employees
+ORDER BY department_id, salary DESC;
+
+/*
+Result:
+DEPT_ID  EMPLOYEE_NAME  SALARY  DEPT_RANK  COMPANY_RANK  PERCENTILE
+-------  -------------  ------  ---------  ------------  ----------
+10       King           24000   1          1             100.0
+10       Kochhar        17000   2          3             66.7
+10       De Haan        17000   2          3             66.7
+10       Whalen         4400    4          20            0.0
+20       Hartstein      13000   1          5             100.0
+20       Fay            6000    2          15            0.0
+...
+*/
+1.3 Aggregate Window Functions
+Apply aggregate functions while keeping all rows:
+
+/*
+ * FINANCIAL REPORTING: Compare each sale to averages
+ */
+SELECT 
+    sale_date,
+    region,
+    salesperson,
+    amount,
+    -- Total for entire dataset
+    SUM(amount) OVER () AS grand_total,
+    -- Total for this region
+    SUM(amount) OVER (PARTITION BY region) AS region_total,
+    -- Average for this salesperson
+    ROUND(AVG(amount) OVER (PARTITION BY salesperson), 2) AS person_avg,
+    -- Count of sales for this region
+    COUNT(*) OVER (PARTITION BY region) AS region_sales_count,
+    -- Percentage of region total
+    ROUND(amount / SUM(amount) OVER (PARTITION BY region) * 100, 1) AS pct_of_region
+FROM sales_data
+ORDER BY region, sale_date;
+
+/*
+Result:
+SALE_DATE   REGION  SALESPERSON  AMOUNT  GRAND_TOTAL  REGION_TOTAL  PERSON_AVG  COUNT  PCT
+----------  ------  -----------  ------  -----------  ------------  ----------  -----  ----
+2024-01-05  North   Alice        2400    14250        7700          1166.67     6      31.2
+2024-01-08  North   Alice        200     14250        7700          1166.67     6      2.6
+2024-01-10  North   Bob          1200    14250        7700          1400.00     6      15.6
+...
+*/
+Running Totals
+/*
+ * ACCOUNTING SCENARIO: Running balance by date
+ */
+SELECT 
+    sale_date,
+    amount,
+    SUM(amount) OVER (
+        ORDER BY sale_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total,
+    COUNT(*) OVER (
+        ORDER BY sale_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS cumulative_count
+FROM sales_data
+ORDER BY sale_date;
+
+/*
+Result:
+SALE_DATE   AMOUNT  RUNNING_TOTAL  CUMULATIVE_COUNT
+----------  ------  -------------  ----------------
+2024-01-05  2400    2400           1
+2024-01-08  200     2600           2
+2024-01-10  1200    3800           3
+2024-01-12  3600    7400           4
+2024-01-15  250     7650           5
+...
+*/
+1.4 LAG and LEAD Functions
+Access data from previous or following rows:
+
+/*
+ * TREND ANALYSIS: Compare each sale to previous sale
+ */
+SELECT 
+    sale_date,
+    salesperson,
+    amount,
+    LAG(amount, 1, 0) OVER (ORDER BY sale_date) AS prev_sale,
+    LEAD(amount, 1, 0) OVER (ORDER BY sale_date) AS next_sale,
+    amount - LAG(amount, 1, 0) OVER (ORDER BY sale_date) AS change_from_prev
+FROM sales_data
+ORDER BY sale_date;
+
+/*
+Result:
+SALE_DATE   SALESPERSON  AMOUNT  PREV_SALE  NEXT_SALE  CHANGE
+----------  -----------  ------  ---------  ---------  ------
+2024-01-05  Alice        2400    0          200        2400
+2024-01-08  Alice        200     2400       1200       -2200
+2024-01-10  Bob          1200    200        3600       1000
+2024-01-12  Carol        3600    1200       250        2400
+...
+*/
+Real-World Example: Month-over-Month Growth
+/*
+ * BUSINESS INTELLIGENCE: Calculate MoM growth rate
+ */
+WITH monthly_sales AS (
+    SELECT 
+        TRUNC(sale_date, 'MM') AS month,
+        SUM(amount) AS monthly_total
+    FROM sales_data
+    GROUP BY TRUNC(sale_date, 'MM')
+)
+SELECT 
+    month,
+    monthly_total,
+    LAG(monthly_total) OVER (ORDER BY month) AS prev_month,
+    ROUND(
+        (monthly_total - LAG(monthly_total) OVER (ORDER BY month)) 
+        / NULLIF(LAG(monthly_total) OVER (ORDER BY month), 0) * 100, 
+        1
+    ) AS growth_pct
+FROM monthly_sales
+ORDER BY month;
+
+/*
+Result:
+MONTH       MONTHLY_TOTAL  PREV_MONTH  GROWTH_PCT
+----------  -------------  ----------  ----------
+2024-01-01  14250          NULL        NULL
+2024-02-01  18500          14250       29.8
+2024-03-01  16200          18500       -12.4
+...
+*/
+Per-Salesperson Trend Analysis
+/*
+ * SALES MANAGEMENT: Track each salesperson's performance trend
+ */
+SELECT 
+    salesperson,
+    sale_date,
+    amount,
+    LAG(amount) OVER (
+        PARTITION BY salesperson 
+        ORDER BY sale_date
+    ) AS prev_sale_by_person,
+    CASE 
+        WHEN amount > LAG(amount) OVER (PARTITION BY salesperson ORDER BY sale_date)
+        THEN '↑ Improved'
+        WHEN amount < LAG(amount) OVER (PARTITION BY salesperson ORDER BY sale_date)
+        THEN '↓ Declined'
+        WHEN LAG(amount) OVER (PARTITION BY salesperson ORDER BY sale_date) IS NULL
+        THEN '● First Sale'
+        ELSE '→ Same'
+    END AS trend
+FROM sales_data
+ORDER BY salesperson, sale_date;
+1.5 FIRST_VALUE, LAST_VALUE, NTH_VALUE
+/*
+ * COMPARISON ANALYSIS: Compare each sale to best/worst in region
+ */
+SELECT 
+    region,
+    salesperson,
+    sale_date,
+    amount,
+    FIRST_VALUE(amount) OVER (
+        PARTITION BY region 
+        ORDER BY amount DESC
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS highest_in_region,
+    LAST_VALUE(amount) OVER (
+        PARTITION BY region 
+        ORDER BY amount DESC
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS lowest_in_region,
+    NTH_VALUE(amount, 2) OVER (
+        PARTITION BY region 
+        ORDER BY amount DESC
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS second_highest
+FROM sales_data
+ORDER BY region, amount DESC;
+⚠️ Important: LAST_VALUE and NTH_VALUE require explicit window frame specification to work correctly. Without it, the default frame
+ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+will give unexpected results.
+
+1.6 Window Frame Specifications
+Understanding ROWS vs RANGE
+┌─────────────────────────────────────────────────────────────────┐
+│                    WINDOW FRAMES                                 │
+├────────────────────────────┬────────────────────────────────────┤
+│           ROWS             │            RANGE                    │
+├────────────────────────────┼────────────────────────────────────┤
+│ Physical rows              │ Logical value range                │
+│ Exact row count            │ All rows with same ORDER BY value  │
+│ ROWS BETWEEN 2 PRECEDING   │ RANGE BETWEEN 100 PRECEDING        │
+│   AND CURRENT ROW          │   AND CURRENT ROW                  │
+│ Good for: moving averages  │ Good for: value-based windows      │
+└────────────────────────────┴────────────────────────────────────┘
+Frame Boundary Options
+Boundary	Description
+UNBOUNDED PRECEDING
+First row of partition
+n PRECEDING
+n rows/values before current
+CURRENT ROW
+Current row
+n FOLLOWING
+n rows/values after current
+UNBOUNDED FOLLOWING
+Last row of partition
+Moving Averages
+/*
+ * STOCK ANALYSIS: 3-day and 7-day moving averages
+ */
+WITH daily_sales AS (
+    SELECT 
+        sale_date,
+        SUM(amount) AS daily_total
+    FROM sales_data
+    GROUP BY sale_date
+)
+SELECT 
+    sale_date,
+    daily_total,
+    -- 3-day moving average (current + 2 preceding)
+    ROUND(
+        AVG(daily_total) OVER (
+            ORDER BY sale_date
+            ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+        ), 2
+    ) AS moving_avg_3day,
+    -- 7-day moving average
+    ROUND(
+        AVG(daily_total) OVER (
+            ORDER BY sale_date
+            ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+        ), 2
+    ) AS moving_avg_7day,
+    -- Centered 5-day average (2 before, current, 2 after)
+    ROUND(
+        AVG(daily_total) OVER (
+            ORDER BY sale_date
+            ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING
+        ), 2
+    ) AS centered_avg_5day
+FROM daily_sales
+ORDER BY sale_date;
+Real-World Example: Rolling 12-Month Sales
+/*
+ * FINANCIAL REPORTING: Rolling 12-month sales analysis
+ */
+WITH monthly_revenue AS (
+    SELECT 
+        TRUNC(sale_date, 'MM') AS month,
+        SUM(amount) AS revenue
+    FROM sales_data
+    GROUP BY TRUNC(sale_date, 'MM')
+)
+SELECT 
+    month,
+    revenue AS current_month,
+    SUM(revenue) OVER (
+        ORDER BY month
+        ROWS BETWEEN 11 PRECEDING AND CURRENT ROW
+    ) AS rolling_12_month,
+    ROUND(
+        AVG(revenue) OVER (
+            ORDER BY month
+            ROWS BETWEEN 11 PRECEDING AND CURRENT ROW
+        ), 2
+    ) AS avg_monthly_12m,
+    -- YoY comparison
+    LAG(revenue, 12) OVER (ORDER BY month) AS same_month_last_year,
+    ROUND(
+        (revenue - LAG(revenue, 12) OVER (ORDER BY month)) 
+        / NULLIF(LAG(revenue, 12) OVER (ORDER BY month), 0) * 100,
+        1
+    ) AS yoy_growth_pct
+FROM monthly_revenue
+ORDER BY month;
+2. Hierarchical Queries
+2.1 Introduction to Tree-Structured Data
+Many real-world data structures are hierarchical:
+
+┌─────────────────────────────────────────────────────────────────┐
+│               HIERARCHICAL DATA EXAMPLES                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ORGANIZATION CHART          PRODUCT CATEGORIES                 │
+│                                                                  │
+│        CEO                      Electronics                      │
+│       /    \                    /    |    \                      │
+│     VP1    VP2              Phones Computers Audio               │
+│    / | \    |               /   \     |                         │
+│   M1 M2 M3  M4          iPhone Android Laptop                   │
+│   |                      |                                      │
+│   E1                   iPhone15                                 │
+│                                                                  │
+│  BILL OF MATERIALS         FILE SYSTEM                          │
+│                                                                  │
+│      Car                       /root                            │
+│     / | \                     /    \                            │
+│  Engine Body Wheels        /home  /var                          │
+│   / \                      |       |                            │
+│ Block Pistons           /user1  /log                            │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+Sample Hierarchical Data
+-- Create organization table
+CREATE TABLE employees_hier (
+    employee_id     NUMBER PRIMARY KEY,
+    employee_name   VARCHAR2(50),
+    job_title       VARCHAR2(50),
+    manager_id      NUMBER REFERENCES employees_hier(employee_id),
+    salary          NUMBER(10,2),
+    department      VARCHAR2(50)
+);
+
+INSERT ALL
+    INTO employees_hier VALUES (100, 'Steven King', 'CEO', NULL, 24000, 'Executive')
+    INTO employees_hier VALUES (101, 'Neena Kochhar', 'VP Operations', 100, 17000, 'Executive')
+    INTO employees_hier VALUES (102, 'Lex De Haan', 'VP Finance', 100, 17000, 'Executive')
+    INTO employees_hier VALUES (103, 'Alexander Hunold', 'IT Manager', 102, 9000, 'IT')
+    INTO employees_hier VALUES (104, 'Bruce Ernst', 'Senior Developer', 103, 6000, 'IT')
+    INTO employees_hier VALUES (105, 'David Austin', 'Developer', 103, 4800, 'IT')
+    INTO employees_hier VALUES (106, 'Valli Pataballa', 'Developer', 103, 4800, 'IT')
+    INTO employees_hier VALUES (107, 'Diana Lorentz', 'Junior Developer', 104, 4200, 'IT')
+    INTO employees_hier VALUES (108, 'Nancy Greenberg', 'Finance Manager', 102, 12000, 'Finance')
+    INTO employees_hier VALUES (109, 'Daniel Faviet', 'Accountant', 108, 9000, 'Finance')
+    INTO employees_hier VALUES (110, 'John Chen', 'Accountant', 108, 8200, 'Finance')
+    INTO employees_hier VALUES (111, 'Susan Mavris', 'HR Manager', 101, 6500, 'HR')
+    INTO employees_hier VALUES (112, 'Jennifer Whalen', 'HR Specialist', 111, 4400, 'HR')
+SELECT * FROM dual;
+COMMIT;
+2.2 CONNECT BY Clause
+Basic Hierarchical Query
+/*
+ * ORGANIZATIONAL CHART: Display reporting structure
+ */
+SELECT 
+    LEVEL,
+    LPAD(' ', (LEVEL - 1) * 4) || employee_name AS org_chart,
+    job_title,
+    salary
+FROM employees_hier
+START WITH manager_id IS NULL          -- Start from CEO (no manager)
+CONNECT BY PRIOR employee_id = manager_id  -- Parent-child relationship
+ORDER SIBLINGS BY employee_name;       -- Order within same level
+
+/*
+Result:
+LEVEL  ORG_CHART                    JOB_TITLE           SALARY
+-----  --------------------------   ------------------  ------
+1      Steven King                  CEO                 24000
+2          Lex De Haan              VP Finance          17000
+3              Alexander Hunold     IT Manager          9000
+4                  Bruce Ernst      Senior Developer    6000
+5                      Diana Lorentz Junior Developer   4200
+4                  David Austin     Developer           4800
+4                  Valli Pataballa  Developer           4800
+3              Nancy Greenberg      Finance Manager     12000
+4                  Daniel Faviet    Accountant          9000
+4                  John Chen        Accountant          8200
+2          Neena Kochhar            VP Operations       17000
+3              Susan Mavris         HR Manager          6500
+4                  Jennifer Whalen  HR Specialist       4400
+*/
+Key Components
+Component	Description
+START WITH
+Defines root node(s) of the hierarchy
+CONNECT BY
+Defines parent-child relationship
+PRIOR
+References parent row values
+LEVEL
+Pseudo-column showing depth (1 = root)
+ORDER SIBLINGS BY
+Orders nodes at same level
+2.3 SYS_CONNECT_BY_PATH
+Generate the full path from root to current node:
+
+/*
+ * REPORTING PATH: Show chain of command
+ */
+SELECT 
+    employee_name,
+    job_title,
+    SYS_CONNECT_BY_PATH(employee_name, ' → ') AS reporting_path,
+    LEVEL AS depth
+FROM employees_hier
+START WITH manager_id IS NULL
+CONNECT BY PRIOR employee_id = manager_id;
+
+/*
+Result:
+EMPLOYEE_NAME     JOB_TITLE        REPORTING_PATH                                    DEPTH
+---------------   ---------------  ------------------------------------------------  -----
+Steven King       CEO               → Steven King                                    1
+Neena Kochhar     VP Operations     → Steven King → Neena Kochhar                   2
+Susan Mavris      HR Manager        → Steven King → Neena Kochhar → Susan Mavris    3
+Jennifer Whalen   HR Specialist     → Steven King → Neena Kochhar → Susan Mavris → Jennifer Whalen  4
+...
+*/
+Real-World Example: Product Category Breadcrumbs
+-- Category hierarchy
+CREATE TABLE categories (
+    category_id     NUMBER PRIMARY KEY,
+    category_name   VARCHAR2(50),
+    parent_id       NUMBER REFERENCES categories(category_id)
+);
+
+INSERT ALL
+    INTO categories VALUES (1, 'Electronics', NULL)
+    INTO categories VALUES (2, 'Computers', 1)
+    INTO categories VALUES (3, 'Laptops', 2)
+    INTO categories VALUES (4, 'Gaming Laptops', 3)
+    INTO categories VALUES (5, 'Phones', 1)
+    INTO categories VALUES (6, 'Smartphones', 5)
+    INTO categories VALUES (7, 'iPhone', 6)
+    INTO categories VALUES (8, 'Android', 6)
+SELECT * FROM dual;
+
+-- Generate breadcrumbs for website navigation
+SELECT 
+    category_id,
+    category_name,
+    SUBSTR(SYS_CONNECT_BY_PATH(category_name, ' > '), 4) AS breadcrumb
+FROM categories
+START WITH parent_id IS NULL
+CONNECT BY PRIOR category_id = parent_id;
+
+/*
+Result:
+CATEGORY_ID  CATEGORY_NAME   BREADCRUMB
+-----------  --------------  ----------------------------------------
+1            Electronics     Electronics
+2            Computers       Electronics > Computers
+3            Laptops         Electronics > Computers > Laptops
+4            Gaming Laptops  Electronics > Computers > Laptops > Gaming Laptops
+5            Phones          Electronics > Phones
+6            Smartphones     Electronics > Phones > Smartphones
+7            iPhone          Electronics > Phones > Smartphones > iPhone
+8            Android         Electronics > Phones > Smartphones > Android
+*/
+2.4 CONNECT_BY_ROOT
+Access root node values from any level:
+
+/*
+ * TOP-LEVEL EXECUTIVE: Who does each employee ultimately report to?
+ */
+SELECT 
+    employee_name,
+    job_title,
+    CONNECT_BY_ROOT employee_name AS ultimate_boss,
+    CONNECT_BY_ROOT job_title AS top_position,
+    LEVEL - 1 AS levels_from_top
+FROM employees_hier
+START WITH manager_id IS NULL
+CONNECT BY PRIOR employee_id = manager_id;
+
+/*
+Result:
+EMPLOYEE_NAME     JOB_TITLE         ULTIMATE_BOSS  TOP_POSITION  LEVELS_FROM_TOP
+---------------   ---------------   -------------  ------------  ---------------
+Steven King       CEO               Steven King    CEO           0
+Neena Kochhar     VP Operations     Steven King    CEO           1
+Susan Mavris      HR Manager        Steven King    CEO           2
+Jennifer Whalen   HR Specialist     Steven King    CEO           3
+...
+*/
+2.5 Additional Hierarchical Features
+CONNECT_BY_ISLEAF and CONNECT_BY_ISCYCLE
+/*
+ * LEAF NODES: Find employees with no direct reports
+ */
+SELECT 
+    employee_name,
+    job_title,
+    CONNECT_BY_ISLEAF AS is_leaf,
+    CASE CONNECT_BY_ISLEAF 
+        WHEN 1 THEN 'Individual Contributor'
+        ELSE 'Manager'
+    END AS role_type
+FROM employees_hier
+START WITH manager_id IS NULL
+CONNECT BY PRIOR employee_id = manager_id;
+
+-- Find only leaf nodes (no subordinates)
+SELECT employee_name, job_title
+FROM employees_hier
+WHERE CONNECT_BY_ISLEAF = 1
+START WITH manager_id IS NULL
+CONNECT BY PRIOR employee_id = manager_id;
+Limiting Hierarchy Depth
+-- Show only first 3 levels
+SELECT 
+    LPAD(' ', (LEVEL - 1) * 2) || employee_name AS org_chart,
+    job_title
+FROM employees_hier
+WHERE LEVEL <= 3
+START WITH manager_id IS NULL
+CONNECT BY PRIOR employee_id = manager_id;
+Bottom-Up Queries
+/*
+ * REVERSE HIERARCHY: Start from employee, go up to CEO
+ */
+SELECT 
+    LEVEL,
+    employee_name,
+    job_title,
+    SYS_CONNECT_BY_PATH(employee_name, ' ← ') AS path_to_top
+FROM employees_hier
+START WITH employee_name = 'Diana Lorentz'  -- Start from leaf
+CONNECT BY employee_id = PRIOR manager_id;  -- Go up (reverse PRIOR)
+
+/*
+Result:
+LEVEL  EMPLOYEE_NAME      JOB_TITLE          PATH_TO_TOP
+-----  ----------------   ----------------   ------------------------------------------
+1      Diana Lorentz      Junior Developer    ← Diana Lorentz
+2      Bruce Ernst        Senior Developer    ← Diana Lorentz ← Bruce Ernst
+3      Alexander Hunold   IT Manager          ← Diana Lorentz ← Bruce Ernst ← Alexander Hunold
+4      Lex De Haan        VP Finance          ← Diana Lorentz ← Bruce Ernst ← Alexander Hunold ← Lex De Haan
+5      Steven King        CEO                 ← Diana Lorentz ← Bruce Ernst ← Alexander Hunold ← Lex De Haan ← Steven King
+*/
+2.6 Recursive CTEs (WITH RECURSIVE)
+Modern alternative to CONNECT BY (more portable):
+
+/*
+ * RECURSIVE CTE: Same org chart using WITH clause
+ * (Oracle 11g R2+)
+ */
+WITH org_hierarchy (employee_id, employee_name, job_title, manager_id, lvl, path) AS (
+    -- Anchor: Start with root nodes
+    SELECT 
+        employee_id, 
+        employee_name, 
+        job_title, 
+        manager_id,
+        1 AS lvl,
+        employee_name AS path
+    FROM employees_hier
+    WHERE manager_id IS NULL
+    
+    UNION ALL
+    
+    -- Recursive: Join children to parents
+    SELECT 
+        e.employee_id,
+        e.employee_name,
+        e.job_title,
+        e.manager_id,
+        h.lvl + 1,
+        h.path || ' → ' || e.employee_name
+    FROM employees_hier e
+    INNER JOIN org_hierarchy h ON e.manager_id = h.employee_id
+)
+SELECT 
+    lvl AS level,
+    LPAD(' ', (lvl - 1) * 4) || employee_name AS org_chart,
+    job_title,
+    path
+FROM org_hierarchy
+ORDER BY path;
+
+/*
+Result: Same as CONNECT BY but more portable to other databases
+*/
+Real-World Example: Bill of Materials
+-- Bill of Materials (BOM) table
+CREATE TABLE bom (
+    component_id    NUMBER PRIMARY KEY,
+    component_name  VARCHAR2(50),
+    parent_id       NUMBER,
+    quantity        NUMBER,
+    unit_cost       NUMBER(10,2)
+);
+
+INSERT ALL
+    INTO bom VALUES (1, 'Bicycle', NULL, 1, 0)
+    INTO bom VALUES (2, 'Frame', 1, 1, 150)
+    INTO bom VALUES (3, 'Wheels', 1, 2, 50)
+    INTO bom VALUES (4, 'Tire', 3, 1, 25)
+    INTO bom VALUES (5, 'Rim', 3, 1, 20)
+    INTO bom VALUES (6, 'Spokes', 3, 36, 0.50)
+    INTO bom VALUES (7, 'Handlebars', 1, 1, 35)
+    INTO bom VALUES (8, 'Grips', 7, 2, 5)
+    INTO bom VALUES (9, 'Seat', 1, 1, 45)
+SELECT * FROM dual;
+
+-- Calculate total cost of product
+WITH bom_exploded AS (
+    SELECT 
+        component_id,
+        component_name,
+        quantity,
+        unit_cost,
+        quantity * unit_cost AS line_cost,
+        1 AS multiplier,
+        LEVEL AS lvl
+    FROM bom
+    START WITH parent_id IS NULL
+    CONNECT BY PRIOR component_id = parent_id
+)
+SELECT 
+    LPAD(' ', (lvl - 1) * 2) || component_name AS component,
+    quantity,
+    unit_cost,
+    line_cost
+FROM bom_exploded;
+
+-- Total product cost
+SELECT SUM(quantity * unit_cost) AS total_cost FROM bom;
+3. Advanced Subqueries
+3.1 Correlated Subqueries
+A correlated subquery references columns from the outer query and executes once per outer row:
+
+/*
+ * SCENARIO: Find employees earning more than their department average
+ */
+SELECT 
+    e.employee_name,
+    e.department,
+    e.salary,
+    (SELECT AVG(salary) FROM employees_hier 
+     WHERE department = e.department) AS dept_avg
+FROM employees_hier e
+WHERE e.salary > (
+    SELECT AVG(salary)
+    FROM employees_hier
+    WHERE department = e.department  -- Correlated!
+);
+
+/*
+Result:
+EMPLOYEE_NAME     DEPARTMENT  SALARY  DEPT_AVG
+---------------   ----------  ------  --------
+Steven King       Executive   24000   19333.33
+Alexander Hunold  IT          9000    5760.00
+Nancy Greenberg   Finance     12000   9733.33
+Susan Mavris      HR          6500    5450.00
+*/
+Real-World Example: Latest Order per Customer
+/*
+ * E-COMMERCE: Get most recent order for each customer
+ */
+SELECT 
+    o.order_id,
+    o.customer_id,
+    o.order_date,
+    o.total_amount
+FROM orders o
+WHERE o.order_date = (
+    SELECT MAX(order_date)
+    FROM orders
+    WHERE customer_id = o.customer_id  -- Correlated
+);
+
+-- Alternative using analytical function (often more efficient)
+SELECT *
+FROM (
+    SELECT 
+        order_id,
+        customer_id,
+        order_date,
+        total_amount,
+        ROW_NUMBER() OVER (
+            PARTITION BY customer_id 
+            ORDER BY order_date DESC
+        ) AS rn
+    FROM orders
+)
+WHERE rn = 1;
+3.2 Scalar Subqueries
+Return a single value, usable anywhere a single value is expected:
+
+/*
+ * REPORTING: Enrich data with calculated values
+ */
+SELECT 
+    e.employee_name,
+    e.salary,
+    e.department,
+    -- Scalar subqueries in SELECT
+    (SELECT AVG(salary) FROM employees_hier) AS company_avg,
+    (SELECT AVG(salary) FROM employees_hier WHERE department = e.department) AS dept_avg,
+    (SELECT COUNT(*) FROM employees_hier WHERE manager_id = e.employee_id) AS direct_reports,
+    -- Calculate variance from average
+    ROUND(e.salary - (SELECT AVG(salary) FROM employees_hier WHERE department = e.department), 2) AS variance_from_dept_avg
+FROM employees_hier e
+ORDER BY e.department, e.salary DESC;
+Scalar Subqueries in WHERE
+-- Find departments with above-average salary cost
+SELECT department, SUM(salary) AS total_salary
+FROM employees_hier
+GROUP BY department
+HAVING SUM(salary) > (
+    SELECT AVG(dept_total)
+    FROM (
+        SELECT SUM(salary) AS dept_total
+        FROM employees_hier
+        GROUP BY department
+    )
+);
+3.3 Inline Views (Subqueries in FROM)
+/*
+ * ANALYTICS: Calculate statistics and join back
+ */
+SELECT 
+    e.employee_name,
+    e.salary,
+    e.department,
+    dept_stats.avg_salary,
+    dept_stats.min_salary,
+    dept_stats.max_salary,
+    dept_stats.emp_count,
+    ROUND((e.salary - dept_stats.avg_salary) / dept_stats.avg_salary * 100, 1) AS pct_above_avg
+FROM employees_hier e
+JOIN (
+    -- Inline view calculating department statistics
+    SELECT 
+        department,
+        AVG(salary) AS avg_salary,
+        MIN(salary) AS min_salary,
+        MAX(salary) AS max_salary,
+        COUNT(*) AS emp_count
+    FROM employees_hier
+    GROUP BY department
+) dept_stats ON e.department = dept_stats.department
+ORDER BY e.department, e.salary DESC;
+3.4 EXISTS vs IN
+Performance Comparison
+/*
+ * EXISTS: Stops at first match (short-circuits)
+ * IN: Evaluates all values in subquery
+ */
+
+-- Use EXISTS when subquery returns many rows
+-- Finds customers who have placed orders
+SELECT c.customer_id, c.customer_name
+FROM customers c
+WHERE EXISTS (
+    SELECT 1 FROM orders o 
+    WHERE o.customer_id = c.customer_id
+);
+
+-- Use IN when subquery returns few distinct values
+-- Finds customers in specific regions
+SELECT customer_id, customer_name
+FROM customers
+WHERE region_id IN (SELECT region_id FROM regions WHERE country = 'USA');
+NOT EXISTS vs NOT IN
+/*
+ * CRITICAL DIFFERENCE: NULL handling!
+ * NOT IN fails if subquery contains NULL
+ * NOT EXISTS handles NULLs correctly
+ */
+
+-- Find customers with no orders
+-- SAFE: Use NOT EXISTS
+SELECT c.customer_id, c.customer_name
+FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1 FROM orders o 
+    WHERE o.customer_id = c.customer_id
+);
+
+-- DANGEROUS: NOT IN with potential NULLs
+-- If orders.customer_id contains any NULL, this returns NO ROWS!
+SELECT customer_id, customer_name
+FROM customers
+WHERE customer_id NOT IN (SELECT customer_id FROM orders);
+-- Fix: Add NULL filter
+WHERE customer_id NOT IN (SELECT customer_id FROM orders WHERE customer_id IS NOT NULL);
+3.5 Multi-Column Subqueries
+/*
+ * SCENARIO: Find employees with max salary in their department
+ */
+
+-- Multi-column comparison
+SELECT employee_name, department, salary
+FROM employees_hier
+WHERE (department, salary) IN (
+    SELECT department, MAX(salary)
+    FROM employees_hier
+    GROUP BY department
+);
+
+/*
+Result:
+EMPLOYEE_NAME     DEPARTMENT  SALARY
+---------------   ----------  ------
+Steven King       Executive   24000
+Alexander Hunold  IT          9000
+Nancy Greenberg   Finance     12000
+Susan Mavris      HR          6500
+*/
+3.6 Common Table Expressions (WITH Clause)
+Basic CTE
+/*
+ * CTE: Named subquery for better readability and reuse
+ */
+WITH 
+    dept_stats AS (
+        SELECT 
+            department,
+            AVG(salary) AS avg_salary,
+            SUM(salary) AS total_salary,
+            COUNT(*) AS emp_count
+        FROM employees_hier
+        GROUP BY department
+    ),
+    company_stats AS (
+        SELECT 
+            AVG(salary) AS company_avg,
+            SUM(salary) AS company_total
+        FROM employees_hier
+    )
+SELECT 
+    d.department,
+    d.emp_count,
+    ROUND(d.avg_salary, 2) AS dept_avg,
+    d.total_salary,
+    ROUND(d.total_salary / c.company_total * 100, 1) AS pct_of_total,
+    CASE 
+        WHEN d.avg_salary > c.company_avg THEN 'Above Average'
+        ELSE 'Below Average'
+    END AS status
+FROM dept_stats d
+CROSS JOIN company_stats c
+ORDER BY d.total_salary DESC;
+Multiple CTEs with Dependencies
+/*
+ * SALES ANALYSIS: Multi-level aggregation
+ */
+WITH 
+    -- Level 1: Daily sales by salesperson
+    daily_sales AS (
+        SELECT 
+            salesperson,
+            TRUNC(sale_date) AS sale_date,
+            SUM(amount) AS daily_total
+        FROM sales_data
+        GROUP BY salesperson, TRUNC(sale_date)
+    ),
+    -- Level 2: Monthly summary (references daily_sales)
+    monthly_sales AS (
+        SELECT 
+            salesperson,
+            TRUNC(sale_date, 'MM') AS month,
+            SUM(daily_total) AS monthly_total,
+            COUNT(DISTINCT sale_date) AS active_days,
+            AVG(daily_total) AS avg_daily
+        FROM daily_sales
+        GROUP BY salesperson, TRUNC(sale_date, 'MM')
+    ),
+    -- Level 3: Rankings (references monthly_sales)
+    ranked_sales AS (
+        SELECT 
+            salesperson,
+            month,
+            monthly_total,
+            active_days,
+            avg_daily,
+            RANK() OVER (PARTITION BY month ORDER BY monthly_total DESC) AS monthly_rank
+        FROM monthly_sales
+    )
+SELECT *
+FROM ranked_sales
+WHERE monthly_rank <= 3
+ORDER BY month, monthly_rank;
+CTE for Data Transformation
+/*
+ * DATA CLEANING: Use CTE to stage transformations
+ */
+WITH 
+    cleaned_data AS (
+        SELECT 
+            UPPER(TRIM(customer_name)) AS customer_name,
+            REGEXP_REPLACE(phone, '[^0-9]', '') AS phone_cleaned,
+            LOWER(TRIM(email)) AS email,
+            COALESCE(status, 'ACTIVE') AS status
+        FROM raw_customers
+        WHERE customer_name IS NOT NULL
+    ),
+    deduplicated AS (
+        SELECT 
+            customer_name,
+            phone_cleaned,
+            email,
+            status,
+            ROW_NUMBER() OVER (
+                PARTITION BY email 
+                ORDER BY customer_name
+            ) AS dup_num
+        FROM cleaned_data
+    )
+SELECT customer_name, phone_cleaned, email, status
+FROM deduplicated
+WHERE dup_num = 1;
+4. Advanced DML Operations
+4.1 MERGE Statement (UPSERT)
+MERGE combines INSERT and UPDATE in a single statement:
+
+/*
+ * REAL-WORLD SCENARIO: Sync inventory from supplier feed
+ */
+
+-- Source: Daily supplier inventory file
+CREATE TABLE supplier_inventory (
+    product_code    VARCHAR2(20),
+    product_name    VARCHAR2(100),
+    quantity        NUMBER,
+    unit_price      NUMBER(10,2),
+    last_updated    DATE
+);
+
+-- Target: Our inventory table
+CREATE TABLE warehouse_inventory (
+    product_code    VARCHAR2(20) PRIMARY KEY,
+    product_name    VARCHAR2(100),
+    quantity        NUMBER,
+    unit_price      NUMBER(10,2),
+    last_updated    DATE,
+    created_date    DATE
+);
+
+-- MERGE: Insert new products, update existing ones
+MERGE INTO warehouse_inventory tgt
+USING supplier_inventory src
+ON (tgt.product_code = src.product_code)
+
+-- When product exists: Update
+WHEN MATCHED THEN
+    UPDATE SET
+        tgt.product_name = src.product_name,
+        tgt.quantity = src.quantity,
+        tgt.unit_price = src.unit_price,
+        tgt.last_updated = SYSDATE
+    -- Optional: Delete if quantity is 0
+    DELETE WHERE src.quantity = 0
+
+-- When product is new: Insert
+WHEN NOT MATCHED THEN
+    INSERT (product_code, product_name, quantity, unit_price, last_updated, created_date)
+    VALUES (src.product_code, src.product_name, src.quantity, src.unit_price, SYSDATE, SYSDATE);
+
+-- Check results
+SELECT * FROM warehouse_inventory;
+MERGE with Conditions
+/*
+ * CONDITIONAL MERGE: Different actions based on data
+ */
+MERGE INTO customer_accounts tgt
+USING customer_updates src
+ON (tgt.customer_id = src.customer_id)
+
+WHEN MATCHED THEN
+    UPDATE SET
+        tgt.email = src.email,
+        tgt.phone = src.phone,
+        tgt.updated_date = SYSDATE
+    WHERE src.update_type = 'CONTACT_CHANGE'  -- Only update contacts
+
+WHEN NOT MATCHED THEN
+    INSERT (customer_id, customer_name, email, phone, created_date)
+    VALUES (src.customer_id, src.customer_name, src.email, src.phone, SYSDATE)
+    WHERE src.update_type = 'NEW_CUSTOMER';   -- Only insert new customers
+Real-World Example: SCD Type 1 Update
+/*
+ * SLOWLY CHANGING DIMENSION: Type 1 (Overwrite)
+ * Data Warehouse pattern for dimension updates
+ */
+MERGE INTO dim_product tgt
+USING (
+    SELECT 
+        product_id,
+        product_name,
+        category,
+        brand,
+        current_price
+    FROM staging_products
+) src
+ON (tgt.product_id = src.product_id)
+
+WHEN MATCHED THEN
+    UPDATE SET
+        tgt.product_name = src.product_name,
+        tgt.category = src.category,
+        tgt.brand = src.brand,
+        tgt.current_price = src.current_price,
+        tgt.last_updated = SYSDATE
+    WHERE tgt.product_name != src.product_name
+       OR tgt.category != src.category
+       OR tgt.brand != src.brand
+       OR tgt.current_price != src.current_price
+
+WHEN NOT MATCHED THEN
+    INSERT (product_id, product_name, category, brand, current_price, created_date)
+    VALUES (src.product_id, src.product_name, src.category, src.brand, src.current_price, SYSDATE);
+4.2 Multi-Table INSERT
+INSERT ALL (Unconditional)
+/*
+ * SCENARIO: Split transaction log into separate tables
+ */
+
+-- Create target tables
+CREATE TABLE sales_log (txn_id NUMBER, txn_date DATE, amount NUMBER, txn_type VARCHAR2(20));
+CREATE TABLE refund_log (txn_id NUMBER, txn_date DATE, amount NUMBER, txn_type VARCHAR2(20));
+CREATE TABLE audit_log (txn_id NUMBER, txn_date DATE, amount NUMBER, txn_type VARCHAR2(20), logged_date DATE);
+
+-- INSERT ALL: Every row goes to ALL target tables
+INSERT ALL
+    INTO sales_log (txn_id, txn_date, amount, txn_type)
+        VALUES (transaction_id, transaction_date, amount, type)
+    INTO audit_log (txn_id, txn_date, amount, txn_type, logged_date)
+        VALUES (transaction_id, transaction_date, amount, type, SYSDATE)
+SELECT 
+    transaction_id,
+    transaction_date,
+    amount,
+    type
+FROM transactions
+WHERE transaction_date = TRUNC(SYSDATE);
+
+-- Each source row creates one row in EACH target table
+INSERT FIRST (Conditional - First Match Wins)
+/*
+ * SCENARIO: Route transactions to appropriate tables
+ */
+INSERT FIRST
+    -- First matching condition wins
+    WHEN amount > 10000 THEN
+        INTO high_value_transactions (txn_id, txn_date, amount, status)
+        VALUES (transaction_id, transaction_date, amount, 'REVIEW_REQUIRED')
+    
+    WHEN type = 'REFUND' THEN
+        INTO refund_log (txn_id, txn_date, amount, txn_type)
+        VALUES (transaction_id, transaction_date, amount, type)
+    
+    WHEN type = 'SALE' THEN
+        INTO sales_log (txn_id, txn_date, amount, txn_type)
+        VALUES (transaction_id, transaction_date, amount, type)
+    
+    -- Default: All other transactions
+    ELSE
+        INTO other_transactions (txn_id, txn_date, amount, txn_type)
+        VALUES (transaction_id, transaction_date, amount, type)
+
+SELECT transaction_id, transaction_date, amount, type
+FROM transactions
+WHERE transaction_date >= TRUNC(SYSDATE) - 1;
+
+-- A $15,000 refund goes ONLY to high_value_transactions (first match)
+INSERT ALL with Conditions
+/*
+ * SCENARIO: One source row can go to MULTIPLE tables
+ */
+INSERT ALL
+    -- Condition 1: All sales to sales table
+    WHEN type = 'SALE' THEN
+        INTO sales_log (txn_id, txn_date, amount, txn_type)
+        VALUES (transaction_id, transaction_date, amount, type)
+    
+    -- Condition 2: High value to review table (even if also a sale)
+    WHEN amount > 10000 THEN
+        INTO high_value_transactions (txn_id, txn_date, amount, status)
+        VALUES (transaction_id, transaction_date, amount, 'PENDING_REVIEW')
+    
+    -- Condition 3: ALL transactions to audit
+    WHEN 1=1 THEN  -- Always true
+        INTO audit_log (txn_id, txn_date, amount, txn_type, logged_date)
+        VALUES (transaction_id, transaction_date, amount, type, SYSDATE)
+
+SELECT transaction_id, transaction_date, amount, type
+FROM transactions;
+
+-- A $15,000 sale goes to: sales_log, high_value_transactions, AND audit_log
+Real-World Example: ETL Data Distribution
+/*
+ * DATA WAREHOUSE ETL: Distribute fact data to partitioned tables
+ */
+INSERT ALL
+    WHEN sale_region = 'NORTH' THEN
+        INTO fact_sales_north (sale_id, sale_date, product_id, amount)
+        VALUES (sale_id, sale_date, product_id, amount)
+    
+    WHEN sale_region = 'SOUTH' THEN
+        INTO fact_sales_south (sale_id, sale_date, product_id, amount)
+        VALUES (sale_id, sale_date, product_id, amount)
+    
+    WHEN sale_region = 'EAST' THEN
+        INTO fact_sales_east (sale_id, sale_date, product_id, amount)
+        VALUES (sale_id, sale_date, product_id, amount)
+    
+    WHEN sale_region = 'WEST' THEN
+        INTO fact_sales_west (sale_id, sale_date, product_id, amount)
+        VALUES (sale_id, sale_date, product_id, amount)
+
+SELECT sale_id, sale_date, product_id, amount, sale_region
+FROM staging_sales;
+4.3 RETURNING Clause
+Get values from DML operations:
+
+/*
+ * INSERT with RETURNING: Get generated values
+ */
+DECLARE
+    v_new_id NUMBER;
+    v_created DATE;
+BEGIN
+    INSERT INTO customers (customer_id, customer_name, email, created_date)
+    VALUES (customer_seq.NEXTVAL, 'New Customer', 'new@email.com', SYSDATE)
+    RETURNING customer_id, created_date INTO v_new_id, v_created;
+    
+    DBMS_OUTPUT.PUT_LINE('Created customer ID: ' || v_new_id || ' on ' || v_created);
+END;
+/
+
+/*
+ * UPDATE with RETURNING: Get old and new values
+ */
+DECLARE
+    v_old_salary NUMBER;
+    v_new_salary NUMBER;
+BEGIN
+    UPDATE employees_hier
+    SET salary = salary * 1.1
+    WHERE employee_id = 104
+    RETURNING salary INTO v_new_salary;
+    
+    DBMS_OUTPUT.PUT_LINE('New salary: ' || v_new_salary);
+END;
+/
+
+/*
+ * DELETE with RETURNING: Capture deleted data
+ */
+DECLARE
+    TYPE id_array IS TABLE OF NUMBER;
+    TYPE name_array IS TABLE OF VARCHAR2(50);
+    v_ids id_array;
+    v_names name_array;
+BEGIN
+    DELETE FROM temp_customers
+    WHERE status = 'INACTIVE'
+    RETURNING customer_id, customer_name BULK COLLECT INTO v_ids, v_names;
+    
+    DBMS_OUTPUT.PUT_LINE('Deleted ' || v_ids.COUNT || ' customers');
+    FOR i IN 1..v_ids.COUNT LOOP
+        DBMS_OUTPUT.PUT_LINE('  - ' || v_ids(i) || ': ' || v_names(i));
+    END LOOP;
+END;
+/
+RETURNING with MERGE
+/*
+ * Track what MERGE actually did
+ */
+DECLARE
+    TYPE id_array IS TABLE OF NUMBER;
+    v_updated_ids id_array;
+BEGIN
+    MERGE INTO warehouse_inventory tgt
+    USING supplier_inventory src
+    ON (tgt.product_code = src.product_code)
+    WHEN MATCHED THEN
+        UPDATE SET
+            tgt.quantity = src.quantity,
+            tgt.last_updated = SYSDATE
+    WHEN NOT MATCHED THEN
+        INSERT (product_code, product_name, quantity, created_date)
+        VALUES (src.product_code, src.product_name, src.quantity, SYSDATE);
+    
+    DBMS_OUTPUT.PUT_LINE('Rows affected: ' || SQL%ROWCOUNT);
+END;
+/
+5. Pivoting and Matrix Reports
+5.1 PIVOT Operator
+Transform rows into columns:
+
+/*
+ * SCENARIO: Monthly sales by region
+ */
+
+-- Sample data
+SELECT region, 
+       TO_CHAR(sale_date, 'Mon') AS month,
+       amount
+FROM sales_data;
+
+-- PIVOT: Transform months to columns
+SELECT *
+FROM (
+    SELECT 
+        region,
+        TO_CHAR(sale_date, 'Mon') AS month,
+        amount
+    FROM sales_data
+)
+PIVOT (
+    SUM(amount)                    -- Aggregate function
+    FOR month                      -- Column to pivot
+    IN ('Jan' AS Jan, 'Feb' AS Feb, 'Mar' AS Mar,
+        'Apr' AS Apr, 'May' AS May, 'Jun' AS Jun,
+        'Jul' AS Jul, 'Aug' AS Aug, 'Sep' AS Sep,
+        'Oct' AS Oct, 'Nov' AS Nov, 'Dec' AS Dec)
+)
+ORDER BY region;
+
+/*
+Result:
+REGION   JAN     FEB     MAR     APR     ...
+------   ------  ------  ------  ------
+North    7700    8500    9200    7800
+South    6550    7200    8100    6900
+*/
+Multi-Column PIVOT
+/*
+ * PIVOT with multiple aggregates: Count and Sum
+ */
+SELECT *
+FROM (
+    SELECT 
+        region,
+        TO_CHAR(sale_date, 'Q') AS quarter,
+        amount
+    FROM sales_data
+    WHERE EXTRACT(YEAR FROM sale_date) = 2024
+)
+PIVOT (
+    COUNT(*) AS cnt,
+    SUM(amount) AS total
+    FOR quarter
+    IN ('1' AS Q1, '2' AS Q2, '3' AS Q3, '4' AS Q4)
+)
+ORDER BY region;
+
+/*
+Result:
+REGION   Q1_CNT  Q1_TOTAL  Q2_CNT  Q2_TOTAL  Q3_CNT  Q3_TOTAL  Q4_CNT  Q4_TOTAL
+------   ------  --------  ------  --------  ------  --------  ------  --------
+North    15      22700     18      28500     12      19200     20      31000
+South    12      18550     15      24200     10      16100     16      25900
+*/
+Real-World Example: Employee Skills Matrix
+/*
+ * HR SCENARIO: Skills matrix showing proficiency levels
+ */
+CREATE TABLE employee_skills (
+    employee_id NUMBER,
+    skill_name VARCHAR2(50),
+    proficiency VARCHAR2(20)  -- Beginner, Intermediate, Expert
+);
+
+INSERT ALL
+    INTO employee_skills VALUES (101, 'SQL', 'Expert')
+    INTO employee_skills VALUES (101, 'Python', 'Intermediate')
+    INTO employee_skills VALUES (101, 'Java', 'Beginner')
+    INTO employee_skills VALUES (102, 'SQL', 'Intermediate')
+    INTO employee_skills VALUES (102, 'Python', 'Expert')
+    INTO employee_skills VALUES (102, 'JavaScript', 'Expert')
+    INTO employee_skills VALUES (103, 'SQL', 'Expert')
+    INTO employee_skills VALUES (103, 'Java', 'Expert')
+SELECT * FROM dual;
+
+-- Pivot to show skills matrix
+SELECT *
+FROM (
+    SELECT 
+        e.employee_name,
+        s.skill_name,
+        s.proficiency
+    FROM employee_skills s
+    JOIN employees_hier e ON s.employee_id = e.employee_id
+)
+PIVOT (
+    MAX(proficiency)
+    FOR skill_name
+    IN ('SQL' AS SQL, 'Python' AS Python, 'Java' AS Java, 'JavaScript' AS JS)
+)
+ORDER BY employee_name;
+
+/*
+Result:
+EMPLOYEE_NAME     SQL          PYTHON        JAVA          JS
+---------------   -----------  -----------   -----------   -----------
+Alexander Hunold  Expert       Intermediate  Beginner      NULL
+Bruce Ernst       Intermediate Expert        NULL          Expert
+David Austin      Expert       NULL          Expert        NULL
+*/
+5.2 UNPIVOT Operator
+Transform columns back to rows:
+
+/*
+ * SCENARIO: Normalize quarterly data stored in columns
+ */
+CREATE TABLE quarterly_results (
+    region      VARCHAR2(20),
+    q1_sales    NUMBER,
+    q2_sales    NUMBER,
+    q3_sales    NUMBER,
+    q4_sales    NUMBER
+);
+
+INSERT INTO quarterly_results VALUES ('North', 22700, 28500, 19200, 31000);
+INSERT INTO quarterly_results VALUES ('South', 18550, 24200, 16100, 25900);
+
+-- UNPIVOT: Columns to rows
+SELECT *
+FROM quarterly_results
+UNPIVOT (
+    sales_amount                               -- New value column
+    FOR quarter                                -- New category column
+    IN (q1_sales AS 'Q1', 
+        q2_sales AS 'Q2', 
+        q3_sales AS 'Q3', 
+        q4_sales AS 'Q4')
+)
+ORDER BY region, quarter;
+
+/*
+Result:
+REGION   QUARTER  SALES_AMOUNT
+------   -------  ------------
+North    Q1       22700
+North    Q2       28500
+North    Q3       19200
+North    Q4       31000
+South    Q1       18550
+South    Q2       24200
+South    Q3       16100
+South    Q4       25900
+*/
+UNPIVOT with INCLUDE NULLS
+-- By default, UNPIVOT excludes NULL values
+-- Use INCLUDE NULLS to keep them
+SELECT *
+FROM quarterly_results
+UNPIVOT INCLUDE NULLS (
+    sales_amount
+    FOR quarter
+    IN (q1_sales AS 'Q1', q2_sales AS 'Q2', q3_sales AS 'Q3', q4_sales AS 'Q4')
+);
+5.3 ROLLUP, CUBE, and GROUPING SETS
+ROLLUP - Hierarchical Subtotals
+/*
+ * SALES REPORT: Subtotals and grand total
+ */
+SELECT 
+    region,
+    salesperson,
+    SUM(amount) AS total_sales,
+    GROUPING(region) AS is_region_subtotal,
+    GROUPING(salesperson) AS is_person_subtotal
+FROM sales_data
+GROUP BY ROLLUP(region, salesperson)
+ORDER BY region NULLS LAST, salesperson NULLS LAST;
+
+/*
+Result:
+REGION   SALESPERSON  TOTAL_SALES  IS_REGION_SUBTOTAL  IS_PERSON_SUBTOTAL
+------   -----------  -----------  ------------------  ------------------
+North    Alice        3500         0                   0
+North    Bob          4200         0                   0
+North    NULL         7700         0                   1    <- Region subtotal
+South    Carol        3850         0                   0
+South    David        2700         0                   0
+South    NULL         6550         0                   1    <- Region subtotal
+NULL     NULL         14250        1                   1    <- Grand total
+*/
+CUBE - All Dimension Combinations
+/*
+ * ANALYSIS: All possible subtotals
+ */
+SELECT 
+    COALESCE(region, 'ALL REGIONS') AS region,
+    COALESCE(product, 'ALL PRODUCTS') AS product,
+    SUM(amount) AS total_sales,
+    COUNT(*) AS num_sales
+FROM sales_data
+GROUP BY CUBE(region, product)
+ORDER BY region, product;
+
+/*
+Result includes:
+- Each region + each product
+- Each region + ALL products (region subtotals)
+- ALL regions + each product (product subtotals)
+- ALL regions + ALL products (grand total)
+*/
+GROUPING SETS - Custom Groupings
+/*
+ * CUSTOM SUBTOTALS: Only specific groupings
+ */
+SELECT 
+    region,
+    product,
+    salesperson,
+    SUM(amount) AS total_sales
+FROM sales_data
+GROUP BY GROUPING SETS (
+    (region, product),           -- Sales by region and product
+    (region, salesperson),       -- Sales by region and person
+    (region),                    -- Region subtotals only
+    ()                           -- Grand total
+)
+ORDER BY region NULLS LAST, product NULLS LAST, salesperson NULLS LAST;
+Real-World Example: Multi-Dimensional Report
+/*
+ * EXECUTIVE DASHBOARD: Flexible aggregation
+ */
+WITH sales_summary AS (
+    SELECT 
+        COALESCE(region, '** ALL **') AS region,
+        COALESCE(TO_CHAR(sale_date, 'YYYY-MM'), '** ALL **') AS month,
+        COALESCE(product, '** ALL **') AS product,
+        SUM(amount) AS revenue,
+        COUNT(*) AS transactions,
+        SUM(quantity) AS units_sold
+    FROM sales_data
+    GROUP BY CUBE(region, TO_CHAR(sale_date, 'YYYY-MM'), product)
+)
+SELECT *
+FROM sales_summary
+WHERE 
+    -- Show useful combinations only
+    (region = '** ALL **' AND month != '** ALL **' AND product = '** ALL **')  -- Monthly totals
+    OR (region != '** ALL **' AND month = '** ALL **' AND product = '** ALL **')  -- Regional totals
+    OR (region = '** ALL **' AND month = '** ALL **' AND product != '** ALL **')  -- Product totals
+    OR (region = '** ALL **' AND month = '** ALL **' AND product = '** ALL **')   -- Grand total
+ORDER BY region, month, product;
+5.4 GROUPING and GROUPING_ID
+/*
+ * IDENTIFY aggregation levels
+ */
+SELECT 
+    region,
+    salesperson,
+    SUM(amount) AS total,
+    CASE GROUPING_ID(region, salesperson)
+        WHEN 0 THEN 'Detail'
+        WHEN 1 THEN 'Region Subtotal'
+        WHEN 3 THEN 'Grand Total'
+    END AS row_type
+FROM sales_data
+GROUP BY ROLLUP(region, salesperson);
+
+/*
+GROUPING_ID returns a bitmap:
+- 0 (binary 00): Both columns are regular values
+- 1 (binary 01): salesperson is aggregated (NULL)
+- 3 (binary 11): Both columns are aggregated (grand total)
+*/
+5.5 MODEL Clause (Spreadsheet Calculations)
+/*
+ * ADVANCED: Spreadsheet-like calculations
+ * Calculate forecasts based on growth rate
+ */
+SELECT region, year, sales, forecast
+FROM (
+    SELECT region, EXTRACT(YEAR FROM sale_date) AS year, SUM(amount) AS sales
+    FROM sales_data
+    GROUP BY region, EXTRACT(YEAR FROM sale_date)
+)
+MODEL
+    PARTITION BY (region)
+    DIMENSION BY (year)
+    MEASURES (sales, 0 AS forecast)
+    RULES (
+        -- Calculate 10% growth forecast for next year
+        forecast[2025] = sales[2024] * 1.10,
+        forecast[2026] = sales[2025] * 1.10
+    )
+ORDER BY region, year;
+
+/*
+Result:
+REGION   YEAR   SALES    FORECAST
+------   ----   ------   --------
+North    2024   7700     0
+North    2025   NULL     8470      <- Calculated: 7700 * 1.10
+North    2026   NULL     9317      <- Calculated: 8470 * 1.10
+South    2024   6550     0
+South    2025   NULL     7205
+South    2026   NULL     7925.5
+*/
+6. Real-World Case Study: Sales Analytics Dashboard
+6.1 Scenario
+Build a comprehensive sales analytics system for a retail company with:
+
+Multi-region sales force
+Product categories and hierarchies
+Monthly/quarterly/yearly comparisons
+Performance rankings
+Trend analysis
+6.2 Sample Data Setup
+-- Complete sales data
+CREATE TABLE sales_transactions (
+    txn_id          NUMBER PRIMARY KEY,
+    txn_date        DATE,
+    region          VARCHAR2(20),
+    territory       VARCHAR2(50),
+    salesperson_id  NUMBER,
+    salesperson     VARCHAR2(50),
+    customer_id     NUMBER,
+    customer_name   VARCHAR2(100),
+    product_id      NUMBER,
+    product_name    VARCHAR2(100),
+    category        VARCHAR2(50),
+    quantity        NUMBER,
+    unit_price      NUMBER(10,2),
+    discount_pct    NUMBER(5,2),
+    amount          NUMBER(10,2)
+);
+
+-- Insert sample transactions (abbreviated)
+INSERT ALL
+    INTO sales_transactions VALUES (1, DATE '2024-01-05', 'North', 'New York', 101, 'Alice Smith', 1001, 'Acme Corp', 501, 'Laptop Pro', 'Electronics', 2, 1200, 0, 2400)
+    INTO sales_transactions VALUES (2, DATE '2024-01-08', 'North', 'Boston', 101, 'Alice Smith', 1002, 'Beta Inc', 502, 'Wireless Mouse', 'Electronics', 10, 25, 5, 237.50)
+    -- ... more rows
+SELECT * FROM dual;
+6.3 Analytics Queries
+Query 1: Salesperson Performance Dashboard
+/*
+ * PERFORMANCE DASHBOARD: Rankings, comparisons, trends
+ */
+WITH salesperson_metrics AS (
+    SELECT 
+        salesperson_id,
+        salesperson,
+        region,
+        SUM(amount) AS total_sales,
+        COUNT(DISTINCT customer_id) AS unique_customers,
+        COUNT(*) AS transaction_count,
+        AVG(amount) AS avg_transaction,
+        SUM(quantity) AS units_sold
+    FROM sales_transactions
+    WHERE EXTRACT(YEAR FROM txn_date) = 2024
+    GROUP BY salesperson_id, salesperson, region
+)
+SELECT 
+    salesperson,
+    region,
+    total_sales,
+    unique_customers,
+    transaction_count,
+    ROUND(avg_transaction, 2) AS avg_transaction,
+    -- Rankings
+    RANK() OVER (ORDER BY total_sales DESC) AS company_rank,
+    RANK() OVER (PARTITION BY region ORDER BY total_sales DESC) AS region_rank,
+    -- Percentile
+    ROUND(PERCENT_RANK() OVER (ORDER BY total_sales) * 100, 1) AS percentile,
+    -- Comparison to average
+    ROUND(total_sales / AVG(total_sales) OVER () * 100, 1) AS pct_of_avg,
+    -- Share of region
+    ROUND(total_sales / SUM(total_sales) OVER (PARTITION BY region) * 100, 1) AS region_share
+FROM salesperson_metrics
+ORDER BY total_sales DESC;
+Query 2: Monthly Trend Analysis
+/*
+ * TREND ANALYSIS: MoM and YoY comparisons
+ */
+WITH monthly_data AS (
+    SELECT 
+        TRUNC(txn_date, 'MM') AS month,
+        region,
+        SUM(amount) AS revenue,
+        COUNT(*) AS transactions,
+        COUNT(DISTINCT customer_id) AS customers
+    FROM sales_transactions
+    GROUP BY TRUNC(txn_date, 'MM'), region
+)
+SELECT 
+    month,
+    region,
+    revenue,
+    transactions,
+    customers,
+    -- Previous month comparison
+    LAG(revenue) OVER (PARTITION BY region ORDER BY month) AS prev_month_revenue,
+    ROUND(
+        (revenue - LAG(revenue) OVER (PARTITION BY region ORDER BY month)) 
+        / NULLIF(LAG(revenue) OVER (PARTITION BY region ORDER BY month), 0) * 100, 
+        1
+    ) AS mom_growth_pct,
+    -- Same month last year
+    LAG(revenue, 12) OVER (PARTITION BY region ORDER BY month) AS same_month_ly,
+    ROUND(
+        (revenue - LAG(revenue, 12) OVER (PARTITION BY region ORDER BY month)) 
+        / NULLIF(LAG(revenue, 12) OVER (PARTITION BY region ORDER BY month), 0) * 100, 
+        1
+    ) AS yoy_growth_pct,
+    -- 3-month moving average
+    ROUND(AVG(revenue) OVER (
+        PARTITION BY region ORDER BY month
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ), 2) AS moving_avg_3m,
+    -- Running total YTD
+    SUM(revenue) OVER (
+        PARTITION BY region, EXTRACT(YEAR FROM month)
+        ORDER BY month
+    ) AS ytd_revenue
+FROM monthly_data
+ORDER BY region, month;
+Query 3: Product Category Matrix Report
+/*
+ * PIVOT REPORT: Category sales by region
+ */
+SELECT *
+FROM (
+    SELECT 
+        category,
+        region,
+        amount
+    FROM sales_transactions
+    WHERE EXTRACT(YEAR FROM txn_date) = 2024
+)
+PIVOT (
+    SUM(amount) AS sales,
+    COUNT(*) AS txns
+    FOR region
+    IN ('North' AS North, 'South' AS South, 'East' AS East, 'West' AS West)
+)
+ORDER BY category;
+Query 4: Hierarchical Territory Report
+/*
+ * HIERARCHY: Region > Territory > Salesperson
+ */
+WITH territory_summary AS (
+    SELECT 
+        region,
+        territory,
+        salesperson,
+        SUM(amount) AS sales
+    FROM sales_transactions
+    GROUP BY region, territory, salesperson
+)
+SELECT 
+    LPAD(' ', (LEVEL - 1) * 4) || 
+    CASE LEVEL
+        WHEN 1 THEN 'Region: ' || region
+        WHEN 2 THEN 'Territory: ' || territory
+        WHEN 3 THEN salesperson
+    END AS hierarchy,
+    sales
+FROM (
+    -- Aggregate at different levels
+    SELECT region, NULL AS territory, NULL AS salesperson, SUM(sales) AS sales, 1 AS lvl
+    FROM territory_summary GROUP BY region
+    UNION ALL
+    SELECT region, territory, NULL, SUM(sales), 2
+    FROM territory_summary GROUP BY region, territory
+    UNION ALL
+    SELECT region, territory, salesperson, sales, 3
+    FROM territory_summary
+)
+START WITH territory IS NULL AND salesperson IS NULL
+CONNECT BY PRIOR region = region 
+       AND (PRIOR territory IS NULL AND territory IS NOT NULL
+            OR PRIOR territory = territory AND PRIOR salesperson IS NULL)
+ORDER SIBLINGS BY sales DESC;
+Query 5: Customer Segmentation with Analytics
+/*
+ * RFM ANALYSIS: Recency, Frequency, Monetary
+ */
+WITH customer_rfm AS (
+    SELECT 
+        customer_id,
+        customer_name,
+        MAX(txn_date) AS last_purchase,
+        COUNT(*) AS frequency,
+        SUM(amount) AS monetary,
+        TRUNC(SYSDATE) - MAX(txn_date) AS recency_days
+    FROM sales_transactions
+    GROUP BY customer_id, customer_name
+),
+rfm_scores AS (
+    SELECT 
+        customer_id,
+        customer_name,
+        last_purchase,
+        recency_days,
+        frequency,
+        monetary,
+        -- Score 1-5 (5 is best)
+        NTILE(5) OVER (ORDER BY recency_days DESC) AS r_score,
+        NTILE(5) OVER (ORDER BY frequency) AS f_score,
+        NTILE(5) OVER (ORDER BY monetary) AS m_score
+    FROM customer_rfm
+)
+SELECT 
+    customer_id,
+    customer_name,
+    recency_days,
+    frequency,
+    monetary,
+    r_score, f_score, m_score,
+    r_score || f_score || m_score AS rfm_segment,
+    CASE 
+        WHEN r_score >= 4 AND f_score >= 4 AND m_score >= 4 THEN 'Champions'
+        WHEN r_score >= 4 AND f_score >= 3 THEN 'Loyal Customers'
+        WHEN r_score >= 4 AND m_score >= 4 THEN 'Big Spenders'
+        WHEN r_score <= 2 AND f_score >= 4 THEN 'At Risk'
+        WHEN r_score <= 2 AND f_score <= 2 THEN 'Lost'
+        ELSE 'Regular'
+    END AS customer_segment
+FROM rfm_scores
+ORDER BY monetary DESC;
+7. Hands-On Lab Exercises
+Lab Exercise 1: Running Totals and Moving Averages (45 min)
+/*
+ * LAB 1: Financial Time Series Analysis
+ * 
+ * Using the sales_data table, create a report showing:
+ * 1. Daily sales total
+ * 2. Running total (cumulative)
+ * 3. 7-day moving average
+ * 4. Comparison to previous day
+ * 5. Comparison to same day last week
+ */
+
+-- YOUR SOLUTION:
+WITH daily_sales AS (
+    SELECT 
+        TRUNC(sale_date) AS sale_date,
+        SUM(amount) AS daily_total
+    FROM sales_data
+    GROUP BY TRUNC(sale_date)
+)
+SELECT 
+    sale_date,
+    daily_total,
+    -- Running total
+    SUM(daily_total) OVER (ORDER BY sale_date) AS running_total,
+    -- 7-day moving average
+    ROUND(AVG(daily_total) OVER (
+        ORDER BY sale_date
+        ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+    ), 2) AS moving_avg_7d,
+    -- Previous day comparison
+    daily_total - LAG(daily_total, 1, 0) OVER (ORDER BY sale_date) AS day_over_day,
+    -- Same day last week
+    daily_total - LAG(daily_total, 7) OVER (ORDER BY sale_date) AS week_over_week
+FROM daily_sales
+ORDER BY sale_date;
+Lab Exercise 2: Organizational Hierarchy Queries (45 min)
+/*
+ * LAB 2: Organization Chart Analysis
+ * 
+ * Using employees_hier table:
+ * 1. Generate indented org chart
+ * 2. Calculate total subordinates for each manager
+ * 3. Calculate total salary cost for each manager's team
+ * 4. Find employees more than 3 levels from CEO
+ */
+
+-- Task 1: Org chart with depth
+SELECT 
+    LEVEL,
+    LPAD(' ', (LEVEL-1)*2) || employee_name AS org_chart,
+    job_title,
+    salary
+FROM employees_hier
+START WITH manager_id IS NULL
+CONNECT BY PRIOR employee_id = manager_id
+ORDER SIBLINGS BY salary DESC;
+
+-- Task 2: Count subordinates (all levels)
+SELECT 
+    e.employee_id,
+    e.employee_name,
+    e.job_title,
+    (
+        SELECT COUNT(*)
+        FROM employees_hier sub
+        WHERE sub.employee_id != e.employee_id
+        START WITH sub.manager_id = e.employee_id
+        CONNECT BY PRIOR sub.employee_id = sub.manager_id
+    ) AS total_subordinates
+FROM employees_hier e
+ORDER BY total_subordinates DESC;
+
+-- Task 3: Total team salary cost
+SELECT 
+    e.employee_id,
+    e.employee_name,
+    e.salary AS own_salary,
+    (
+        SELECT SUM(salary)
+        FROM employees_hier sub
+        START WITH sub.employee_id = e.employee_id
+        CONNECT BY PRIOR sub.employee_id = sub.manager_id
+    ) AS total_team_cost
+FROM employees_hier e
+ORDER BY total_team_cost DESC;
+
+-- Task 4: Employees > 3 levels from CEO
+SELECT employee_name, job_title, LEVEL AS depth
+FROM employees_hier
+WHERE LEVEL > 3
+START WITH manager_id IS NULL
+CONNECT BY PRIOR employee_id = manager_id;
+Lab Exercise 3: Pivot Reports (30 min)
+/*
+ * LAB 3: Create Matrix Reports
+ * 
+ * 1. Pivot sales by region and quarter
+ * 2. Pivot sales by salesperson and product
+ * 3. Use UNPIVOT to normalize quarterly budget data
+ */
+
+-- Task 1: Region × Quarter matrix
+SELECT *
+FROM (
+    SELECT 
+        region,
+        'Q' || TO_CHAR(sale_date, 'Q') AS quarter,
+        amount
+    FROM sales_data
+    WHERE EXTRACT(YEAR FROM sale_date) = 2024
+)
+PIVOT (
+    SUM(amount) AS sales,
+    COUNT(*) AS count
+    FOR quarter IN ('Q1' AS Q1, 'Q2' AS Q2, 'Q3' AS Q3, 'Q4' AS Q4)
+);
+
+-- Task 2: Salesperson × Product matrix
+SELECT *
+FROM (
+    SELECT salesperson, product, amount
+    FROM sales_data
+)
+PIVOT (
+    SUM(amount)
+    FOR product IN ('Laptop' AS Laptop, 'Mouse' AS Mouse, 
+                    'Monitor' AS Monitor, 'Keyboard' AS Keyboard)
+);
+
+-- Task 3: UNPIVOT budget data
+CREATE TABLE budget_data (
+    department VARCHAR2(50),
+    jan_budget NUMBER, feb_budget NUMBER, mar_budget NUMBER
+);
+INSERT INTO budget_data VALUES ('Sales', 50000, 55000, 52000);
+INSERT INTO budget_data VALUES ('Marketing', 30000, 35000, 32000);
+
+SELECT *
+FROM budget_data
+UNPIVOT (
+    budget_amount
+    FOR month IN (jan_budget AS 'January', 
+                  feb_budget AS 'February', 
+                  mar_budget AS 'March')
+);
+Lab Exercise 4: MERGE for Data Synchronization (30 min)
+/*
+ * LAB 4: Implement Data Synchronization
+ * 
+ * Scenario: Sync product prices from supplier feed
+ * - Update prices for existing products
+ * - Add new products
+ * - Mark discontinued products as inactive
+ */
+
+-- Create source (supplier feed)
+CREATE TABLE supplier_prices (
+    product_code VARCHAR2(20),
+    product_name VARCHAR2(100),
+    new_price NUMBER(10,2),
+    is_available CHAR(1)
+);
+
+-- Create target (our catalog)
+CREATE TABLE product_catalog (
+    product_code VARCHAR2(20) PRIMARY KEY,
+    product_name VARCHAR2(100),
+    current_price NUMBER(10,2),
+    status VARCHAR2(20),
+    last_updated DATE
+);
+
+-- Insert test data
+INSERT INTO product_catalog VALUES ('P001', 'Old Laptop', 999, 'ACTIVE', SYSDATE-30);
+INSERT INTO product_catalog VALUES ('P002', 'Old Mouse', 29, 'ACTIVE', SYSDATE-30);
+
+INSERT INTO supplier_prices VALUES ('P001', 'New Laptop Pro', 1099, 'Y');
+INSERT INTO supplier_prices VALUES ('P003', 'New Keyboard', 79, 'Y');
+INSERT INTO supplier_prices VALUES ('P002', 'Mouse', 29, 'N');  -- Discontinued
+
+-- MERGE solution
+MERGE INTO product_catalog tgt
+USING supplier_prices src
+ON (tgt.product_code = src.product_code)
+
+WHEN MATCHED THEN
+    UPDATE SET
+        tgt.product_name = src.product_name,
+        tgt.current_price = src.new_price,
+        tgt.status = CASE src.is_available WHEN 'Y' THEN 'ACTIVE' ELSE 'DISCONTINUED' END,
+        tgt.last_updated = SYSDATE
+
+WHEN NOT MATCHED THEN
+    INSERT (product_code, product_name, current_price, status, last_updated)
+    VALUES (src.product_code, src.product_name, src.new_price, 
+            CASE src.is_available WHEN 'Y' THEN 'ACTIVE' ELSE 'DISCONTINUED' END,
+            SYSDATE)
+    WHERE src.is_available = 'Y';  -- Only insert available products
+
+-- Verify
+SELECT * FROM product_catalog ORDER BY product_code;
+8. Module Summary
+8.1 Key Concepts Review
+Topic	Key Points
+Window Functions	Perform calculations across related rows without collapsing results
+ROW_NUMBER, RANK, DENSE_RANK	Different ranking behaviors for ties
+LAG/LEAD	Access previous/next row values
+Window Frames	ROWS vs RANGE, PRECEDING/FOLLOWING/UNBOUNDED
+CONNECT BY	Oracle's traditional hierarchical query syntax
+Recursive CTE	Modern, portable alternative to CONNECT BY
+Correlated Subqueries	Reference outer query, execute per row
+CTEs (WITH)	Named subqueries for readability and reuse
+MERGE	UPSERT: combined INSERT/UPDATE/DELETE
+Multi-table INSERT	Distribute rows to multiple tables
+PIVOT/UNPIVOT	Transform rows↔columns
+ROLLUP/CUBE	Hierarchical and multi-dimensional subtotals
+8.2 Quick Reference
+-- Window Function Syntax
+function() OVER (
+    PARTITION BY col
+    ORDER BY col
+    ROWS BETWEEN n PRECEDING AND m FOLLOWING
+)
+
+-- Hierarchical Query
+SELECT ... FROM table
+START WITH condition
+CONNECT BY PRIOR parent = child
+ORDER SIBLINGS BY col;
+
+-- Recursive CTE
+WITH cte (cols) AS (
+    SELECT ... -- Anchor
+    UNION ALL
+    SELECT ... FROM cte JOIN table ON ... -- Recursive
+)
+SELECT * FROM cte;
+
+-- MERGE
+MERGE INTO target USING source ON (join_condition)
+WHEN MATCHED THEN UPDATE SET ...
+WHEN NOT MATCHED THEN INSERT ...;
+
+-- PIVOT
+SELECT * FROM table
+PIVOT (agg_function FOR column IN (values));
+
+-- ROLLUP/CUBE
+GROUP BY ROLLUP(col1, col2)  -- Hierarchical subtotals
+GROUP BY CUBE(col1, col2)    -- All combinations
+8.3 Performance Tips
+Feature	Performance Consideration
+Window Functions	Use appropriate window frame; avoid unnecessary PARTITION BY
+Hierarchical Queries	Add NOCYCLE to prevent infinite loops; use LEVEL for filtering
+Correlated Subqueries	Consider rewriting as JOINs or analytical functions
+MERGE	Ensure join columns are indexed; use batch sizes for large data
+PIVOT	Limit IN clause values; use subqueries for dynamic pivoting
+Additional Resources
+Oracle Documentation
+Oracle Analytics Functions
+Hierarchical Queries
+MERGE Statement
+Practice
+Oracle Live SQL: https://livesql.oracle.com
+Mode Analytics SQL Tutorial
+— End of Module 4: Advanced SQL Features —
+
+Next Module: Module 5: PL/SQL Fundamentals

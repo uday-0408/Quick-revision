@@ -1,0 +1,715 @@
+MODULE 8: SQL TESTING & VALIDATION
+Ensuring Data Quality and Integrity in Enterprise Systems
+Duration	8-10 Hours
+Prerequisites	Module 1-4: SQL Fundamentals
+Learning Objectives	• Understand data quality dimensions and testing theory
+• Master data reconciliation techniques across systems
+• Implement comprehensive null and duplicate detection
+• Validate referential integrity through SQL
+• Build regression testing frameworks for releases
+Table of Contents
+Foundations of Data Quality
+Data Testing Theory
+Data Reconciliation Queries
+Count and Checksum Comparisons
+Null Detection and Analysis
+Duplicate Detection
+Referential Integrity Validation
+Business Rule Validation
+Regression Testing
+Testing Framework
+Lab Exercises
+Module Summary
+1. Foundations of Data Quality
+1.1 The Six Dimensions of Data Quality
+Understanding these dimensions is crucial for designing effective data tests:
+
+Dimension	Definition	Example Test
+Accuracy	Data correctly represents real-world	Customer phone matches actual number
+Completeness	All required data is present	Every order has a customer
+Consistency	Data agrees across systems/fields	State matches zip code
+Timeliness	Data is current when needed	Stock prices updated in real-time
+Validity	Data conforms to format/rules	Email contains @ symbol
+Uniqueness	Each entity represented once	No duplicate customer IDs
+1.2 The Cost of Poor Data Quality
+┌─────────────────────────────────────────────────────────────────┐
+│              THE 1-10-100 RULE                                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  $1   - Cost to VERIFY data at entry point                      │
+│  $10  - Cost to CLEANSE data in batch                           │
+│  $100 - Cost of DOING NOTHING (bad decisions, rework)           │
+│                                                                  │
+│  Key Insight: Prevention is far cheaper than correction         │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+2. Data Testing Theory
+2.1 Types of Data Tests
+┌─────────────────────────────────────────────────────────────────┐
+│                    DATA TESTING PYRAMID                          │
+├─────────────────────────────────────────────────────────────────┤
+│                         /\                                       │
+│                        /  \      END-TO-END TESTS                │
+│                       / E2E\     Full pipeline validation        │
+│                      /──────\                                    │
+│                     /        \   INTEGRATION TESTS               │
+│                    / INTEGR.  \  Cross-table, referential        │
+│                   /────────────\                                 │
+│                  /              \ UNIT TESTS                     │
+│                 /   UNIT TESTS   \Column-level, format           │
+│                /──────────────────\                              │
+│                                                                  │
+│  More unit tests (fast), fewer E2E tests (slow)                 │
+└─────────────────────────────────────────────────────────────────┘
+2.2 Test Design Principles
+Principle 1: Test Early, Test Often
+
+-- Validation at data entry (trigger)
+CREATE OR REPLACE TRIGGER trg_validate_customer
+BEFORE INSERT OR UPDATE ON customers
+FOR EACH ROW
+BEGIN
+    IF NOT REGEXP_LIKE(:NEW.email, '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$') THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Invalid email format');
+    END IF;
+END;
+/
+Principle 2: Make Tests Deterministic
+
+-- BAD: Non-deterministic (depends on current time)
+SELECT * FROM orders WHERE order_date > SYSDATE - 7;
+
+-- GOOD: Deterministic (fixed date range)
+SELECT * FROM orders WHERE order_date BETWEEN DATE '2024-01-01' AND DATE '2024-01-31';
+Principle 3: Test Boundaries
+
+SELECT 
+    MIN(order_date) AS earliest,
+    MAX(order_date) AS latest,
+    MIN(order_total) AS min_amount,
+    MAX(order_total) AS max_amount
+FROM orders;
+3. Data Reconciliation Queries
+3.1 Theory of Reconciliation
+Data Reconciliation compares data across sources to identify discrepancies. Essential for:
+
+Data migrations
+ETL validation
+System integrations
+Audit compliance
+3.2 Aggregate Reconciliation
+-- Compare high-level metrics between systems
+SELECT 
+    'SOURCE' AS system_name,
+    COUNT(*) AS record_count,
+    SUM(order_total) AS total_amount,
+    COUNT(DISTINCT customer_id) AS unique_customers
+FROM source_orders
+UNION ALL
+SELECT 
+    'TARGET',
+    COUNT(*),
+    SUM(order_total),
+    COUNT(DISTINCT customer_id)
+FROM target_orders;
+3.3 Record-Level Reconciliation
+-- Find records in SOURCE but not TARGET
+SELECT 'IN_SOURCE_ONLY' AS status, s.*
+FROM source_orders s
+WHERE NOT EXISTS (SELECT 1 FROM target_orders t WHERE t.order_id = s.order_id);
+
+-- Find records in TARGET but not SOURCE
+SELECT 'IN_TARGET_ONLY' AS status, t.*
+FROM target_orders t
+WHERE NOT EXISTS (SELECT 1 FROM source_orders s WHERE s.order_id = t.order_id);
+
+-- Combined with FULL OUTER JOIN
+SELECT 
+    COALESCE(s.order_id, t.order_id) AS order_id,
+    CASE 
+        WHEN s.order_id IS NULL THEN 'TARGET_ONLY'
+        WHEN t.order_id IS NULL THEN 'SOURCE_ONLY'
+        WHEN s.order_total != t.order_total THEN 'AMOUNT_MISMATCH'
+        ELSE 'MATCH'
+    END AS status,
+    s.order_total AS source_amount,
+    t.order_total AS target_amount
+FROM source_orders s
+FULL OUTER JOIN target_orders t ON s.order_id = t.order_id
+WHERE s.order_id IS NULL OR t.order_id IS NULL OR s.order_total != t.order_total;
+3.4 Field-Level Comparison
+-- Detailed field comparison using UNPIVOT
+WITH source_data AS (
+    SELECT order_id,
+           TO_CHAR(customer_id) AS customer_id,
+           TO_CHAR(order_total) AS order_total,
+           status
+    FROM source_orders
+),
+target_data AS (
+    SELECT order_id,
+           TO_CHAR(customer_id) AS customer_id,
+           TO_CHAR(order_total) AS order_total,
+           status
+    FROM target_orders
+)
+SELECT s.order_id, s.field_name,
+       s.field_value AS source_value,
+       t.field_value AS target_value
+FROM (
+    SELECT order_id, field_name, field_value
+    FROM source_data
+    UNPIVOT (field_value FOR field_name IN (customer_id, order_total, status))
+) s
+JOIN (
+    SELECT order_id, field_name, field_value
+    FROM target_data
+    UNPIVOT (field_value FOR field_name IN (customer_id, order_total, status))
+) t ON s.order_id = t.order_id AND s.field_name = t.field_name
+WHERE NVL(s.field_value, 'NULL') != NVL(t.field_value, 'NULL');
+4. Count and Checksum Comparisons
+4.1 Theory of Checksums
+┌─────────────────────────────────────────────────────────────────┐
+│                 CHECKSUM COMPARISON BENEFITS                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  SPEED: O(1) vs O(N) for full comparison                        │
+│  For 1 billion records: checksum = ms, full = hours             │
+│                                                                  │
+│  TYPES:                                                          │
+│  • Count checksum: Record counts                                 │
+│  • Additive checksum: SUM of numeric fields                     │
+│  • Hash checksum: Cryptographic hash of data                    │
+│                                                                  │
+│  LIMITATION: May miss offsetting errors                         │
+│  (+$100 and -$100 errors cancel out)                            │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+4.2 Count-Based Validation
+-- Multi-level count comparison
+SELECT 'TOTAL' AS level, NULL AS group_value,
+       (SELECT COUNT(*) FROM source_orders) AS source_count,
+       (SELECT COUNT(*) FROM target_orders) AS target_count
+UNION ALL
+SELECT 'BY_STATUS', status,
+       s.cnt, t.cnt
+FROM (SELECT status, COUNT(*) cnt FROM source_orders GROUP BY status) s
+FULL JOIN (SELECT status, COUNT(*) cnt FROM target_orders GROUP BY status) t
+USING (status)
+WHERE NVL(s.cnt, 0) != NVL(t.cnt, 0);
+4.3 Additive Checksums
+-- Sum-based checksum
+SELECT 
+    'ORDERS' AS table_name,
+    COUNT(*) AS record_count,
+    SUM(order_total) AS amount_checksum,
+    SUM(order_id) AS id_checksum  -- Catches missing/duplicate IDs
+FROM orders;
+4.4 Hash-Based Checksums
+-- Row-level hash
+SELECT 
+    order_id,
+    ORA_HASH(order_id || '|' || customer_id || '|' || order_total || '|' || status) AS row_hash
+FROM orders;
+
+-- Compare row hashes between systems
+SELECT 
+    COALESCE(s.order_id, t.order_id) AS order_id,
+    CASE 
+        WHEN s.row_hash IS NULL THEN 'MISSING_IN_SOURCE'
+        WHEN t.row_hash IS NULL THEN 'MISSING_IN_TARGET'
+        WHEN s.row_hash != t.row_hash THEN 'DATA_DIFFERS'
+        ELSE 'MATCH'
+    END AS status
+FROM (SELECT order_id, ORA_HASH(order_id||customer_id||order_total) AS row_hash FROM source_orders) s
+FULL JOIN (SELECT order_id, ORA_HASH(order_id||customer_id||order_total) AS row_hash FROM target_orders) t
+ON s.order_id = t.order_id
+WHERE s.row_hash IS NULL OR t.row_hash IS NULL OR s.row_hash != t.row_hash;
+5. Null Detection and Analysis
+5.1 Theory of Null Values
+┌─────────────────────────────────────────────────────────────────┐
+│                  THREE-VALUED LOGIC                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  SQL uses: TRUE, FALSE, UNKNOWN                                  │
+│                                                                  │
+│  NULL = NULL  → UNKNOWN (not TRUE!)                             │
+│  NULL != NULL → UNKNOWN (not FALSE!)                            │
+│  NULL > 5     → UNKNOWN                                         │
+│                                                                  │
+│  Testing implications:                                           │
+│  • Use IS NULL / IS NOT NULL for comparisons                    │
+│  • COUNT(*) vs COUNT(column) behave differently                 │
+│  • Use NVL/COALESCE when comparing nullable values              │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+5.2 Comprehensive Null Analysis
+-- Null count per column
+SELECT 
+    'email' AS column_name,
+    COUNT(*) AS total_rows,
+    COUNT(*) - COUNT(email) AS null_count,
+    ROUND((COUNT(*) - COUNT(email)) * 100.0 / COUNT(*), 2) AS null_pct
+FROM customers
+UNION ALL
+SELECT 'phone', COUNT(*), COUNT(*) - COUNT(phone),
+       ROUND((COUNT(*) - COUNT(phone)) * 100.0 / COUNT(*), 2)
+FROM customers;
+5.3 Dynamic Null Analysis
+CREATE OR REPLACE PROCEDURE analyze_nulls(p_table_name IN VARCHAR2)
+IS
+    v_sql VARCHAR2(4000);
+    v_null_count NUMBER;
+    v_total NUMBER;
+BEGIN
+    EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ' || p_table_name INTO v_total;
+    
+    DBMS_OUTPUT.PUT_LINE('NULL Analysis for ' || p_table_name);
+    DBMS_OUTPUT.PUT_LINE(RPAD('Column', 30) || RPAD('Nulls', 10) || 'Pct');
+    
+    FOR col IN (SELECT column_name FROM user_tab_columns WHERE table_name = UPPER(p_table_name))
+    LOOP
+        v_sql := 'SELECT COUNT(*) - COUNT(' || col.column_name || ') FROM ' || p_table_name;
+        EXECUTE IMMEDIATE v_sql INTO v_null_count;
+        DBMS_OUTPUT.PUT_LINE(
+            RPAD(col.column_name, 30) || 
+            RPAD(v_null_count, 10) ||
+            ROUND(v_null_count * 100.0 / NULLIF(v_total, 0), 2) || '%'
+        );
+    END LOOP;
+END;
+/
+5.4 Null Pattern Analysis
+-- Find combinations of nulls
+SELECT 
+    CASE WHEN email IS NULL THEN 'N' ELSE 'Y' END ||
+    CASE WHEN phone IS NULL THEN 'N' ELSE 'Y' END ||
+    CASE WHEN address IS NULL THEN 'N' ELSE 'Y' END AS null_pattern,
+    COUNT(*) AS record_count,
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS percentage
+FROM customers
+GROUP BY 
+    CASE WHEN email IS NULL THEN 'N' ELSE 'Y' END ||
+    CASE WHEN phone IS NULL THEN 'N' ELSE 'Y' END ||
+    CASE WHEN address IS NULL THEN 'N' ELSE 'Y' END
+ORDER BY record_count DESC;
+6. Duplicate Detection
+6.1 Types of Duplicates
+Type	Description	Detection Method
+Exact	All fields identical	GROUP BY all columns
+Partial	Key matches, some fields differ	GROUP BY business key
+Fuzzy	Similar but not exact ("Jon" vs "John")	SOUNDEX, UTL_MATCH
+6.2 Exact Duplicate Detection
+-- Find completely duplicate rows
+SELECT customer_id, first_name, last_name, email, COUNT(*) AS occurrences
+FROM customers
+GROUP BY customer_id, first_name, last_name, email
+HAVING COUNT(*) > 1;
+
+-- Using ROW_NUMBER to identify duplicates
+SELECT *
+FROM (
+    SELECT c.*,
+           ROW_NUMBER() OVER (PARTITION BY email ORDER BY customer_id) AS rn
+    FROM customers c
+)
+WHERE rn > 1;  -- All duplicates except first
+6.3 Key-Based Duplicates
+-- Duplicate emails
+SELECT email, COUNT(*) AS occurrences,
+       LISTAGG(customer_id, ', ') WITHIN GROUP (ORDER BY customer_id) AS customer_ids
+FROM customers
+WHERE email IS NOT NULL
+GROUP BY email
+HAVING COUNT(*) > 1;
+6.4 Fuzzy Duplicate Detection
+-- Using SOUNDEX (phonetic matching)
+SELECT c1.customer_id, c1.last_name,
+       c2.customer_id AS match_id, c2.last_name AS match_name
+FROM customers c1
+JOIN customers c2 ON SOUNDEX(c1.last_name) = SOUNDEX(c2.last_name)
+WHERE c1.customer_id < c2.customer_id
+  AND c1.last_name != c2.last_name;
+
+-- Using UTL_MATCH (edit distance similarity)
+SELECT c1.customer_id, c1.last_name,
+       c2.customer_id AS match_id, c2.last_name AS match_name,
+       UTL_MATCH.JARO_WINKLER_SIMILARITY(c1.last_name, c2.last_name) AS similarity
+FROM customers c1
+JOIN customers c2 ON c1.customer_id < c2.customer_id
+WHERE UTL_MATCH.JARO_WINKLER_SIMILARITY(c1.last_name, c2.last_name) > 85
+ORDER BY similarity DESC;
+6.5 Duplicate Resolution
+-- Keep record with most complete data
+WITH ranked_duplicates AS (
+    SELECT customer_id, email,
+           (CASE WHEN phone IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN address IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN last_order_date IS NOT NULL THEN 2 ELSE 0 END) AS completeness_score,
+           ROW_NUMBER() OVER (
+               PARTITION BY email 
+               ORDER BY last_order_date DESC NULLS LAST, created_date
+           ) AS keep_rank
+    FROM customers
+    WHERE email IN (SELECT email FROM customers GROUP BY email HAVING COUNT(*) > 1)
+)
+SELECT * FROM ranked_duplicates WHERE keep_rank = 1;  -- Records to keep
+7. Referential Integrity Validation
+7.1 Theory of Referential Integrity
+┌─────────────────────────────────────────────────────────────────┐
+│              REFERENTIAL INTEGRITY                               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ORPHAN RECORDS: Child exists without parent                     │
+│  Example: Order with deleted customer                            │
+│                                                                  │
+│  WHY CONSTRAINTS MAY BE MISSING:                                 │
+│  • Performance: FKs slow bulk loads                              │
+│  • Legacy systems: Old designs                                   │
+│  • Data warehouse: Disabled for ETL                              │
+│  • Cross-database: Can't enforce across DBs                      │
+│                                                                  │
+│  SOLUTION: SQL-based integrity checks                            │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+7.2 Orphan Record Detection
+-- Orders without customers
+SELECT 'Orphan Orders' AS issue, COUNT(*) AS count
+FROM orders o
+WHERE NOT EXISTS (SELECT 1 FROM customers c WHERE c.customer_id = o.customer_id);
+
+-- Comprehensive orphan check
+WITH orphan_checks AS (
+    SELECT 'orders.customer_id -> customers' AS relationship, o.order_id AS record_id
+    FROM orders o WHERE NOT EXISTS (SELECT 1 FROM customers c WHERE c.customer_id = o.customer_id)
+    UNION ALL
+    SELECT 'order_items.order_id -> orders', oi.item_id
+    FROM order_items oi WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.order_id = oi.order_id)
+    UNION ALL
+    SELECT 'employees.department_id -> departments', e.employee_id
+    FROM employees e WHERE department_id IS NOT NULL
+      AND NOT EXISTS (SELECT 1 FROM departments d WHERE d.department_id = e.department_id)
+)
+SELECT relationship, COUNT(*) AS orphan_count
+FROM orphan_checks
+GROUP BY relationship;
+7.3 Self-Referencing Integrity
+-- Check employee manager hierarchy
+SELECT employee_id, manager_id, 'Invalid manager' AS issue
+FROM employees e
+WHERE manager_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM employees m WHERE m.employee_id = e.manager_id);
+
+-- Detect circular references
+WITH RECURSIVE emp_hierarchy AS (
+    SELECT employee_id, manager_id, CAST(employee_id AS VARCHAR2(4000)) AS path
+    FROM employees WHERE manager_id IS NULL
+    UNION ALL
+    SELECT e.employee_id, e.manager_id, h.path || '->' || e.employee_id
+    FROM employees e JOIN emp_hierarchy h ON e.manager_id = h.employee_id
+    WHERE h.path NOT LIKE '%' || e.employee_id || '%'  -- Prevent cycles
+)
+SELECT * FROM employees WHERE employee_id NOT IN (SELECT employee_id FROM emp_hierarchy);
+8. Business Rule Validation
+8.1 Types of Business Rules
+Type	Description	Example
+Attribute	Single field	Order total > 0
+Intra-record	Multiple fields, same record	Ship date > order date
+Inter-record	Multiple records	Sum of items = order total
+Temporal	Time-based	Cancel within 24 hours
+8.2 Attribute Rules
+-- Salary within job grade range
+SELECT e.employee_id, e.salary, j.min_salary, j.max_salary,
+       CASE 
+           WHEN e.salary < j.min_salary THEN 'Below minimum'
+           WHEN e.salary > j.max_salary THEN 'Above maximum'
+           ELSE 'Within range'
+       END AS status
+FROM employees e JOIN jobs j ON e.job_id = j.job_id
+WHERE e.salary < j.min_salary OR e.salary > j.max_salary;
+8.3 Intra-Record Rules
+-- Date sequence validation
+SELECT order_id, order_date, ship_date, delivery_date,
+       CASE 
+           WHEN ship_date < order_date THEN 'Ship before order'
+           WHEN delivery_date < ship_date THEN 'Delivery before ship'
+           ELSE 'VALID'
+       END AS date_check
+FROM orders
+WHERE ship_date < order_date OR delivery_date < ship_date;
+
+-- Conditional requirements
+SELECT order_id, status, tracking_number,
+       CASE 
+           WHEN status = 'SHIPPED' AND tracking_number IS NULL THEN 'Missing tracking'
+           ELSE 'OK'
+       END AS check_result
+FROM orders
+WHERE status = 'SHIPPED' AND tracking_number IS NULL;
+8.4 Inter-Record Rules
+-- Order total must equal sum of line items
+SELECT o.order_id, o.order_total AS stored_total,
+       SUM(oi.quantity * oi.unit_price) AS calculated_total,
+       ABS(o.order_total - SUM(oi.quantity * oi.unit_price)) AS difference
+FROM orders o JOIN order_items oi ON o.order_id = oi.order_id
+GROUP BY o.order_id, o.order_total
+HAVING ABS(o.order_total - SUM(oi.quantity * oi.unit_price)) > 0.01;
+
+-- Credit limit check
+SELECT c.customer_id, c.credit_limit, SUM(o.order_total) AS outstanding
+FROM customers c JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.status NOT IN ('CANCELLED', 'DELIVERED')
+GROUP BY c.customer_id, c.credit_limit
+HAVING SUM(o.order_total) > c.credit_limit;
+9. Regression Testing
+9.1 Theory of Regression Testing
+┌─────────────────────────────────────────────────────────────────┐
+│              REGRESSION TEST TYPES                               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  1. SNAPSHOT COMPARISON                                          │
+│     Capture before, compare after                                │
+│                                                                  │
+│  2. EXPECTED VALUE TESTS                                         │
+│     Verify specific records have expected values                 │
+│                                                                  │
+│  3. AGGREGATE COMPARISON                                         │
+│     Compare counts, sums before/after                            │
+│                                                                  │
+│  4. BEHAVIOR TESTS                                               │
+│     Execute operations, verify outcomes                          │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+9.2 Snapshot-Based Testing
+-- Create pre-release snapshot
+CREATE TABLE snapshot_orders AS
+SELECT order_id, customer_id, order_total, status,
+       ORA_HASH(order_id || customer_id || order_total || status) AS row_hash,
+       SYSDATE AS snapshot_date
+FROM orders;
+
+-- Post-release comparison
+SELECT COALESCE(s.order_id, o.order_id) AS order_id,
+       CASE 
+           WHEN s.order_id IS NULL THEN 'NEW'
+           WHEN o.order_id IS NULL THEN 'DELETED'
+           WHEN s.row_hash != ORA_HASH(o.order_id||o.customer_id||o.order_total||o.status) THEN 'MODIFIED'
+           ELSE 'UNCHANGED'
+       END AS change_type
+FROM snapshot_orders s FULL JOIN orders o ON s.order_id = o.order_id
+WHERE s.order_id IS NULL OR o.order_id IS NULL 
+   OR s.row_hash != ORA_HASH(o.order_id||o.customer_id||o.order_total||o.status);
+9.3 Expected Value Tests
+-- Test cases with expected values
+CREATE TABLE regression_tests (
+    test_id NUMBER PRIMARY KEY,
+    test_name VARCHAR2(100),
+    test_query CLOB,
+    expected_value VARCHAR2(1000),
+    comparison_type VARCHAR2(20)  -- EXACT, RANGE, NOT_NULL
+);
+
+INSERT INTO regression_tests VALUES (1, 'Total Active Customers', 
+    'SELECT COUNT(*) FROM customers WHERE status = ''ACTIVE''', '10000', 'RANGE:9500:10500');
+INSERT INTO regression_tests VALUES (2, 'Order #12345 Total',
+    'SELECT order_total FROM orders WHERE order_id = 12345', '1250.00', 'EXACT');
+COMMIT;
+
+-- Execute tests
+CREATE OR REPLACE PROCEDURE run_regression_tests
+IS
+    v_actual VARCHAR2(1000);
+    v_status VARCHAR2(20);
+BEGIN
+    FOR test IN (SELECT * FROM regression_tests)
+    LOOP
+        EXECUTE IMMEDIATE test.test_query INTO v_actual;
+        
+        IF test.comparison_type = 'EXACT' THEN
+            v_status := CASE WHEN v_actual = test.expected_value THEN 'PASS' ELSE 'FAIL' END;
+        END IF;
+        
+        DBMS_OUTPUT.PUT_LINE('[' || v_status || '] ' || test.test_name || 
+                            ' | Expected: ' || test.expected_value || 
+                            ' | Actual: ' || v_actual);
+    END LOOP;
+END;
+/
+9.4 Aggregate Baseline Comparison
+-- Capture baseline
+CREATE TABLE aggregate_baseline AS
+SELECT 'ORDERS' AS table_name, 'COUNT' AS metric, COUNT(*) AS value FROM orders
+UNION ALL SELECT 'ORDERS', 'SUM', SUM(order_total) FROM orders
+UNION ALL SELECT 'CUSTOMERS', 'COUNT', COUNT(*) FROM customers;
+
+-- Compare to baseline
+SELECT b.table_name, b.metric, b.value AS baseline,
+       c.current_value,
+       ROUND(ABS(c.current_value - b.value) / NULLIF(b.value, 0) * 100, 2) AS variance_pct
+FROM aggregate_baseline b
+JOIN (
+    SELECT 'ORDERS' AS table_name, 'COUNT' AS metric, COUNT(*) AS current_value FROM orders
+    UNION ALL SELECT 'ORDERS', 'SUM', SUM(order_total) FROM orders
+    UNION ALL SELECT 'CUSTOMERS', 'COUNT', COUNT(*) FROM customers
+) c ON b.table_name = c.table_name AND b.metric = c.metric
+WHERE ABS(c.current_value - b.value) / NULLIF(b.value, 0) > 0.01;  -- >1% variance
+10. Testing Framework
+10.1 Test Results Table
+CREATE TABLE data_test_results (
+    test_id         NUMBER GENERATED ALWAYS AS IDENTITY,
+    run_id          NUMBER,
+    test_name       VARCHAR2(100),
+    test_category   VARCHAR2(50),
+    status          VARCHAR2(20),
+    message         VARCHAR2(4000),
+    row_count       NUMBER,
+    execution_ms    NUMBER,
+    run_timestamp   TIMESTAMP DEFAULT SYSTIMESTAMP
+);
+10.2 Testing Package
+CREATE OR REPLACE PACKAGE data_test_framework AS
+    PROCEDURE run_all_tests(p_category VARCHAR2 DEFAULT NULL);
+    PROCEDURE run_null_checks(p_table_name VARCHAR2);
+    PROCEDURE run_duplicate_checks(p_table_name VARCHAR2, p_key_columns VARCHAR2);
+    PROCEDURE run_referential_checks;
+    PROCEDURE generate_report(p_run_id NUMBER);
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY data_test_framework AS
+    g_run_id NUMBER;
+    
+    PROCEDURE log_result(p_name VARCHAR2, p_category VARCHAR2, p_status VARCHAR2, 
+                        p_message VARCHAR2, p_count NUMBER, p_ms NUMBER) IS
+        PRAGMA AUTONOMOUS_TRANSACTION;
+    BEGIN
+        INSERT INTO data_test_results (run_id, test_name, test_category, status, message, row_count, execution_ms)
+        VALUES (g_run_id, p_name, p_category, p_status, p_message, p_count, p_ms);
+        COMMIT;
+    END;
+    
+    PROCEDURE run_all_tests(p_category VARCHAR2 DEFAULT NULL) IS
+    BEGIN
+        SELECT NVL(MAX(run_id), 0) + 1 INTO g_run_id FROM data_test_results;
+        DBMS_OUTPUT.PUT_LINE('Starting Test Run #' || g_run_id);
+        
+        IF p_category IS NULL OR p_category = 'NULL_CHECKS' THEN
+            run_null_checks('CUSTOMERS');
+            run_null_checks('ORDERS');
+        END IF;
+        
+        IF p_category IS NULL OR p_category = 'DUPLICATES' THEN
+            run_duplicate_checks('CUSTOMERS', 'email');
+        END IF;
+        
+        IF p_category IS NULL OR p_category = 'REFERENTIAL' THEN
+            run_referential_checks;
+        END IF;
+        
+        generate_report(g_run_id);
+    END;
+    
+    PROCEDURE run_null_checks(p_table_name VARCHAR2) IS
+        v_start TIMESTAMP; v_count NUMBER; v_sql VARCHAR2(4000);
+    BEGIN
+        FOR col IN (SELECT column_name FROM user_tab_columns WHERE table_name = UPPER(p_table_name))
+        LOOP
+            v_start := SYSTIMESTAMP;
+            v_sql := 'SELECT COUNT(*) FROM ' || p_table_name || ' WHERE ' || col.column_name || ' IS NULL';
+            EXECUTE IMMEDIATE v_sql INTO v_count;
+            log_result(p_table_name || '.' || col.column_name || ' NULL', 'NULL_CHECKS', 'INFO',
+                      v_count || ' nulls', v_count, EXTRACT(SECOND FROM (SYSTIMESTAMP - v_start)) * 1000);
+        END LOOP;
+    END;
+    
+    PROCEDURE run_duplicate_checks(p_table_name VARCHAR2, p_key_columns VARCHAR2) IS
+        v_start TIMESTAMP; v_count NUMBER;
+    BEGIN
+        v_start := SYSTIMESTAMP;
+        EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM (SELECT ' || p_key_columns || 
+                         ' FROM ' || p_table_name || ' GROUP BY ' || p_key_columns || ' HAVING COUNT(*) > 1)'
+            INTO v_count;
+        log_result(p_table_name || ' duplicates on ' || p_key_columns, 'DUPLICATES',
+                  CASE WHEN v_count = 0 THEN 'PASS' ELSE 'FAIL' END,
+                  v_count || ' duplicates', v_count, EXTRACT(SECOND FROM (SYSTIMESTAMP - v_start)) * 1000);
+    END;
+    
+    PROCEDURE run_referential_checks IS
+        v_start TIMESTAMP; v_count NUMBER;
+    BEGIN
+        v_start := SYSTIMESTAMP;
+        SELECT COUNT(*) INTO v_count FROM orders o
+        WHERE NOT EXISTS (SELECT 1 FROM customers c WHERE c.customer_id = o.customer_id);
+        log_result('Orders->Customers FK', 'REFERENTIAL',
+                  CASE WHEN v_count = 0 THEN 'PASS' ELSE 'FAIL' END,
+                  v_count || ' orphans', v_count, EXTRACT(SECOND FROM (SYSTIMESTAMP - v_start)) * 1000);
+    END;
+    
+    PROCEDURE generate_report(p_run_id NUMBER) IS
+        v_total NUMBER; v_passed NUMBER; v_failed NUMBER;
+    BEGIN
+        SELECT COUNT(*), SUM(CASE WHEN status = 'PASS' THEN 1 ELSE 0 END),
+               SUM(CASE WHEN status = 'FAIL' THEN 1 ELSE 0 END)
+        INTO v_total, v_passed, v_failed FROM data_test_results WHERE run_id = p_run_id;
+        
+        DBMS_OUTPUT.PUT_LINE('=== TEST SUMMARY ===');
+        DBMS_OUTPUT.PUT_LINE('Total: ' || v_total || ' | Passed: ' || v_passed || ' | Failed: ' || v_failed);
+    END;
+END;
+/
+11. Lab Exercises
+Lab 1: Data Reconciliation (45 min)
+Write queries to reconcile source and target order tables:
+
+Compare record counts
+Find records in source not in target
+Find records with different values
+Calculate checksum differences
+Lab 2: Null and Duplicate Analysis (30 min)
+Find columns with >10% nulls
+Identify potential duplicate customers
+Create null pattern analysis
+Lab 3: Business Rule Validation (45 min)
+Implement tests for:
+
+Order total = sum of line items
+Ship date > order date
+Customer credit limit not exceeded
+Lab 4: Regression Test Suite (60 min)
+Create baseline snapshots
+Write 10 expected value tests
+Build automated test runner
+12. Module Summary
+Key Concepts
+Concept	Description
+Data Quality	Accuracy, Completeness, Consistency, Timeliness, Validity, Uniqueness
+Reconciliation	Comparing data across systems
+Checksums	Quick validation (count, sum, hash)
+Null Analysis	Detecting missing data patterns
+Duplicates	Exact, partial, and fuzzy detection
+Referential Integrity	Validating table relationships
+Business Rules	Domain-specific constraints
+Regression Testing	Verifying changes don't break data
+Quick Reference
+-- Null check
+SELECT COUNT(*) - COUNT(column) AS nulls FROM table;
+
+-- Duplicate check  
+SELECT key, COUNT(*) FROM table GROUP BY key HAVING COUNT(*) > 1;
+
+-- Orphan check
+SELECT * FROM child WHERE NOT EXISTS (SELECT 1 FROM parent WHERE parent.id = child.parent_id);
+
+-- Row hash
+SELECT id, ORA_HASH(col1||col2||col3) AS hash FROM table;
+
+-- Fuzzy match
+SELECT * FROM t1, t2 WHERE UTL_MATCH.JARO_WINKLER_SIMILARITY(t1.name, t2.name) > 85;
+Best Practices
+Practice	Description
+Test early	Catch issues before they propagate
+Automate	Consistent, repeatable tests
+Use checksums	Fast detection of discrepancies
+Document expected values	Know what "correct" looks like
+Test at multiple levels	Unit, integration, end-to-end
+— End of Module 8: SQL Testing & Validation —
