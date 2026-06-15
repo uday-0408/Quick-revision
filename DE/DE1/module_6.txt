@@ -1,0 +1,863 @@
+MODULE 2: Section 6
+Enterprise Data Engineering & Data Warehouse Masterclass
+
+📋 Table of Contents
+Section Contents
+No.	Lecture Title
+66	What is Business Intelligence?
+67	BI Architecture & Components Deep Dive
+68	Uses and Applications of Business Intelligence
+69	BI Tools Landscape: Power BI, Tableau, Looker & More
+70	Self-Service BI vs Enterprise BI
+71	Embedded Analytics & White-Label BI
+72	Real-Time vs Batch BI
+73	BI Best Practices & Common Pitfalls
+74	Hands-On: Connecting a BI Tool to Sample Data
+Lecture 67: What is Business Intelligence?
+Definition and Core Concepts
+Business Intelligence (BI) is the set of technologies, processes, and practices used to collect, integrate, analyze, and present business data to support better decision-making.
+
+In simpler terms: BI turns raw data into meaningful insights that drive business actions.
+
+The Evolution of BI
+1960s-1980s: DSS (Decision Support Systems) - Mainframe-based reporting
+
+1990s: Data Warehousing Era - OLAP cubes, dimensional modeling
+
+2000s: Modern BI Tools - Tableau, QlikView revolutionize visualization
+
+2010s: Self-Service BI - Business users create their own reports
+
+2020s: AI-Powered BI - Automated insights, natural language queries
+
+BI vs Analytics - What's the Difference?
+Aspect Business Intelligence Analytics
+
+Focus What happened? Why? What will happen? What should we do?
+
+Time Frame Historical and current Future-oriented
+
+Approach Descriptive, Diagnostic Predictive, Prescriptive
+
+Users Executives, Managers Data Scientists, Analysts
+
+Examples Sales dashboards, KPIs Churn prediction, optimization
+Key Components of BI
+Data Integration: ETL/ELT processes to consolidate data from multiple sources
+
+Data Warehousing: Central repository for integrated, historical data
+
+OLAP: Multi-dimensional analysis with drill-down, roll-up, slice-and-dice
+
+Reporting: Scheduled, formatted reports for stakeholders
+
+Dashboards: Real-time visual displays of key metrics
+
+Data Visualization: Charts, graphs, maps to communicate insights
+
+Ad-hoc Query: Self-service exploration of data
+
+Mobile BI: Access to insights on smartphones and tablets
+
+Real-World Example: Retail Chain
+Scenario: A retail chain with 500 stores wants to understand sales performance.
+
+Without BI:
+
+Each store manager sends Excel spreadsheets weekly
+
+Corporate manually consolidates data
+
+Takes 2 weeks to get insights
+
+By then, opportunities are lost
+
+With BI:
+
+POS systems automatically feed data to warehouse
+
+Dashboards update hourly
+
+Executives see real-time performance by store, region, product
+
+Automated alerts for underperforming stores
+
+Actionable insights in minutes
+
+BI Value Proposition
+Faster Decision-Making: Real-time insights instead of weeks-old reports
+
+Data-Driven Culture: Decisions based on facts, not gut feelings
+
+Increased Revenue: Identify opportunities and optimize pricing
+
+Cost Reduction: Spot inefficiencies and waste
+
+Better Customer Understanding: Segmentation and personalization
+
+Competitive Advantage: React faster to market changes
+
+Reference Resources
+What is Business Intelligence?: https://www.youtube.com/watch?v=RdTL-gWRR00
+
+BI Explained in 5 Minutes: https://www.youtube.com/watch?v=8V3WkqE_TLQ
+
+Gartner BI Guide: https://www.gartner.com/en/information-technology/glossary/business-intelligence-bi
+
+Lecture 68: BI Architecture & Components Deep Dive
+A robust BI architecture integrates multiple components to deliver insights from raw data. Understanding this architecture is essential for designing scalable BI systems.
+
+Complete BI Architecture
+{width="6.5in" height="4.875in"}
+
+Layer 1: Data Sources
+BI systems consume data from diverse sources:
+
+Operational Databases: OLTP systems (CRM, ERP, POS)
+
+Files: CSV, Excel, JSON, XML from partners/vendors
+
+APIs: REST APIs from SaaS applications (Salesforce, HubSpot)
+
+Streaming Data: IoT sensors, clickstreams, application logs
+
+Cloud Storage: S3, Azure Blob, Google Cloud Storage
+
+Legacy Systems: Mainframes, AS/400, flat files
+
+Layer 2: Data Integration (ETL/ELT)
+Extract, Transform, Load (ETL) or Extract, Load, Transform (ELT) processes:
+
+Extract: Pull data from source systems
+
+Transform: Clean, deduplicate, standardize, aggregate
+
+Load: Insert into data warehouse or data lake
+
+Schedule: Run on cadence (hourly, daily, real-time)
+
+Monitor: Track failures, data quality issues
+
+Log: Maintain audit trails and lineage
+
+Popular ETL Tools:
+
+Open Source: Apache Airflow, Talend, Apache NiFi
+
+Commercial: Informatica, IBM DataStage, SAP Data Services
+
+Cloud-Native: AWS Glue, Azure Data Factory, Google Dataflow
+
+Modern ELT: Fivetran, Stitch, Airbyte
+
+Layer 3: Data Storage
+Centralized repository optimized for analytics:
+
+Data Warehouse: Snowflake, BigQuery, Redshift, Synapse
+
+Data Lake: S3 + Athena, ADLS + Synapse, GCS + BigQuery
+
+Lakehouse: Databricks, Dremio (Delta Lake, Iceberg)
+
+OLAP Cube: SQL Server Analysis Services, Oracle OLAP
+
+Data Mart: Subject-specific subset (Sales, Finance, HR)
+
+Layer 4: BI Semantic Layer
+Business logic layer that abstracts technical complexity:
+
+Business-friendly names (Revenue vs SUM(order_amount))
+
+Pre-defined metrics and KPIs
+
+Relationships between tables
+
+Row-level security and data governance
+
+Calculated fields and measures
+
+Technologies:
+
+Looker LookML
+
+Tableau Data Sources
+
+Power BI Semantic Models
+
+dbt Metrics Layer
+
+Cube.js
+
+Layer 5: Presentation Layer
+How users interact with insights:
+
+Dashboards: Visual displays of KPIs, auto-refresh
+
+Reports: Formatted, paginated documents (PDF, Excel)
+
+Ad-hoc Analysis: Self-service exploration and drilling
+
+Alerts: Email/Slack notifications when thresholds hit
+
+Mobile Apps: iOS/Android native or responsive web
+
+Embedded Analytics: BI widgets inside operational apps
+
+Layer 6: Access & Security
+Authentication: SSO, SAML, OAuth, Active Directory
+
+Authorization: Role-based access control (RBAC)
+
+Row-Level Security: Filter data by user/group
+
+Column-Level Security: Hide sensitive fields (PII, salary)
+
+Encryption: At rest and in transit (TLS, AES-256)
+
+Audit Logging: Track who viewed what, when
+
+Reference Resources
+BI Architecture Explained: https://www.youtube.com/watch?v=J-5GjHdVxCs
+
+Modern BI Stack: https://www.youtube.com/watch?v=DlAm8W3JBso
+
+Lecture 69: Uses and Applications of Business Intelligence
+BI Applications by Business Function
+1. Sales & Marketing
+Sales Performance Tracking: Pipeline, quota attainment, win rates
+
+Customer Segmentation: RFM analysis, demographics, behavior
+
+Campaign Effectiveness: ROI, conversion rates, attribution
+
+Lead Scoring: Predict which leads will convert
+
+Churn Prediction: Identify at-risk customers
+
+Market Basket Analysis: What products are bought together?
+
+Example KPIs: Monthly Recurring Revenue (MRR), Customer Acquisition Cost (CAC), Customer Lifetime Value (CLV), Net Promoter Score (NPS)
+
+2. Finance & Accounting
+Financial Reporting: P&L, balance sheet, cash flow statements
+
+Budget vs Actuals: Variance analysis by department
+
+Profitability Analysis: By product, customer, region
+
+Accounts Receivable: Aging reports, collections forecasting
+
+Cost Center Analysis: Overhead allocation, cost drivers
+
+Regulatory Compliance: SOX, GAAP, IFRS reporting
+
+3. Operations & Supply Chain
+Inventory Optimization: Stock levels, reorder points, turnover
+
+Demand Forecasting: Predict future sales for planning
+
+Supplier Performance: On-time delivery, quality metrics
+
+Manufacturing Efficiency: OEE, cycle time, defect rates
+
+Logistics & Transportation: Route optimization, freight costs
+
+Warehouse Management: Pick/pack efficiency, space utilization
+
+4. Human Resources
+Workforce Analytics: Headcount, turnover, diversity metrics
+
+Recruitment: Time-to-hire, cost-per-hire, source effectiveness
+
+Performance Management: Goal tracking, performance ratings
+
+Compensation Analysis: Salary benchmarking, pay equity
+
+Employee Engagement: Survey results, sentiment analysis
+
+Learning & Development: Training completion, skills gaps
+
+Real-World Use Case: Amazon
+Amazon uses BI extensively across the business:
+
+Recommendation engine drives 35% of sales
+
+Dynamic pricing updated millions of times per day
+
+Inventory prediction to position stock near customers
+
+Fraud detection on transactions and returns
+
+A/B testing for every website change
+
+Supply chain optimization saving billions annually
+
+Measuring BI ROI
+Organizations measure BI success through:
+
+Time Savings: Hours saved on manual reporting
+
+Revenue Impact: Increased sales from better insights
+
+Cost Reduction: Waste elimination, efficiency gains
+
+User Adoption: % of employees using BI tools
+
+Data Quality: Reduction in errors and reconciliations
+
+Decision Speed: Time from question to answer
+
+Reference Resources
+BI Use Cases: https://www.youtube.com/watch?v=8VPHkQ0xdvw
+Lecture 70: BI Tools Landscape
+The BI tools market is crowded with dozens of vendors. Understanding the landscape helps you choose the right tool for your needs.
+
+BI Tools Market Positioning
+{width="6.5in" height="4.642857611548556in"}
+
+Market Leaders
+1. Tableau (Salesforce)
+
+Strengths: Best-in-class visualization, easy drag-and-drop
+
+Deployment: Cloud (Tableau Online) or On-Premise (Tableau Server)
+
+Pricing: ~$70/user/month (Creator), $42 (Explorer), $15 (Viewer)
+
+Best For: Data visualization, exploratory analysis
+
+Learning Curve: Medium
+
+Market Share: ~15-20%
+
+2. Microsoft Power BI
+
+Strengths: Microsoft ecosystem integration, low cost, rapid adoption
+
+Deployment: Cloud (Power BI Service) or Desktop
+
+Pricing: $10-20/user/month (Pro/Premium)
+
+Best For: Organizations already using Microsoft 365/Azure
+
+Learning Curve: Low-Medium
+
+Market Share: ~35-40% (fastest growing)
+
+3. Looker (Google Cloud)
+
+Strengths: Git-based modeling (LookML), embedded analytics
+
+Deployment: Cloud-only (SaaS)
+
+Pricing: Custom enterprise pricing (~$3,000/month minimum)
+
+Best For: Software companies, embedded use cases, technical teams
+
+Learning Curve: High (requires SQL knowledge)
+
+Market Share: ~5-8%
+
+4. Qlik Sense
+
+Strengths: Associative engine, in-memory analytics
+
+Deployment: Cloud or On-Premise
+
+Pricing: ~$30/user/month
+
+Best For: Large datasets, complex data relationships
+
+Learning Curve: Medium
+
+Market Share: ~10-12%
+
+Specialized/Niche Tools
+Domo: All-in-one cloud BI, strong mobile, expensive ($750-2000/user/year)
+
+Sisense: Embedded analytics, white-label BI
+
+ThoughtSpot: AI-powered search analytics, natural language queries
+
+MicroStrategy: Enterprise BI, mobile-first, complex deployments
+
+SAP BusinessObjects: ERP integration, legacy enterprise
+
+Oracle BI: Oracle ecosystem, Fusion Analytics
+
+IBM Cognos: Enterprise reporting, complex requirements
+
+Open Source BI Tools
+Apache Superset: Created by Airbnb, Python-based, modern UI
+
+Metabase: Simple, user-friendly, good for small teams
+
+Redash: SQL-focused, developer-friendly
+
+Grafana: Time-series data, IoT monitoring, DevOps metrics
+
+Selection Criteria
+Criteria Questions to Ask Impact
+
+User Base How many users? Technical level? High
+
+Data Sources Where is your data? Cloud/on-prem? High
+
+Budget What can you afford per user? High
+
+Deployment Cloud-only or on-premise option needed? Medium
+
+Scalability Future growth plans? High
+
+Integration Existing tech stack (Microsoft, Google)? Medium
+
+Support Need 24/7 support? Training? Medium
+
+Features Specific needs (embedded, mobile, AI)? High
+Recommendation by Company Size
+Startup (<50 employees): Metabase (free) or Power BI ($10/user)
+
+Small Business (50-500): Power BI or Tableau
+
+Mid-Market (500-5000): Tableau, Qlik, or Looker
+
+Enterprise (5000+): Multiple tools (Tableau + Power BI + custom)
+
+Reference Resources
+Gartner Magic Quadrant for BI: https://www.gartner.com/en/documents/magic-quadrant-for-analytics-and-business-intelligence-platforms
+
+Tableau vs Power BI Comparison: https://www.youtube.com/watch?v=3nDPFPUIKLo
+
+Lecture 71: Self-Service BI vs Enterprise BI
+Understanding the Spectrum
+BI tools exist on a spectrum from highly governed enterprise BI to fully self-service analytics. Most organizations need both approaches.
+
+Aspect Enterprise BI Self-Service BI
+
+Ownership IT/BI team builds everything Business users create own reports
+
+Governance High - centralized control Low - distributed creation
+
+Speed Slow - requires IT queue Fast - immediate self-service
+
+Quality High - standardized metrics Variable - user skill dependent
+
+Scalability High - reusable components Low - lots of one-off reports
+
+Training Required Low - users just consume High - users must learn tool
+
+Examples SAP BO, MicroStrategy Tableau, Power BI, Looker
+
+Best For Regulatory reports, KPIs Ad-hoc analysis, exploration
+The Hybrid Model (Best Practice)
+Modern organizations adopt a hybrid approach:
+
+Centralized Data Layer: IT manages data warehouse, ensures quality
+
+Governed Metrics: Finance owns revenue definition, HR owns headcount
+
+Self-Service Exploration: Users can slice/dice with certified datasets
+
+Template Reports: IT creates templates, users customize
+
+Review Process: Critical reports reviewed before publishing
+
+Training Program: Users trained on tool and best practices
+
+Self-Service BI Success Factors
+Clean, well-modeled data warehouse
+
+Business-friendly semantic layer
+
+Clear data governance policies
+
+Comprehensive training program
+
+Center of Excellence for support
+
+Certification process for published content
+
+Regular audits to retire unused reports
+
+Common Pitfalls
+⚠️ Self-Service Gone Wrong:
+
+"Wild West" - hundreds of inconsistent reports
+
+"Version of truth" problem - multiple revenue numbers
+
+Poor performance - users create inefficient queries
+
+Security risks - users accidentally expose PII
+
+Maintenance nightmare - no one owns orphaned reports
+
+✓ Solution: Implement governed self-service with clear guardrails.
+
+Reference Resources
+Self-Service BI Best Practices: https://www.youtube.com/watch?v=vOqP1N8k8oU
+Lecture 72: Embedded Analytics & White-Label BI
+What is Embedded Analytics?
+Embedded Analytics is the integration of BI capabilities directly into business applications, so users can access insights without leaving their workflow.
+
+Use Cases
+SaaS Applications: Shopify embeds sales analytics in merchant dashboard
+
+CRM Systems: Salesforce shows pipeline analytics in sales console
+
+ERP Systems: SAP displays financial KPIs in procurement app
+
+Customer Portals: Banks show spending analysis in mobile apps
+
+Partner Portals: Distributors see sales performance in B2B portal
+
+Embedded Analytics Approaches
+1. iFrame Embedding
+
+Easiest approach - embed BI dashboard in iframe
+
+Pros: Quick to implement, no coding
+
+Cons: Not truly integrated, separate login, style mismatch
+
+2. JavaScript SDK
+
+Embed charts/dashboards via JavaScript API
+
+Pros: Better integration, dynamic filters, SSO
+
+Cons: Requires development, more complex
+
+Examples: Tableau Embed API, Power BI Embed, Looker Embed
+
+3. White-Label / OEM
+
+Fully rebrand BI as your own product
+
+Pros: Seamless UX, no vendor branding, multi-tenancy
+
+Cons: Most expensive, requires enterprise license
+
+Examples: Sisense OEM, Logi Analytics, GoodData
+
+Technical Considerations
+Single Sign-On (SSO): Users authenticate once, access both app and BI
+
+Row-Level Security: Filter data based on logged-in user's permissions
+
+Multi-Tenancy: Isolate customer data in SaaS applications
+
+Performance: Ensure embedded charts load quickly (<2 seconds)
+
+Responsive Design: Work on mobile, tablet, desktop
+
+API Integration: Programmatic dashboard creation, user management
+
+Real-World Example: Shopify
+Shopify embeds analytics throughout its merchant admin:
+
+Sales dashboard shows revenue, orders, traffic
+
+Product analytics show best sellers, inventory
+
+Customer reports show repeat purchase rate, LTV
+
+All embedded seamlessly - merchants never leave Shopify
+
+Powered by internal BI infrastructure + data warehouse
+
+Pricing Models
+Per-Viewer Licensing: $15-25 per end user (gets expensive at scale)
+
+Core-Based Licensing: License by CPU cores, unlimited users
+
+Revenue Share: % of your SaaS revenue (typical for OEM deals)
+
+Flat Fee: Annual contract ($50K-500K+ depending on scale)
+
+Reference Resources
+Embedded Analytics Guide: https://www.sisense.com/glossary/embedded-analytics/
+Lecture 73: Real-Time vs Batch BI
+Comparison Overview
+{width="6.0in" height="3.5in"}
+
+When to Use Real-Time BI
+Fraud Detection: Flag suspicious transactions immediately
+
+Stock Trading: Monitor portfolio value in real-time
+
+E-Commerce: Live sales monitoring during promotions
+
+Operations: Factory floor metrics, equipment monitoring
+
+Customer Support: Live queue depths, SLA compliance
+
+Social Media: Campaign performance, engagement spikes
+
+When to Use Batch BI
+Financial Reporting: Month-end close, quarterly reports
+
+Compliance: Regulatory filings, audit reports
+
+Historical Analysis: Year-over-year trends, seasonality
+
+Complex ETL: Heavy transformations, data quality checks
+
+Data Science: ML model training on full datasets
+
+Real-Time BI Technologies
+Stream Processing: Apache Kafka, Flink, Spark Streaming
+
+Change Data Capture: Debezium, AWS DMS, Airbyte
+
+In-Memory Databases: Redis, MemSQL, SAP HANA
+
+Real-Time DW: Snowflake Streams, BigQuery Streaming
+
+Dashboarding: Grafana, Datadog, Splunk
+
+Cost Considerations
+Real-Time is 3-10x more expensive than batch due to:
+
+24/7 compute resources (vs scheduled batch jobs)
+
+Streaming infrastructure (Kafka clusters, CDC tools)
+
+Higher data warehouse costs (constant ingestion)
+
+More complex monitoring and alerting
+
+Higher skill requirements for engineers
+
+Hybrid Architecture (Recommended)
+Most organizations use both:
+
+Real-Time: Operational metrics that need immediate action
+
+Near Real-Time (5-15 min): Most dashboards, alerts
+
+Hourly Batch: Standard business metrics
+
+Daily Batch: Historical analysis, complex transformations
+
+Monthly Batch: Compliance reports, archival
+
+Lecture 74: BI Best Practices & Common Pitfalls
+Best Practices
+1. Start with Business Questions
+
+Don't build dashboards for the sake of it. Begin with:
+
+What decisions will this dashboard inform?
+
+Who will use it and how often?
+
+What action will they take based on the insights?
+
+2. Design for Your Audience
+
+Executives: High-level KPIs, trends, red/green indicators
+
+Managers: Team performance, drill-down capabilities
+
+Analysts: Detailed data, export to Excel, ad-hoc queries
+
+Operational Users: Real-time metrics, alerts, mobile access
+
+3. Follow Visualization Best Practices
+
+Use appropriate chart types (bar for comparison, line for trends)
+
+Limit colors - don't use 10 colors on one chart
+
+Label axes and include units ($, %, count)
+
+Remove chart junk - unnecessary gridlines, 3D effects
+
+Use white space effectively
+
+Make it mobile-friendly
+
+4. Establish Data Governance
+
+Single source of truth for key metrics
+
+Clear data ownership (who owns revenue definition?)
+
+Data quality monitoring and alerts
+
+Access control and row-level security
+
+Audit logging (who viewed what, when)
+
+Sunset process for old/unused reports
+
+Common Pitfalls
+❌ Pitfall 1: Dashboard Overload
+
+Problem: Too many metrics crammed on one dashboard. Users overwhelmed.
+
+✓ Solution: Limit to 5-7 KPIs per dashboard. Create focused views.
+
+❌ Pitfall 2: Inconsistent Metrics
+
+Problem: Sales reports $2.4M revenue, Finance reports $2.1M. Who's right?
+
+✓ Solution: Define metrics once in semantic layer. Everyone uses same definition.
+
+❌ Pitfall 3: Ignoring Performance
+
+Problem: Dashboards take 30+ seconds to load. Users give up.
+
+✓ Solution: Use aggregates, caching, incremental refreshes. Target <3 seconds.
+
+❌ Pitfall 4: No Mobile Strategy
+
+Problem: Executives want insights on phone, but dashboards don't work on mobile.
+
+✓ Solution: Design mobile-first or create separate mobile layouts.
+
+❌ Pitfall 5: Set-It-and-Forget-It
+
+Problem: Dashboards created 3 years ago, never updated, now irrelevant.
+
+✓ Solution: Quarterly review of all reports. Archive unused content.
+
+BI Maturity Model
+{width="6.0in" height="4.0in"}
+
+Lecture 75: Hands-On Lab - Connecting a BI Tool
+Lab Overview
+In this hands-on lab, you'll connect a BI tool to a sample database and create your first dashboard. We'll use Power BI Desktop (free) for this exercise.
+
+Prerequisites
+Download Power BI Desktop (free): https://powerbi.microsoft.com/desktop/
+
+Sample database: AdventureWorks (SQL Server) or we'll use Excel/CSV
+
+30 minutes of hands-on time
+
+Lab Steps
+Step 1: Download Sample Data
+
+Download sample CSV: Sales data with columns: Date, Product, Region, Sales_Amount, Quantity
+
+Step 2: Connect Power BI to Data
+
+Open Power BI Desktop
+
+Click 'Get Data' → 'Text/CSV'
+
+Select your downloaded CSV file
+
+Click 'Transform Data' to open Power Query Editor
+
+Step 3: Clean and Transform Data
+
+Change Date column to Date type
+
+Change Sales_Amount to Decimal Number
+
+Create calculated column: Profit = Sales_Amount * 0.3
+
+Click 'Close & Apply'
+
+Step 4: Create Visualizations
+
+Add Card visual: Show total Sales_Amount
+
+Add Line chart: Sales_Amount by Date
+
+Add Bar chart: Sales_Amount by Product
+
+Add Map: Sales_Amount by Region (if you have lat/long)
+
+Step 5: Add Filters and Slicers
+
+Add Date slicer to filter by time period
+
+Add Region slicer for regional filtering
+
+Test interactions - clicking one visual filters others
+
+Step 6: Format and Polish
+
+Add dashboard title
+
+Apply consistent color scheme
+
+Add labels to charts
+
+Remove unnecessary gridlines
+
+Save your .pbix file
+
+Challenge Exercises
+1. Create a calculated measure: YoY Growth %
+
+2. Add conditional formatting to highlight top performers
+
+3. Create a drill-through page for product details
+
+4. Publish to Power BI Service (requires free account)
+
+Expected Outcome
+{width="6.5in" height="4.178571741032371in"}
+
+Reference Resources
+Power BI Desktop Tutorial: https://www.youtube.com/watch?v=AGrl-H87pRU
+
+Sample Data Sources: https://www.kaggle.com/datasets
+
+📊 Section 6 Summary
+Key Concepts Covered
+Business Intelligence transforms data into actionable insights
+
+BI architecture includes data sources, ETL, warehouse, semantic layer, and presentation
+
+BI applications span all business functions: sales, finance, operations, HR
+
+Major BI tools: Tableau, Power BI, Looker, Qlik - each with strengths
+
+Self-service BI empowers users but requires governance
+
+Embedded analytics brings insights into operational applications
+
+Real-time BI for immediate action, batch BI for historical analysis
+
+Best practices: start with business questions, design for audience, govern metrics
+
+Learning Outcomes
+After completing this section, you should be able to:
+
+Explain what BI is and how it differs from analytics
+
+Describe the components of BI architecture
+
+Identify appropriate use cases for BI across business functions
+
+Compare and select BI tools based on requirements
+
+Understand trade-offs between enterprise and self-service BI
+
+Implement embedded analytics in applications
+
+Choose between real-time and batch BI approaches
+
+Apply BI best practices and avoid common pitfalls
+
+Next Steps
+Continue to Section 7: Data Modeling & Schema Design to learn advanced techniques for dimensional modeling, slowly changing dimensions, and performance optimization.
+
+Additional Resources
+Tableau Training: https://www.tableau.com/learn/training
+
+Power BI Learning: https://learn.microsoft.com/en-us/training/powerplatform/power-bi
+
+BI & Analytics Glossary: https://www.gartner.com/en/information-technology/glossary
+
+Modern Data Stack: https://www.getdbt.com/analytics-engineering/
+
+────────────────────────────────────────────────────────────
+
+End of Section 6: Business Intelligence & Analytics

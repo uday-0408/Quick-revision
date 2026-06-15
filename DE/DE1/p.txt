@@ -1,0 +1,17 @@
+Act as an expert Data Engineering Professor. I will provide you with a raw text transcript from a course module.
+
+Your task is to transform this text into comprehensive, highly readable study notes that balance technical depth with scannability. Do not create a stripped-down "cheat sheet" or a high-level summary. I need to read this to thoroughly learn the concepts.
+
+Target Audience: A computer engineering student who is getting hands-on with data pipelines, advanced SQL logic, and orchestration tools. Do not oversimplify the engineering concepts.
+
+Follow these strict formatting and content guidelines:
+
+1. Explanatory Depth: Retain the "why" and the "how." Ensure all technical trade-offs, architecture decisions, and operational nuances are fully explained, not just listed.
+2. Structure and Hierarchy: Use clear Markdown headings (H1 for module phases, H2/H3 for sub-concepts) to create a logical flow of information.
+3. Visual Organization: Use bullet points to break down dense paragraphs, but keep the explanatory context intact. Use Markdown tables exclusively for direct comparisons (e.g., ETL vs. ELT, Batch vs. Streaming).
+4. Code & Architecture Preservation: If the text describes data flow, pipelines, or includes code (like dbt SQL snippets), preserve it using proper formatting or code blocks.
+5. Professional Tone: Omit conversational filler, emojis, "welcome back" introductions, and overly enthusiastic cheerleading. Focus strictly on high-density, academic information transfer.
+
+Here is the source text to process:
+
+[INSERT YOUR MODULE_2.TXT CONTENT HERE]

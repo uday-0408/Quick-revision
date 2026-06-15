@@ -1,0 +1,562 @@
+DATA STORAGE TECHNOLOGIES
+MODULE 2: Section 4
+Enterprise Data Engineering & Data Warehouse Masterclass
+
+Section Contents
+📋 Table of Contents
+37 Data Storage Landscape Overview
+38–40. RDBMS Fundamentals & ACID Properties
+41–45. NoSQL Database Systems
+46–49. Flat Files & File Formats
+50–52. Scaling Strategies
+53. Choosing the Right Storage Technology
+54. Hands-On Labs & Exercises
+
+Lecture 37: Data Storage Landscape Overview
+Introduction
+The modern data engineering landscape offers a diverse array of storage technologies, each optimized for specific use cases, workload patterns, and data characteristics. Understanding this landscape is crucial for designing efficient, scalable data systems.
+
+Storage Technology Categories
+1. Relational Databases (RDBMS)
+Structured data with predefined schemas
+ACID compliance for transactional integrity
+Strong consistency and relationships
+Examples: PostgreSQL, MySQL, Oracle, SQL Server
+2. NoSQL Databases
+Key-Value Stores: Redis, DynamoDB
+Document Databases: MongoDB, Couchbase
+Column-Family Stores: Cassandra, HBase
+Graph Databases: Neo4j, Amazon Neptune
+3. File-Based Storage
+Text formats: CSV, JSON, XML
+Columnar formats: Parquet, ORC, Avro
+Table formats: Delta Lake, Apache Iceberg, Apache Hudi
+The CAP Theorem
+The CAP theorem states that distributed systems can only guarantee two of the following three properties simultaneously:
+
+Consistency: All nodes see the same data at the same time
+Availability: Every request receives a response (success or failure)
+Partition Tolerance: System continues operating despite network partitions
+Key Insight: In practice, network partitions are inevitable in distributed systems, so the real choice is between Consistency (CP) and Availability (AP).
+
+Reference Resources
+🎥 CAP Theorem Explained
+🎥 Database Paradigms
+Lectures 38-40: RDBMS Fundamentals
+What is a Relational Database?
+A Relational Database Management System (RDBMS) organizes data into tables (relations) with predefined schemas. Each table consists of rows (records) and columns (attributes), with relationships established through foreign keys.
+
+Core Concepts
+Schema Design
+Normalization: Organizing data to reduce redundancy (1NF, 2NF, 3NF, BCNF)
+Denormalization: Strategic redundancy for performance optimization
+Primary Keys: Unique identifiers for each row
+Foreign Keys: References to primary keys in other tables
+Example: E-Commerce Database Schema
+Below is a normalized schema design for an e-commerce system:
+
+-- Customers Table
+CREATE TABLE customers (
+    customer_id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Orders Table
+CREATE TABLE orders (
+    order_id SERIAL PRIMARY KEY,
+    customer_id INTEGER REFERENCES customers(customer_id),
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    total_amount DECIMAL(10,2),
+    status VARCHAR(50)
+);
+ACID Properties
+ACID properties ensure reliable transaction processing:
+
+Atomicity
+Transactions are all-or-nothing. Either all operations complete successfully, or none do.
+
+Example: Bank transfer either debits and credits both accounts, or neither
+Consistency
+Database remains in a valid state before and after transactions.
+
+Example: Foreign key constraints are maintained
+Isolation
+Concurrent transactions don't interfere with each other.
+
+Isolation levels: READ UNCOMMITTED, READ COMMITTED, REPEATABLE READ, SERIALIZABLE
+Durability
+Committed transactions persist even after system failures.
+
+Example: Write-ahead logging (WAL) ensures recovery
+Transaction Example
+BEGIN TRANSACTION;
+
+-- Debit from account A
+UPDATE accounts
+SET balance = balance - 100
+WHERE account_id = 'A';
+
+-- Credit to account B
+UPDATE accounts
+SET balance = balance + 100
+WHERE account_id = 'B';
+
+COMMIT; -- or ROLLBACK if error occurs
+Popular RDBMS Systems Comparison
+Database	Best For	Strengths	License	Scale
+PostgreSQL	Complex queries, JSON	Advanced features, reliability	Open Source	TB-scale
+MySQL	Web apps, read-heavy	Speed, simplicity	Open Source	TB-scale
+SQL Server	Enterprise, .NET	Integration, BI	Commercial	PB-scale
+Oracle	Mission-critical	Performance, scalability	Commercial	PB-scale
+Reference Resources
+🎥 Database Normalization
+🎥 ACID Properties Explained
+📚 PostgreSQL Documentation
+Lectures 41-45: NoSQL Database Systems
+NoSQL Introduction
+NoSQL (Not Only SQL) databases emerged to address limitations of traditional RDBMS for certain use cases: massive scale, flexible schemas, high-velocity data, and distributed architectures.
+
+1. Key-Value Stores
+Characteristics:
+Simplest NoSQL model: unique key → value
+Extremely fast lookups (O(1) complexity)
+Values are opaque to the database
+Horizontal scalability through partitioning
+Popular Solutions:
+Redis: In-memory cache, supports data structures (lists, sets, sorted sets, hashes)
+Amazon DynamoDB: Fully managed, single-digit millisecond latency, automatic scaling
+Riak: Distributed, fault-tolerant, eventual consistency
+Use Cases:
+Session management and caching
+Real-time leaderboards and counters
+Shopping cart data
+User preferences and profiles
+Redis Example:
+# Set a simple key-value
+SET user:1001:session "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+EXPIRE user:1001:session 3600
+
+# Hash for structured data
+HSET user:1001 name "John Doe" email "john@example.com"
+HGET user:1001 name
+
+# Sorted set for leaderboard
+ZADD leaderboard 9500 "player1" 8700 "player2"
+ZREVRANGE leaderboard 0 9 WITHSCORES
+2. Document Databases
+Characteristics:
+Store semi-structured documents (JSON, BSON, XML)
+Flexible schema - documents in same collection can have different fields
+Support for nested structures and arrays
+Rich query capabilities including indexing
+Popular Solutions:
+MongoDB: Most popular, BSON format, aggregation framework, sharding
+Couchbase: Memory-first architecture, N1QL query language, mobile sync
+Amazon DocumentDB: MongoDB-compatible, fully managed AWS service
+Use Cases:
+Content management systems
+User profiles and catalogs
+Event logging and analytics
+Real-time applications
+MongoDB Example:
+// Insert a document
+db.products.insertOne({
+  name: "Laptop",
+  price: 1299.99,
+  specs: {
+    cpu: "Intel i7",
+    ram: "16GB",
+    storage: "512GB SSD"
+  },
+  tags: ["electronics", "computers"],
+  inStock: true
+})
+
+// Query documents
+db.products.find({
+  price: { $lt: 1500 },
+  "specs.ram": "16GB"
+})
+3. Column-Family Stores
+Characteristics:
+Data stored by column families rather than rows
+Optimized for write-heavy workloads
+Excellent for time-series and analytical queries
+Highly scalable across commodity hardware
+Popular Solutions:
+Apache Cassandra: Linear scalability, multi-datacenter replication, no single point of failure
+Apache HBase: Built on Hadoop, strong consistency, real-time read/write
+Google Bigtable: Fully managed, petabyte-scale, high throughput
+Use Cases:
+Time-series data (IoT sensors, metrics)
+Event logging and audit trails
+Recommendation engines
+Messaging platforms
+Cassandra Example:
+-- Create keyspace
+CREATE KEYSPACE iot_data WITH replication = {
+  'class': 'SimpleStrategy',
+  'replication_factor': 3
+};
+
+-- Create table
+CREATE TABLE iot_data.sensor_readings (
+  sensor_id UUID,
+  reading_time TIMESTAMP,
+  temperature DOUBLE,
+  humidity DOUBLE,
+  PRIMARY KEY (sensor_id, reading_time)
+) WITH CLUSTERING ORDER BY (reading_time DESC);
+4. Graph Databases
+Characteristics:
+Store data as nodes, edges (relationships), and properties
+Optimize for traversing relationships
+Native graph storage and processing
+Query languages: Cypher (Neo4j), Gremlin, SPARQL
+Popular Solutions:
+Neo4j: Leading graph database, Cypher query language, ACID compliant
+Amazon Neptune: Fully managed, supports Property Graph and RDF
+ArangoDB: Multi-model database supporting graph, document, and key-value
+Use Cases:
+Social networks and friend recommendations
+Fraud detection and pattern analysis
+Knowledge graphs and semantic search
+Network and IT operations
+Neo4j Cypher Example:
+// Create nodes and relationships
+CREATE (alice:Person {name: 'Alice', age: 30})
+CREATE (bob:Person {name: 'Bob', age: 35})
+CREATE (alice)-[:FRIENDS_WITH {since: 2020}]->(bob)
+
+// Find friends of friends
+MATCH (person:Person)-[:FRIENDS_WITH*2]-(fof:Person)
+WHERE person.name = 'Alice'
+RETURN DISTINCT fof.name
+Reference Resources
+📚 MongoDB University
+🎥 Cassandra Tutorial
+📚 Neo4j GraphAcademy
+Lectures 46-49: Flat Files & File Formats
+Introduction to File-Based Storage
+File-based storage remains a cornerstone of data engineering, especially in data lakes and big data processing. The choice of file format significantly impacts storage efficiency, query performance, and processing speed.
+
+Text-Based Formats
+CSV (Comma-Separated Values)
+Pros: Human-readable, universal support, simple structure
+Cons: No schema enforcement, limited data types, inefficient storage
+Use When: Exchanging data between systems, small datasets, human readability required
+JSON (JavaScript Object Notation)
+Pros: Flexible schema, nested structures, wide language support
+Cons: Verbose, slower parsing, larger file sizes
+Use When: APIs, semi-structured data, configuration files, logging
+XML (eXtensible Markup Language)
+Pros: Schema validation (XSD), complex hierarchies, metadata support
+Cons: Most verbose, complex parsing, legacy technology
+Use When: Legacy system integration, SOAP services, document markup
+Columnar File Formats
+Columnar formats store data by column rather than by row, dramatically improving analytics performance and compression ratios.
+
+Apache Parquet
+Columnar storage with nested data support
+Efficient compression (typically 75-90% reduction)
+Schema evolution and predicate pushdown
+Optimized for read-heavy analytics workloads
+Native support: Spark, Hive, Impala, Presto, Athena
+Apache ORC (Optimized Row Columnar)
+Designed for Hadoop workloads
+Better compression than Parquet for some datasets
+Built-in indexes and bloom filters
+ACID transaction support with Hive
+Primary use: Hive, Spark, Presto on Hadoop
+Apache Avro
+Row-based format with schema embedded in data
+Excellent for schema evolution and versioning
+Compact binary serialization
+Ideal for streaming and messaging (Kafka)
+Better for write-heavy workloads
+Format Comparison
+Format	Storage Type	Compression	Best Use Case	Schema
+CSV	Row-based	None (gzip optional)	Data exchange	No
+JSON	Row-based	None (gzip optional)	APIs, semi-structured	Flexible
+Parquet	Columnar	Excellent	Analytics, data lakes	Yes
+ORC	Columnar	Best	Hive/Hadoop	Yes
+Avro	Row-based	Good	Streaming, Kafka	Yes
+Modern Table Formats
+Table formats provide ACID guarantees, schema evolution, and time travel capabilities on top of object storage (S3, ADLS, GCS).
+
+Delta Lake
+Developed by Databricks, open-source
+ACID transactions on data lakes
+Time travel and data versioning
+Schema enforcement and evolution
+Unified batch and streaming
+Optimized for Spark but supports other engines
+Apache Iceberg
+Originally developed by Netflix
+Engine-agnostic (Spark, Flink, Trino, Presto)
+Hidden partitioning (no partition columns in queries)
+Partition evolution without rewriting data
+Time travel and snapshot isolation
+Supports Parquet, ORC, and Avro
+Apache Hudi
+Developed by Uber, specializes in upserts
+Copy-on-Write (CoW) and Merge-on-Read (MoR) strategies
+Incremental processing and change capture
+Record-level indexing
+Time travel and point-in-time queries
+Best for CDC and real-time data lakes
+Table Format Selection Guide
+Format	Primary Use Case	Key Advantage	Ecosystem	Maturity
+Delta Lake	Databricks/Spark workloads	Unified batch & streaming	Spark, Flink, Trino	High
+Iceberg	Multi-engine analytics	Engine-agnostic design	Spark, Flink, Trino, Presto	High
+Hudi	CDC & upsert-heavy workloads	Incremental processing	Spark, Flink, Presto	Medium
+Reference Resources
+🎥 Parquet vs ORC vs Avro
+📚 Delta Lake Documentation
+📚 Apache Iceberg Guide
+Lectures 50-52: Scaling Considerations
+Introduction to Database Scaling
+As data volumes and user loads grow, databases must scale to maintain performance. Understanding scaling strategies is critical for designing resilient, high-performance systems.
+
+Vertical Scaling (Scale Up)
+Definition: Adding more resources (CPU, RAM, storage) to a single server.
+
+Advantages:
+Simpler architecture - no code changes
+No data partitioning complexity
+Full ACID compliance maintained
+Lower operational complexity
+Disadvantages:
+Hardware limits (finite ceiling)
+Single point of failure
+Downtime required for upgrades
+Cost grows exponentially
+Horizontal Scaling (Scale Out)
+Definition: Adding more servers to distribute load across multiple machines.
+
+Advantages:
+Nearly unlimited scalability
+High availability through redundancy
+Linear cost scaling
+Commodity hardware usage
+Disadvantages:
+Complex architecture and code changes
+Data consistency challenges
+Network latency and overhead
+Operational complexity
+Sharding Strategies
+Sharding divides data across multiple database instances. The shard key determines data distribution.
+
+1. Range-Based Sharding
+Data distributed by value ranges (e.g., A-M, N-Z)
+Pros: Range queries on shard key are efficient
+Cons: Risk of hotspots if data isn't uniformly distributed
+2. Hash-Based Sharding
+Hash function determines shard placement
+Pros: Even distribution, prevents hotspots
+Cons: Range queries require querying all shards
+3. Geographic/Directory-Based Sharding
+Data stored by location or logical grouping
+Pros: Data locality, compliance with regional regulations
+Cons: Requires lookup service, potential imbalance
+Partitioning Strategies
+Partitioning divides large tables within a single database instance for manageability and performance.
+
+Horizontal Partitioning (Row Partitioning)
+Divide rows based on partition key
+Example: Partition by date range (monthly, yearly)
+Benefits: Query pruning, easier archival, improved maintenance
+Vertical Partitioning (Column Partitioning)
+Split table into multiple tables with fewer columns
+Example: Separate frequently accessed from rarely accessed columns
+Benefits: Reduced I/O, better cache utilization
+PostgreSQL Partitioning Example:
+-- Create partitioned table
+CREATE TABLE measurements (
+    measurement_id SERIAL,
+    measurement_date DATE NOT NULL,
+    value NUMERIC
+) PARTITION BY RANGE (measurement_date);
+
+-- Create partitions
+CREATE TABLE measurements_2024_01 PARTITION OF measurements
+    FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');
+
+CREATE TABLE measurements_2024_02 PARTITION OF measurements
+    FOR VALUES FROM ('2024-02-01') TO ('2024-03-01');
+Read Replicas & Replication
+Master-Slave Replication
+Master handles writes, slaves handle reads
+Asynchronous or synchronous replication
+Improves read scalability and availability
+Multi-Master Replication
+Multiple nodes accept writes
+Conflict resolution required
+Higher availability but more complexity
+Reference Resources
+🎥 Database Sharding Explained
+🎥 Horizontal vs Vertical Scaling
+Lecture 53: Choosing the Right Storage Technology
+Decision Framework
+Selecting the appropriate storage technology requires analyzing multiple dimensions of your requirements:
+
+Consideration	Technology Recommendation
+Data Structure	Structured & relational → RDBMS | Semi-structured → Document DB | Graph-like → Graph DB
+Query Pattern	OLTP → RDBMS | OLAP → Columnar formats | Key lookups → Key-Value store
+Consistency Needs	Strong consistency → RDBMS | Eventual consistency OK → NoSQL
+Scale Requirements	< 1TB → RDBMS | 1TB-100TB → NoSQL | > 100TB → Data Lake
+Write Pattern	Heavy writes → Cassandra/Hudi | Batch → Parquet/ORC | Streaming → Avro/Hudi
+Latency Requirements	Sub-ms → Redis | Milliseconds → DynamoDB | Seconds → RDBMS | Minutes → Data Lake
+Schema Flexibility	Fixed → RDBMS | Evolving → Document DB | Schema-on-read → Data Lake
+Real-World Scenarios
+Scenario 1: E-Commerce Platform
+Product Catalog: PostgreSQL (structured, ACID, complex queries)
+Shopping Cart: Redis (fast, session-based, temporary)
+Product Reviews: MongoDB (semi-structured, flexible schema)
+Recommendations: Neo4j (relationship-heavy, graph traversal)
+Analytics: Parquet files in S3 + Athena (columnar, historical)
+Scenario 2: IoT Sensor Platform
+Real-time Metrics: Cassandra (write-heavy, time-series)
+Device Registry: PostgreSQL (structured, relationships)
+Historical Data: Delta Lake (ACID on data lake, cost-effective)
+Alerting Cache: Redis (fast lookups, TTL support)
+Scenario 3: Social Media Platform
+User Profiles: PostgreSQL (structured, consistent)
+Posts/Content: MongoDB (flexible, multimedia metadata)
+Social Graph: Neo4j (friend connections, recommendations)
+Activity Feed: Cassandra (high write throughput)
+Media Files: S3/Object Storage (scalable, cost-effective)
+Key Takeaways
+Polyglot Persistence: Use multiple storage technologies optimized for different workloads
+No One-Size-Fits-All: Each technology has trade-offs - understand your requirements
+Start Simple: Begin with proven solutions, scale and specialize as needed
+Consider Total Cost: Include operational complexity, not just licensing and infrastructure
+Lecture 54: Hands-On Lab
+Lab Overview
+In this hands-on lab, you'll work with multiple storage technologies to understand their characteristics and appropriate use cases.
+
+Exercise 1: RDBMS Operations (PostgreSQL)
+Objective: Create a normalized database schema and perform ACID transactions
+
+-- Setup
+docker run --name postgres-lab -e POSTGRES_PASSWORD=password \
+  -p 5432:5432 -d postgres:15
+
+-- Create schema
+CREATE TABLE accounts (
+    account_id SERIAL PRIMARY KEY,
+    account_name VARCHAR(100),
+    balance DECIMAL(10,2) CHECK (balance >= 0)
+);
+
+-- Insert test data
+INSERT INTO accounts (account_name, balance) VALUES
+    ('Alice', 1000.00),
+    ('Bob', 500.00);
+
+-- Test ACID transaction
+BEGIN;
+UPDATE accounts SET balance = balance - 100 WHERE account_name = 'Alice';
+UPDATE accounts SET balance = balance + 100 WHERE account_name = 'Bob';
+COMMIT;
+Exercise 2: Key-Value Store (Redis)
+Objective: Implement caching and session management
+
+# Setup
+docker run --name redis-lab -p 6379:6379 -d redis:7
+redis-cli
+
+# Session management
+SET session:user123 '{"userId":123,"name":"Alice"}' EX 3600
+GET session:user123
+
+# Leaderboard with sorted sets
+ZADD leaderboard 1500 "player1" 2000 "player2" 1800 "player3"
+ZREVRANGE leaderboard 0 2 WITHSCORES
+ZINCRBY leaderboard 500 "player1"
+Exercise 3: Document Database (MongoDB)
+Objective: Work with flexible schemas and nested documents
+
+# Setup
+docker run --name mongo-lab -p 27017:27017 -d mongo:7
+mongosh
+
+// Insert documents
+db.products.insertMany([
+  {
+    name: "Laptop",
+    price: 1299.99,
+    specs: { cpu: "i7", ram: "16GB" },
+    tags: ["electronics", "computers"]
+  },
+  {
+    name: "Mouse",
+    price: 29.99,
+    wireless: true,
+    tags: ["electronics", "accessories"]
+  }
+])
+
+// Query with aggregation
+db.products.aggregate([
+  { $match: { tags: "electronics" } },
+  { $group: { _id: null, avgPrice: { $avg: "$price" } } }
+])
+Exercise 4: Working with Parquet Files
+Objective: Create and query columnar data files
+
+# Python script using pandas and pyarrow
+import pandas as pd
+import pyarrow.parquet as pq
+
+# Create sample data
+df = pd.DataFrame({
+    'date': pd.date_range('2024-01-01', periods=1000000),
+    'user_id': range(1000000),
+    'event_type': ['click', 'view', 'purchase'] * 333334,
+    'value': pd.np.random.randint(1, 100, 1000000)
+})
+
+# Write to Parquet (compare compression)
+df.to_parquet('events.parquet', compression='snappy')
+df.to_csv('events.csv', index=False)
+
+# Read and query (predicate pushdown)
+result = pd.read_parquet('events.parquet',
+    filters=[('event_type', '=', 'purchase')])
+Lab Challenges
+Performance Comparison: Measure query times for the same dataset in PostgreSQL vs Parquet
+Data Migration: Export PostgreSQL data to Parquet and load into a data lake
+Polyglot Architecture: Design a system using PostgreSQL, Redis, and MongoDB together
+File Format Analysis: Compare storage sizes and query performance of CSV, JSON, and Parquet
+📊 Section Summary
+Key Concepts Covered
+Understanding the data storage landscape and CAP theorem
+RDBMS fundamentals: ACID properties, normalization, transactions
+NoSQL databases: key-value, document, column-family, graph
+File formats: text-based (CSV, JSON) and columnar (Parquet, ORC, Avro)
+Modern table formats: Delta Lake, Iceberg, Hudi
+Scaling strategies: vertical vs horizontal, sharding, partitioning
+Decision frameworks for selecting appropriate storage technologies
+Learning Outcomes
+After completing this section, you should be able to:
+
+✅ Evaluate trade-offs between different storage technologies
+✅ Design schemas for both relational and NoSQL databases
+✅ Select appropriate file formats based on use case requirements
+✅ Implement scaling strategies for growing data volumes
+✅ Architect polyglot persistence solutions
+Additional Resources
+🎥 Database Design Course
+🎥 NoSQL Explained
+🌐 AWS Database Services
+📚 Database Performance at Scale
+Next Steps
+Continue to Section 5: Data Warehousing Fundamentals to learn how these storage technologies are applied in analytical contexts.
+
+End of Section 4: Data Storage Technologies
+
+Enterprise Data Engineering & Data Warehouse Masterclass

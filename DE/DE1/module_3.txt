@@ -1,0 +1,1037 @@
+MODULE 1: FOUNDATIONS
+SECTION 3: Data Generation & Source Systems
+Deep dive into the various sources where enterprise data originates
+
+#	Lecture Title
+22	Introduction to Data Sources
+23	Transactional Systems: ERP & CRM
+24	APIs as Data Sources
+25	Working with REST & GraphQL APIs
+26	Application Logs & Event Streams
+27	Web Applications & Clickstream Data
+28	Mobile Apps & SDK Integrations
+29	IoT Devices & Sensor Data
+30	SFTP, Email & Legacy File Sources
+31	Social Media & Third-Party Data
+32	SaaS Applications & Data Exports
+33	Data Generation Patterns & Volumes
+34	Source System Documentation Best Practices
+35	Practical Exercise: Connecting to Multiple Data Sources
+Lecture 22: Introduction to Data Sources
+Learning Objectives
+Understand what constitutes a data source in enterprise environments
+Classify data sources by type, structure, and generation patterns
+Recognize the importance of source system understanding for data engineers
+Map the enterprise data landscape
+What is a Data Source?
+A data source is any system, application, device, or process that generates, stores, or provides data that can be extracted for analysis and business intelligence. Data sources are the origin points where data is created before it enters your data pipelines.
+
+"The average enterprise works with over 400 different data sources!"
+
+The Enterprise Data Landscape
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    ENTERPRISE DATA SOURCE LANDSCAPE                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                    INTERNAL DATA SOURCES                             │   │
+│  ├─────────────────────────────────────────────────────────────────────┤   │
+│  │                                                                      │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │   │
+│  │  │ TRANSACTIONAL│  │  OPERATIONAL │  │   BUSINESS   │               │   │
+│  │  │   SYSTEMS    │  │    SYSTEMS   │  │ APPLICATIONS │               │   │
+│  │  │              │  │              │  │              │               │   │
+│  │  │  • ERP       │  │  • Databases │  │  • CRM       │               │   │
+│  │  │  • POS       │  │  • File      │  │  • HRM       │               │   │
+│  │  │  • Banking   │  │    Servers   │  │  • SCM       │               │   │
+│  │  │  • Inventory │  │  • Logs      │  │  • Marketing │               │   │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘               │   │
+│  │                                                                      │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │   │
+│  │  │   DIGITAL    │  │     IOT &    │  │    LEGACY    │               │   │
+│  │  │   CHANNELS   │  │   SENSORS    │  │   SYSTEMS    │               │   │
+│  │  │              │  │              │  │              │               │   │
+│  │  │  • Websites  │  │  • Factory   │  │  • Mainframe │               │   │
+│  │  │  • Mobile    │  │  • Retail    │  │  • Flat Files│               │   │
+│  │  │  • Apps      │  │  • Fleet     │  │  • SFTP      │               │   │
+│  │  │  • Email     │  │  • Smart     │  │  • EDI       │               │   │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘               │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                    EXTERNAL DATA SOURCES                             │   │
+│  ├─────────────────────────────────────────────────────────────────────┤   │
+│  │                                                                      │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │   │
+│  │  │ THIRD-PARTY  │  │   SOCIAL &   │  │   PUBLIC &   │               │   │
+│  │  │     DATA     │  │    MEDIA     │  │  GOVERNMENT  │               │   │
+│  │  │              │  │              │  │              │               │   │
+│  │  │  • SaaS APIs │  │  • Twitter/X │  │  • Census    │               │   │
+│  │  │  • Data      │  │  • LinkedIn  │  │  • Weather   │               │   │
+│  │  │    Vendors   │  │  • News      │  │  • Regulatory│               │   │
+│  │  │  • Partners  │  │  • Reviews   │  │  • Economic  │               │   │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘               │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+Data Source Classification
+By Data Structure
+Type	Description	Examples	Processing
+Structured	Fixed schema, rows/columns	Databases, CSV, ERP	SQL, standard ETL
+Semi-structured	Flexible schema, self-describing	JSON, XML, logs	Schema inference
+Unstructured	No predefined format	Images, video, audio, documents	NLP, ML processing
+By Generation Pattern
+Pattern	Description	Examples	Ingestion Approach
+Batch/Static	Periodic updates, point-in-time	Daily reports, file exports	Scheduled batch jobs
+Transactional	Event-driven, atomic operations	Orders, payments, bookings	CDC, triggers
+Streaming	Continuous, real-time flow	Clickstream, IoT sensors	Kafka, Kinesis
+On-Demand	Query-based, request-response	APIs, web services	API polling, webhooks
+By Ownership
+Category	Control Level	Challenges
+Internal	Full control	Legacy systems, technical debt
+Vendor/SaaS	Limited control	API rate limits, data model changes
+Partner	Shared control	Data agreements, SLAs
+Public	No control	Quality, availability, licensing
+Key Questions for Every Data Source
+Before integrating any data source, data engineers should answer:
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                  DATA SOURCE EVALUATION CHECKLIST                       │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  📊 DATA CHARACTERISTICS                                                │
+│  ┌────────────────────────────────────────────────────────────────┐    │
+│  │  • What data is available? (schema, fields, types)             │    │
+│  │  • How much data? (volume, growth rate)                        │    │
+│  │  • How often is it updated? (velocity, frequency)              │    │
+│  │  • What formats? (JSON, CSV, Parquet, database)                │    │
+│  └────────────────────────────────────────────────────────────────┘    │
+│                                                                         │
+│  🔌 ACCESS & CONNECTIVITY                                               │
+│  ┌────────────────────────────────────────────────────────────────┐    │
+│  │  • How do we connect? (API, JDBC, file transfer)               │    │
+│  │  • Authentication method? (OAuth, API key, credentials)        │    │
+│  │  • Rate limits or quotas?                                      │    │
+│  │  • Network requirements? (VPN, whitelisting)                   │    │
+│  └────────────────────────────────────────────────────────────────┘    │
+│                                                                         │
+│  👤 OWNERSHIP & GOVERNANCE                                              │
+│  ┌────────────────────────────────────────────────────────────────┐    │
+│  │  • Who owns this system?                                       │    │
+│  │  • Who approves access?                                        │    │
+│  │  • What are the SLAs?                                          │    │
+│  │  • Privacy/compliance requirements? (PII, GDPR, HIPAA)         │    │
+│  └────────────────────────────────────────────────────────────────┘    │
+│                                                                         │
+│  ⚠️ RELIABILITY & CHANGE                                               │
+│  ┌────────────────────────────────────────────────────────────────┐    │
+│  │  • How stable is the schema?                                   │    │
+│  │  • How are changes communicated?                               │    │
+│  │  • What happens during downtime?                               │    │
+│  │  • Is historical data available?                               │    │
+│  └────────────────────────────────────────────────────────────────┘    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+The Data Engineer's Role with Source Systems
+Data engineers must:
+
+Discover - Identify and catalog available data sources
+Evaluate - Assess data quality, volume, and access methods
+Connect - Establish secure, reliable connections
+Extract - Pull data efficiently without impacting source systems
+Monitor - Track schema changes and data quality issues
+Document - Maintain comprehensive source system documentation
+Reference Resources
+📚 Book: Fundamentals of Data Engineering - Source Systems (O'Reilly)
+
+📖 Article: Enterprise Data Sources Overview - Preprints.org
+
+📖 Article: Introduction to Enterprise Data Warehouse - Agile Data Engine
+
+📺 Video: Data Engineering Fundamentals - Great Learning
+
+📺 Channel: Seattle Data Guy - Source Systems
+
+Lecture 23: Transactional Systems: ERP & CRM
+Learning Objectives
+Understand ERP and CRM systems as primary enterprise data sources
+Identify the types of data generated by transactional systems
+Learn how to extract data from ERP and CRM systems
+Recognize challenges in transactional system integration
+What are Transactional Systems?
+Transactional systems (also called OLTP - Online Transaction Processing) are designed to manage and process real-time business transactions. They are optimized for:
+
+High volume of concurrent users
+Fast read/write operations
+ACID compliance (Atomicity, Consistency, Isolation, Durability)
+Data integrity and consistency
+ERP: Enterprise Resource Planning
+ERP systems are the backbone of business operations, integrating core functions into a unified platform:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ERP SYSTEM ARCHITECTURE                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                        ┌─────────────────────────┐                          │
+│                        │    CENTRAL DATABASE     │                          │
+│                        │  (Single Source of      │                          │
+│                        │       Truth)            │                          │
+│                        └───────────┬─────────────┘                          │
+│                                    │                                        │
+│        ┌───────────┬───────────┬───┴───┬───────────┬───────────┐           │
+│        │           │           │       │           │           │           │
+│        ▼           ▼           ▼       ▼           ▼           ▼           │
+│  ┌──────────┐┌──────────┐┌──────────┐┌──────────┐┌──────────┐┌──────────┐  │
+│  │ FINANCE  ││   HR     ││  SUPPLY  ││   SALES  ││INVENTORY ││MANUFACTU-│  │
+│  │          ││          ││  CHAIN   ││          ││          ││  RING    │  │
+│  │• Ledger  ││• Payroll ││• Procure-││• Orders  ││• Stock   ││• BOM     │  │
+│  │• AP/AR   ││• Benefits││  ment    ││• Pricing ││• Warehouse│• MRP     │  │
+│  │• Budget  ││• Recruit ││• Vendors ││• Quotes  ││• Shipping││• QC      │  │
+│  └──────────┘└──────────┘└──────────┘└──────────┘└──────────┘└──────────┘  │
+│                                                                             │
+│  Popular ERP Systems:                                                       │
+│  • SAP S/4HANA, SAP Business One                                           │
+│  • Oracle NetSuite, Oracle ERP Cloud                                       │
+│  • Microsoft Dynamics 365                                                  │
+│  • Workday, Infor, Epicor, Odoo                                           │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+Data Generated by ERP Systems
+Module	Data Types	Example Tables
+Finance	Transactions, journal entries, budgets	GL_ENTRIES, INVOICES, PAYMENTS
+HR	Employee records, payroll, benefits	EMPLOYEES, SALARIES, TIME_ENTRIES
+Supply Chain	Purchase orders, suppliers, receipts	PO_HEADERS, VENDORS, RECEIPTS
+Sales	Orders, customers, pricing	SALES_ORDERS, CUSTOMERS, PRICE_LISTS
+Inventory	Stock levels, movements, warehouses	INVENTORY, STOCK_MOVES, LOCATIONS
+Manufacturing	BOMs, work orders, production	BOM, WORK_ORDERS, PRODUCTION_LOTS
+CRM: Customer Relationship Management
+CRM systems manage all customer interactions and front-office functions:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         CRM SYSTEM ARCHITECTURE                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                      ┌─────────────────────────────┐                        │
+│                      │    CUSTOMER 360° VIEW       │                        │
+│                      │  (Unified Customer Profile) │                        │
+│                      └─────────────┬───────────────┘                        │
+│                                    │                                        │
+│           ┌────────────────────────┼────────────────────────┐               │
+│           │                        │                        │               │
+│           ▼                        ▼                        ▼               │
+│    ┌─────────────┐          ┌─────────────┐          ┌─────────────┐       │
+│    │   SALES     │          │  MARKETING  │          │   SERVICE   │       │
+│    │             │          │             │          │             │       │
+│    │ • Leads     │          │ • Campaigns │          │ • Cases     │       │
+│    │ • Opport-   │          │ • Segments  │          │ • Tickets   │       │
+│    │   unities   │          │ • Analytics │          │ • Knowledge │       │
+│    │ • Accounts  │          │ • Emails    │          │   Base      │       │
+│    │ • Contacts  │          │ • Events    │          │ • SLA       │       │
+│    │ • Quotes    │          │ • Social    │          │ • Feedback  │       │
+│    └─────────────┘          └─────────────┘          └─────────────┘       │
+│                                                                             │
+│  Popular CRM Systems:                                                       │
+│  • Salesforce (Sales Cloud, Service Cloud, Marketing Cloud)                │
+│  • Microsoft Dynamics 365 CRM                                              │
+│  • HubSpot CRM                                                             │
+│  • Zoho CRM, Pipedrive, Freshsales                                         │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+Data Generated by CRM Systems
+Module	Data Types	Example Objects
+Sales	Leads, opportunities, forecasts	Lead, Opportunity, Account, Contact
+Marketing	Campaigns, responses, segments	Campaign, CampaignMember, EmailTemplate
+Service	Cases, tickets, knowledge articles	Case, Ticket, Knowledge__kav
+Analytics	Activities, interactions, scores	Task, Event, EmailMessage
+ERP vs CRM: Key Differences
+Aspect	ERP	CRM
+Primary Focus	Back-office operations	Front-office (customer-facing)
+Data Type	Transactional (orders, payments)	Relational (interactions, activities)
+Users	Finance, operations, supply chain	Sales, marketing, customer service
+Core Value	Operational efficiency	Customer relationship optimization
+Data Volume	Very high (financial records)	High (interactions, touchpoints)
+Data Extraction Methods
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                  ERP/CRM DATA EXTRACTION METHODS                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. DIRECT DATABASE CONNECTION                                              │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  [ERP/CRM Database] ──JDBC/ODBC──▶ [ETL Tool] ──▶ [Data Warehouse] │    │
+│  │                                                                     │    │
+│  │  ✅ Full access to all data                                        │    │
+│  │  ✅ Real-time extraction possible                                  │    │
+│  │  ❌ May impact source system performance                           │    │
+│  │  ❌ Requires deep schema knowledge                                 │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  2. API-BASED EXTRACTION                                                    │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  [ERP/CRM] ──REST/SOAP API──▶ [Integration Layer] ──▶ [Target]     │    │
+│  │                                                                     │    │
+│  │  ✅ Vendor-supported, stable interface                             │    │
+│  │  ✅ No direct database access needed                               │    │
+│  │  ❌ Rate limits and quotas                                         │    │
+│  │  ❌ May not expose all data                                        │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  3. CHANGE DATA CAPTURE (CDC)                                               │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  [Transaction Log] ──Debezium/CDC──▶ [Kafka] ──▶ [Data Platform]   │    │
+│  │                                                                     │    │
+│  │  ✅ Captures only changes (efficient)                              │    │
+│  │  ✅ Near real-time synchronization                                 │    │
+│  │  ❌ Complex setup                                                  │    │
+│  │  ❌ Requires log access permissions                                │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  4. FILE EXPORT / SCHEDULED REPORTS                                         │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  [ERP/CRM] ──Export──▶ [CSV/XML Files] ──▶ [SFTP] ──▶ [Data Lake] │    │
+│  │                                                                     │    │
+│  │  ✅ Simple, widely supported                                       │    │
+│  │  ✅ No real-time requirements                                      │    │
+│  │  ❌ Not real-time (batch only)                                     │    │
+│  │  ❌ Manual setup for new reports                                   │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+Common Challenges
+Challenge	Impact	Mitigation
+Complex schemas	Hundreds of tables with relationships	Document key entities first
+Customizations	Custom fields, workflows vary	Work with business analysts
+Performance impact	Extraction can slow operations	Schedule during off-hours
+Data quality	Inconsistent data entry	Implement validation rules
+Schema changes	Upgrades break pipelines	Monitor, version control
+Real-World Example: Extracting Sales Data
+# Example: Extracting Salesforce Opportunities via API
+from simple_salesforce import Salesforce
+
+# Connect to Salesforce
+sf = Salesforce(
+    username='user@company.com',
+    password='password',
+    security_token='token',
+    domain='login'  # or 'test' for sandbox
+)
+
+# Query Opportunities
+query = """
+    SELECT Id, Name, Amount, StageName, CloseDate,
+           Account.Name, Owner.Name
+    FROM Opportunity
+    WHERE CloseDate >= LAST_N_DAYS:90
+    AND StageName != 'Closed Lost'
+"""
+
+results = sf.query_all(query)
+
+# Process results
+for record in results['records']:
+    print(f"Opportunity: {record['Name']}")
+    print(f"  Amount: ${record['Amount']}")
+    print(f"  Stage: {record['StageName']}")
+    print(f"  Account: {record['Account']['Name']}")
+Reference Resources
+📖 Article: What is ERP? Essential Guide - SAP
+
+📖 Article: CRM vs ERP: What's the Difference - Oracle
+
+📖 Article: ERP vs CRM - NetSuite
+
+📖 Article: 22 ERP System Examples - Cube Software
+
+📺 Video: SAP Overview for Beginners
+
+📺 Video: Salesforce Data Model Explained
+
+Lecture 24: APIs as Data Sources
+Learning Objectives
+Understand APIs as modern data integration interfaces
+Learn API fundamentals: endpoints, methods, authentication
+Recognize different API architectures
+Identify API data extraction patterns
+What is an API?
+An API (Application Programming Interface) is a set of protocols and tools that allows different software applications to communicate with each other. For data engineers, APIs are crucial for:
+
+Extracting data from SaaS applications
+Integrating third-party data services
+Building data pipelines without direct database access
+Enabling real-time data synchronization
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        API COMMUNICATION MODEL                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                    REQUEST (from Client)                                    │
+│   ┌─────────────┐  ──────────────────────────▶  ┌─────────────┐            │
+│   │             │   • Endpoint URL              │             │            │
+│   │   CLIENT    │   • HTTP Method (GET, POST)   │   SERVER    │            │
+│   │ (Your App/  │   • Headers (Auth, Content)   │ (API Host)  │            │
+│   │  Pipeline)  │   • Body (if POST/PUT)        │             │            │
+│   │             │  ◀──────────────────────────  │             │            │
+│   └─────────────┘   RESPONSE (from Server)      └─────────────┘            │
+│                     • Status Code (200, 404)                               │
+│                     • Headers                                              │
+│                     • Body (JSON/XML data)                                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+API Architecture Types
+Type	Description	Use Case	Example
+REST	Resource-based, stateless, HTTP methods	Most common, general purpose	Twitter API, Stripe API
+GraphQL	Query language, single endpoint	Complex data needs, mobile	GitHub API, Shopify API
+SOAP	XML-based, strict contracts	Enterprise, legacy systems	Banking, healthcare
+gRPC	Binary protocol, high performance	Microservices, real-time	Internal services
+Webhooks	Push-based, event-driven	Real-time notifications	Payment processors
+HTTP Methods
+Method	Purpose	Idempotent	Example
+GET	Retrieve data	Yes	GET /api/customers/123
+POST	Create new resource	No	POST /api/orders
+PUT	Update (full replace)	Yes	PUT /api/customers/123
+PATCH	Partial update	No	PATCH /api/customers/123
+DELETE	Remove resource	Yes	DELETE /api/orders/456
+HTTP Status Codes
+Code Range	Category	Common Codes
+2xx	Success	200 OK, 201 Created, 204 No Content
+3xx	Redirect	301 Moved, 304 Not Modified
+4xx	Client Error	400 Bad Request, 401 Unauthorized, 404 Not Found, 429 Rate Limited
+5xx	Server Error	500 Internal Error, 502 Bad Gateway, 503 Unavailable
+API Authentication Methods
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      API AUTHENTICATION METHODS                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. API KEY                                                                 │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  Header: X-API-Key: abc123xyz789                                   │    │
+│  │                                                                     │    │
+│  │  ✅ Simple to implement                                            │    │
+│  │  ❌ Key rotation is manual                                         │    │
+│  │  Use Case: Simple integrations, public APIs                        │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  2. BASIC AUTH                                                              │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  Header: Authorization: Basic base64(username:password)            │    │
+│  │                                                                     │    │
+│  │  ✅ Simple, widely supported                                       │    │
+│  │  ❌ Credentials sent with every request                            │    │
+│  │  Use Case: Internal APIs, legacy systems                           │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  3. OAUTH 2.0                                                               │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  Header: Authorization: Bearer <access_token>                      │    │
+│  │                                                                     │    │
+│  │  ✅ Secure, token-based, scoped access                             │    │
+│  │  ❌ Complex flow, token refresh needed                             │    │
+│  │  Use Case: SaaS APIs, third-party integrations                     │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  4. JWT (JSON Web Token)                                                    │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  Header: Authorization: Bearer <jwt_token>                         │    │
+│  │  Token contains: header.payload.signature                          │    │
+│  │                                                                     │    │
+│  │  ✅ Stateless, self-contained                                      │    │
+│  │  ❌ Cannot revoke individual tokens                                │    │
+│  │  Use Case: Microservices, stateless APIs                           │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+OAuth 2.0 Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        OAUTH 2.0 AUTHORIZATION FLOW                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌────────────┐                                          ┌────────────┐    │
+│  │   Your     │                                          │   Auth     │    │
+│  │   App      │                                          │  Server    │    │
+│  └─────┬──────┘                                          └─────┬──────┘    │
+│        │                                                       │           │
+│        │  1. Redirect user to auth server                      │           │
+│        │  ─────────────────────────────────────────────────▶  │           │
+│        │                                                       │           │
+│        │  2. User logs in & grants permission                  │           │
+│        │                                                       │           │
+│        │  3. Auth server redirects back with code              │           │
+│        │  ◀─────────────────────────────────────────────────  │           │
+│        │                                                       │           │
+│        │  4. Exchange code for access token                    │           │
+│        │  ─────────────────────────────────────────────────▶  │           │
+│        │                                                       │           │
+│        │  5. Return access token (+ refresh token)             │           │
+│        │  ◀─────────────────────────────────────────────────  │           │
+│        │                                                       │           │
+│        │  6. Use access token to call API                      │           │
+│        │  ──────────────────────────▶ [Resource Server]        │           │
+│        │                                                       │           │
+└─────────────────────────────────────────────────────────────────────────────┘
+API Rate Limiting
+Most APIs implement rate limits to prevent abuse:
+
+Limit Type	Description	Example
+Requests per second	Max calls in 1 second	10 req/sec
+Requests per minute	Max calls in 1 minute	100 req/min
+Daily quota	Max calls per day	10,000 req/day
+Concurrent connections	Simultaneous requests	5 concurrent
+Handling Rate Limits
+# Example: Exponential backoff with rate limit handling
+import time
+import requests
+
+def api_call_with_retry(url, headers, max_retries=5):
+    for attempt in range(max_retries):
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code == 429:  # Rate limited
+            retry_after = int(response.headers.get('Retry-After', 60))
+            print(f"Rate limited. Waiting {retry_after}s...")
+            time.sleep(retry_after)
+        else:
+            wait_time = 2 ** attempt  # Exponential backoff
+            time.sleep(wait_time)
+    
+    raise Exception("Max retries exceeded")
+Pagination Patterns
+APIs return data in pages to handle large datasets:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      API PAGINATION PATTERNS                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. OFFSET-BASED                                                            │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  GET /api/customers?offset=0&limit=100                             │    │
+│  │  GET /api/customers?offset=100&limit=100                           │    │
+│  │  GET /api/customers?offset=200&limit=100                           │    │
+│  │                                                                     │    │
+│  │  ✅ Simple to implement                                            │    │
+│  │  ❌ Performance degrades with large offsets                        │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  2. CURSOR-BASED                                                            │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  GET /api/customers?cursor=abc123&limit=100                        │    │
+│  │  Response: { "data": [...], "next_cursor": "def456" }              │    │
+│  │                                                                     │    │
+│  │  ✅ Consistent performance                                         │    │
+│  │  ✅ Handles real-time data changes                                 │    │
+│  │  ❌ Can't jump to arbitrary page                                   │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+│  3. PAGE-BASED                                                              │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  GET /api/customers?page=1&per_page=100                            │    │
+│  │  Response: { "data": [...], "total_pages": 50 }                    │    │
+│  │                                                                     │    │
+│  │  ✅ User-friendly, easy to understand                              │    │
+│  │  ❌ Same offset issues under the hood                              │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+API Data Extraction Best Practices
+Always handle rate limits - Implement backoff and retry logic
+Use incremental extraction - Only fetch new/changed data when possible
+Handle pagination properly - Don't assume data fits in one request
+Store raw responses - Keep original data for debugging and reprocessing
+Monitor API changes - Subscribe to API changelogs and deprecation notices
+Implement error handling - Handle network errors, timeouts, and invalid responses
+Reference Resources
+📖 Article: GraphQL vs REST API - AWS
+
+📖 Article: API Design Best Practices - API7
+
+📖 Article: Data Engineering: GraphQL or REST - Medium
+
+📺 Video: REST API Crash Course
+
+📺 Video: OAuth 2.0 Explained
+
+Lecture 25: Working with REST & GraphQL APIs
+Learning Objectives
+Master REST API consumption patterns
+Understand GraphQL query language
+Compare REST vs GraphQL for data engineering
+Implement API data extraction pipelines
+REST API Deep Dive
+REST (Representational State Transfer) is the most common API architecture:
+
+REST Principles
+Stateless: Each request contains all information needed
+Resource-Based: URLs represent resources (nouns, not verbs)
+HTTP Methods: Standard verbs for operations
+Uniform Interface: Consistent patterns across endpoints
+REST API Example
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     REST API EXAMPLE: E-COMMERCE                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ENDPOINTS                                                                  │
+│  ─────────                                                                  │
+│  GET    /api/v1/products              → List all products                  │
+│  GET    /api/v1/products/123          → Get product #123                   │
+│  POST   /api/v1/products              → Create new product                 │
+│  PUT    /api/v1/products/123          → Update product #123                │
+│  DELETE /api/v1/products/123          → Delete product #123                │
+│                                                                             │
+│  GET    /api/v1/orders                → List all orders                    │
+│  GET    /api/v1/orders?status=pending → Filter by status                   │
+│  GET    /api/v1/customers/456/orders  → Customer's orders (nested)         │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+Python REST API Client Example
+import requests
+from typing import Generator, Dict
+
+class RESTAPIClient:
+    def __init__(self, base_url: str, api_key: str):
+        self.base_url = base_url
+        self.headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+    
+    def get_all_records(self, endpoint: str) -> Generator[Dict, None, None]:
+        """Paginate through all records from an endpoint."""
+        page = 1
+        while True:
+            response = requests.get(
+                f"{self.base_url}/{endpoint}",
+                headers=self.headers,
+                params={"page": page, "per_page": 100}
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            for record in data["data"]:
+                yield record
+            
+            if page >= data["pagination"]["total_pages"]:
+                break
+            page += 1
+GraphQL Deep Dive
+GraphQL is a query language that lets clients request exactly the data they need:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        GRAPHQL ARCHITECTURE                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                                 ┌─────────────┐                             │
+│                                 │   GraphQL   │                             │
+│   ┌──────────────┐              │   Server    │              ┌───────────┐  │
+│   │              │   Query      │             │              │           │  │
+│   │    Client    │──────────▶   │  ┌───────┐  │  ◀─────────▶ │ Database  │  │
+│   │              │              │  │Schema │  │              │           │  │
+│   │              │◀──────────   │  │       │  │              └───────────┘  │
+│   └──────────────┘   Response   │  │Resolvers│ │                            │
+│                                 │  └───────┘  │                            │
+│                                 └─────────────┘                            │
+│                                                                             │
+│  Key Concepts:                                                              │
+│  • Schema: Defines types and fields available                              │
+│  • Query: Read operations (like GET)                                       │
+│  • Mutation: Write operations (like POST/PUT/DELETE)                       │
+│  • Resolver: Functions that fetch data for each field                      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+GraphQL Query Example
+# GraphQL Query - Get exactly what you need
+query GetOrderWithDetails($orderId: ID!) {
+  order(id: $orderId) {
+    id
+    orderDate
+    status
+    totalAmount
+    customer {
+      id
+      name
+      email
+    }
+    items {
+      product {
+        name
+        sku
+      }
+      quantity
+      unitPrice
+    }
+  }
+}
+REST vs GraphQL Comparison
+Feature	REST	GraphQL
+Endpoints	Multiple (one per resource)	Single endpoint
+Data Fetching	Fixed response structure	Client specifies fields
+Over-fetching	Common (returns all fields)	Eliminated
+Under-fetching	Common (multiple requests)	Eliminated
+Caching	Easy (HTTP caching)	Complex (needs client)
+Learning Curve	Lower	Higher
+When to Use Each
+Use REST When	Use GraphQL When
+Simple CRUD operations	Complex, nested data needs
+Public APIs with caching needs	Mobile apps (bandwidth sensitive)
+Team is familiar with REST	Multiple frontend clients
+Microservices with clear boundaries	Rapid iteration on data requirements
+Reference Resources
+📖 Official: GraphQL Documentation
+
+📖 Article: How GraphQL Works - How To GraphQL
+
+📺 Video: GraphQL Full Course
+
+Lecture 26: Application Logs & Event Streams
+Learning Objectives
+Understand application logs as valuable data sources
+Learn log formats and parsing techniques
+Design event streaming architectures
+Implement log data pipelines
+What are Application Logs?
+Application logs are timestamped records of events, errors, and transactions generated by software systems.
+
+Log Types
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        LOG TYPES IN ENTERPRISE                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐             │
+│  │  APPLICATION    │  │    SYSTEM       │  │    SECURITY     │             │
+│  │     LOGS        │  │     LOGS        │  │     LOGS        │             │
+│  │                 │  │                 │  │                 │             │
+│  │ • Error logs    │  │ • Syslog        │  │ • Auth logs     │             │
+│  │ • Access logs   │  │ • Kernel logs   │  │ • Audit logs    │             │
+│  │ • Debug logs    │  │ • Service logs  │  │ • Firewall logs │             │
+│  │ • Transaction   │  │ • Cron logs     │  │ • IDS/IPS       │             │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+Log Formats
+JSON (Structured)
+{
+  "timestamp": "2024-01-15T10:23:45.123Z",
+  "level": "ERROR",
+  "service": "UserService",
+  "message": "Failed to authenticate user",
+  "context": {
+    "user_email": "john@example.com",
+    "error_code": "AUTH_001"
+  }
+}
+Apache Combined Log Format
+192.168.1.100 - john [15/Jan/2024:10:23:45 +0000] "GET /api/users HTTP/1.1" 200 1234
+Event Streaming Architecture
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    LOG & EVENT STREAMING PIPELINE                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌──────────────┐     ┌──────────────┐    ┌──────────────┐    ┌──────────┐ │
+│  │ App Servers  │────▶│   Fluentd/   │───▶│    KAFKA     │───▶│Data Lake │ │
+│  │   Databases  │     │   Filebeat   │    │   KINESIS    │    │   SIEM   │ │
+│  │  Containers  │     │   Logstash   │    │              │    │Elasticsearch│
+│  └──────────────┘     └──────────────┘    └──────────────┘    └──────────┘ │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+Log Collection Tools
+Tool	Description	Best For
+Fluentd	Open-source data collector	Kubernetes, unified logging
+Filebeat	Lightweight log shipper	Simple file-based collection
+Logstash	Pipeline processing	Complex transformations
+Vector	High-performance collector	High-volume, multi-source
+Reference Resources
+📺 Video: Apache Kafka Crash Course
+
+Lecture 27: Web Applications & Clickstream Data
+Learning Objectives
+Understand clickstream data and its value
+Learn web analytics data collection methods
+Design clickstream data pipelines
+What is Clickstream Data?
+Clickstream data is a record of all user interactions within a website or application.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      CLICKSTREAM USER JOURNEY                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌────────┐     ┌────────┐     ┌────────┐     ┌────────┐     ┌────────┐   │
+│  │  Land  │────▶│ Browse │────▶│  View  │────▶│  Add   │────▶│Checkout│   │
+│  │  Page  │     │Products│     │ Detail │     │ to Cart│     │        │   │
+│  └────────┘     └────────┘     └────────┘     └────────┘     └────────┘   │
+│      │              │              │              │              │         │
+│      ▼              ▼              ▼              ▼              ▼         │
+│  page_view     product_click   product_view   add_to_cart   purchase      │
+│  session_start scroll_depth    image_zoom     page_view     checkout      │
+│  utm_params    filter_used     reviews_view                               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+Clickstream Data Structure
+{
+  "event_id": "evt_abc123",
+  "event_type": "page_view",
+  "timestamp": "2024-01-15T10:23:45.123Z",
+  "session_id": "sess_xyz789",
+  "user_id": "user_456",
+  "page": {
+    "url": "https://store.com/products/laptop",
+    "title": "Laptop Pro",
+    "referrer": "https://google.com"
+  },
+  "context": {
+    "device": "desktop",
+    "browser": "Chrome 120",
+    "country": "US"
+  }
+}
+Collection Tools
+Tool	Type	Best For
+Segment	CDP	Multi-destination routing
+RudderStack	Open-source CDP	Warehouse-first approach
+Snowplow	Analytics platform	Full data ownership
+Google Analytics	Free analytics	Basic web analytics
+Reference Resources
+📖 Article: Clickstream Data - Matomo
+
+📖 Article: What is Clickstream Data? - Hightouch
+
+Lecture 28: Mobile Apps & SDK Integrations
+Learning Objectives
+Understand mobile app data collection challenges
+Learn SDK integration patterns
+Design mobile analytics pipelines
+Mobile Data Collection Challenges
+Challenge	Description
+Connectivity	Intermittent network, offline mode
+Battery	CPU and memory constraints
+Platform	iOS vs Android differences
+Privacy	ATT (iOS 14+), GDPR/CCPA
+Lifecycle	Background, foreground, terminate states
+Popular Mobile Analytics SDKs
+SDK	Platforms	Features
+Firebase Analytics	iOS, Android	Free, Google integration
+Amplitude	iOS, Android	Product analytics
+Mixpanel	iOS, Android	Event analytics
+Segment	iOS, Android	Multi-destination
+Lecture 29: IoT Devices & Sensor Data
+Learning Objectives
+Understand IoT data characteristics and challenges
+Learn IoT communication protocols
+Design IoT data ingestion pipelines
+Work with time-series databases
+IoT Data Characteristics - The 5 V's
+V	Description	Example
+Volume	Billions of events/day	Millions of sensors
+Velocity	Millisecond resolution	Real-time readings
+Variety	Temperature, pressure, GPS	Multiple sensor types
+Veracity	Sensor noise, calibration drift	Data quality issues
+Value	Predictive maintenance	Business outcomes
+IoT Protocol Stack
+Protocol	Layer	Use Case
+MQTT	Application	Pub/sub messaging, lightweight
+CoAP	Application	Constrained devices
+HTTP/REST	Application	General purpose
+LoRaWAN	Network	Long range, low power
+IoT Data Pipeline
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      IoT DATA PIPELINE ARCHITECTURE                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌──────────┐      ┌──────────────┐    ┌──────────────┐    ┌─────────┐    │
+│  │ Sensors  │─MQTT─│   IoT Hub    │───▶│    Spark     │───▶│InfluxDB │    │
+│  │ Devices  │      │  (AWS IoT/   │    │  Streaming   │    │TimescaleDB   │
+│  │ Gateway  │      │  Azure IoT)  │    │              │    │Data Lake│    │
+│  └──────────┘      └──────────────┘    └──────────────┘    └─────────┘    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+IoT Data Example
+{
+  "device_id": "sensor_factory_01_temp_001",
+  "timestamp": "2024-01-15T10:23:45.123Z",
+  "metadata": {
+    "site_id": "factory_01",
+    "sensor_type": "temperature",
+    "unit": "celsius"
+  },
+  "measurements": {
+    "temperature": 45.7,
+    "humidity": 62.3
+  }
+}
+Time-Series Databases
+Database	Best For	Key Features
+InfluxDB	General IoT	High write throughput
+TimescaleDB	SQL-based	PostgreSQL extension
+QuestDB	High performance	Fastest ingestion
+Reference Resources
+📖 Article: IoT Time Series Analysis - Databricks
+
+📖 Article: Data Engineering for IoT - IABAC
+
+Lecture 30: SFTP, Email & Legacy File Sources
+Learning Objectives
+Understand legacy file transfer protocols
+Learn email as a data source
+Handle various file formats
+File Transfer Protocols
+Protocol	Security	Port	Use Case
+FTP	None	21	Legacy (avoid)
+SFTP	SSH encrypted	22	Standard secure transfer
+FTPS	TLS encrypted	990	FTP over SSL
+SCP	SSH encrypted	22	Single file transfers
+AS2/EDI	Encrypted	Varies	B2B retail/healthcare
+Common File Formats
+Format	Type	Use Case
+CSV	Flat text	Simple tabular data
+JSON	Hierarchical	Modern APIs
+XML	Hierarchical	B2B, config
+Excel	Spreadsheet	Business reports
+Parquet	Columnar	Analytics
+Fixed-width	Legacy	Mainframe exports
+Lecture 31: Social Media & Third-Party Data
+Learning Objectives
+Understand social media as a data source
+Navigate API limitations
+Learn third-party data options
+Social Media Platforms
+Platform	Data Available	API Access
+Twitter/X	Posts, trends, hashtags	Enterprise API (paid)
+LinkedIn	Company pages, job postings	Partner access
+Instagram	Posts, reels, engagement	Graph API (business)
+Facebook	Public posts, ad insights	Graph API (limited)
+Third-Party Data Providers
+Provider	Data Type	Use Case
+Clearbit	Company enrichment	B2B firmographics
+ZoomInfo	Contact data	Sales intelligence
+Similarweb	Web traffic	Competitive analysis
+Lecture 32: SaaS Applications & Data Exports
+Learning Objectives
+Understand SaaS data integration patterns
+Learn common SaaS connector approaches
+SaaS Categories
+Category	Examples
+CRM & Sales	Salesforce, HubSpot, Pipedrive
+Marketing	HubSpot, Mailchimp, Marketo
+Finance	Stripe, QuickBooks, Xero
+HR	Workday, BambooHR, Greenhouse
+Support	Zendesk, Intercom, Freshdesk
+E-commerce	Shopify, WooCommerce, BigCommerce
+SaaS Integration Tools
+Tool	Type	Connectors
+Fivetran	Managed ELT	300+
+Airbyte	Open-source	350+
+Stitch	Managed ELT	130+
+Meltano	Open-source	300+
+Lecture 33: Data Generation Patterns & Volumes
+Learning Objectives
+Understand data volume estimation
+Learn data generation patterns
+Plan for data growth
+Data Volume Reference
+Source Type	Volume Example	Growth Pattern
+Web Clickstream	10M-100M events/day	Linear with traffic
+IoT Sensors	1M-1B points/day	Exponential with devices
+ERP Transactions	100K-1M records/day	Business growth
+Mobile App Events	1M-50M events/day	User growth
+Log Files	10GB-1TB/day	Service scaling
+Lecture 34: Source System Documentation Best Practices
+Learning Objectives
+Create effective data source documentation
+Build data dictionaries
+Establish data contracts
+Documentation Template
+## Source System Overview
+- Name: [System Name]
+- Owner: [Team/Person]
+- Type: [ERP/CRM/API/etc.]
+
+## Connection Details
+- Protocol: [JDBC/API/SFTP]
+- Host: [endpoint]
+- Authentication: [method]
+- Rate Limits: [if applicable]
+
+## Data Model
+- Key Entities: [list]
+- Schema: [DDL or link]
+
+## Data Characteristics
+- Volume: [records/day]
+- Update Frequency: [real-time/hourly/daily]
+
+## Quality & Governance
+- Known Issues: [list]
+- PII Fields: [list]
+- Compliance: [GDPR/HIPAA/etc.]
+
+## Contacts
+- Technical: [name/email]
+- Business: [name/email]
+Lecture 35: Hands-On Lab - Connecting to Multiple Data Sources
+Lab Overview
+Connect to multiple data sources and extract data into a common format.
+
+Lab Objectives
+Connect to a REST API and extract JSON data
+Read data from a CSV file
+Query a PostgreSQL database
+Combine data from multiple sources
+Setup
+pip install requests pandas psycopg2-binary
+API Extraction
+import requests
+import pandas as pd
+
+def extract_from_api(base_url, api_key, endpoint):
+    all_data = []
+    page = 1
+    while True:
+        response = requests.get(
+            f"{base_url}/{endpoint}",
+            headers={"Authorization": f"Bearer {api_key}"},
+            params={"page": page, "per_page": 100}
+        )
+        data = response.json()
+        if not data.get("results"):
+            break
+        all_data.extend(data["results"])
+        page += 1
+    return pd.DataFrame(all_data)
+CSV Extraction
+def extract_from_csv(file_path):
+    return pd.read_csv(file_path, encoding="utf-8")
+Database Extraction
+import psycopg2
+
+def extract_from_postgres(conn_params, query):
+    conn = psycopg2.connect(**conn_params)
+    df = pd.read_sql(query, conn)
+    conn.close()
+    return df
+Combine Sources
+# Join multiple sources
+df_combined = df_orders.merge(
+    df_users[["user_id", "name"]], 
+    on="user_id"
+).merge(
+    df_products[["product_id", "product_name"]],
+    on="product_id"
+)
+
+# Save output
+df_combined.to_parquet("output/combined_data.parquet")
+Section Summary
+✅ Data source classification (structured, semi-structured, unstructured)
+✅ Transactional systems (ERP & CRM)
+✅ API architectures (REST, GraphQL)
+✅ Log collection and event streaming
+✅ Clickstream and mobile analytics
+✅ IoT sensor data and time-series databases
+✅ Legacy file transfers and SaaS integrations
+✅ Documentation best practices
+
+Additional Resources
+Books
+📚 Fundamentals of Data Engineering - O'Reilly
+📚 Designing Data-Intensive Applications
+YouTube Channels
+📺 Seattle Data Guy
+📺 Andreas Kretz
+End of Section 3: Data Generation & Source Systems
