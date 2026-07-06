@@ -1,0 +1,39 @@
+https://docs.snowflake.com/en/user-guide/streams-intro
+
+https://docs.snowflake.com/en/user-guide/streams-manage
+
+https://docs.snowflake.com/en/user-guide/streams-manage
+
+https://docs.snowflake.com/en/user-guide/tasks-intro
+
+https://docs.snowflake.com/en/user-guide/tasks-triggered
+
+http://docs.snowflake.com/en/user-guide/tasks-graphs
+
+https://docs.snowflake.com/en/user-guide/tasks-monitor
+
+https://docs.snowflake.com/en/user-guide/tasks-errors
+
+https://docs.snowflake.com/en/user-guide/tasks-errors-integrate
+
+https://docs.snowflake.com/en/user-guide/tasks-success-integrate
+
+https://docs.snowflake.com/en/user-guide/tasks-events
+
+https://docs.snowflake.com/en/user-guide/ui-snowsight-tasks
+
+https://docs.snowflake.com/en/user-guide/tasks-python-jvm
+
+https://docs.snowflake.com/en/user-guide/tasks-ts
+
+
+
+These are all the linkes for the documents for the snowflake topics like :
+
+streams, tasks
+
+s  Your target is that make proper notes for the all topics one by one , while making the topics you should give me information about that then , and focus more on the edge cases and gotchas for exam like snowpro now we should start for the  
+
+Streams
+
+and make sure the explaination is in simple language so that i can understand that

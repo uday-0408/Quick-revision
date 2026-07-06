@@ -1,0 +1,6 @@
+These are all the linkes for the documents for the snowflake topics like :
+Resource-moniter, cost optimize,Credit usage calc,
+ACCOUNT_USAGE schema:
+Your target is that make proper notes for the all topics one by one , while making the topics you should give me information about that then , and focus more on the edge cases and gotchas for exam like snowpro now we should start for the 
+Resource-moniter
+and make sure the explaination is in simple language so that i can understand that
