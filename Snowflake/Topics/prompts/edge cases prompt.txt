@@ -1,0 +1,5 @@
+this is the all the topics that i need to read for the snowpro exam and i wanna cover all the edge cases and gotchas , and the types that can be come in scenario or seperate question in exam ,
+
+you task is to read only the documentaition or if you find the case from somewhere else you should cross check it with documentatioin 
+
+and give me content in only the markdown file 

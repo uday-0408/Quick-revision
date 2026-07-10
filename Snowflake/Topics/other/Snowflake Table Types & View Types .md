@@ -245,7 +245,32 @@ Traditionally, keeping a derived table up to date meant building a **stream** (t
 
 **Atomic refresh:** New results are applied all at once — readers never see a half-finished refresh.
 
-### Costs
+### CostsDomain 3.0: Data Loading, Unloading, and Connectivity
+3.1 Perform data loading and unloading
+● File formats
+● Create and use stages
+○ Internal stages
+○ External stages
+○ Server-side encryption
+○ Directory tables
+● COPY INTO command
+● Error handling options
+3.2 Perform automated data ingestion
+● Snowpipe
+● Snowpipe streaming
+● Streams
+● Tasks
+● Dynamic tables
+● Openflow (Feature will not be tested
+until it’s globally GA)
+3.3 Identify the different Snowflake
+Connectors and integrations
+● Snowflake drivers
+● Snowflake connectors
+● Storage integration
+● API integration
+● Git integration
+
 Dynamic tables have three cost categories:
 1. **Warehouse compute** — running the refresh query itself.
 2. **Cloud Services** — compiling the query, tracking dependencies, monitoring for changes, coordinating refresh scheduling.
