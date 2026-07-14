@@ -1,0 +1,750 @@
+Question $102 
+True False Snowflake bills for a minimum of five minutes each time a Virtual Warehouse is started. 
+False 
+Correct Answer-. B 
+Com•nwmity vote 
+#103 
+When scaling up '{•rlual Warehouses by increasing Virtual Warehouse t-shirt size. you are primarily scaling for improved 
+A. Concurrency 
+8. Performance 
+Correct g 
+Vote dis 
+Quesllcn 
+AS a practice, Clustering keys Should be defined tables Of Which minimum Size? 
+A. Multi-Kilobyte (KB) Range 
+g, Multi-Megabyte RanF 
+Multi-Gigabyte O;g) Range 
+D. Multi-Tera-byte (T8) Range 
+Correct D 
+dis 
+Question *IOS 
+How a Snowpipe charges calculated? 
+A, Per-second,'per Warehouse Size 
+granularity 
+C, Number Of Pipes in account 
+D. Total storage bucket size 
+Correct Answer: B 
+True o' False: A Snowflake account is charged fol data stored in both Internal and External Stages. 
+8. False 
+Correct g 
+Cm-nnnity vote dis 
+aueglicm 
+True False; When active, Pipe a dedicated Virtual Warehouse to 
+A. True 
+B, False 
+Correct Answer: g 
+t:mnmuoyty vote 
+Question #108 
+True False: Snowflake supports federated authentication in all editions. 
+False 
+Correct Answer-. A 
+Question $109 
+True False When a new Snowflake object is created, it is automatically owned by the user who created it 
+False 
+Correct Answer. B 
+Cwm•wmity 
+True False A Virtual Warehouse consumes Snowflake credits even when inactive. 
+A. True 
+False 
+Correct Answer: 
+Question #111 
+True False: During data unloading. only JSON and CSV files can be compressed. 
+False 
+Correct Answer; B 
+Community 
+Which of the following are options when creating a Virtual "arehouse? (Choose two.) 
+A. Autcrsuspeod 
+8. Auto-resume 
+C, Local SSD size 
+D. User count 
+Correct Answer-. AB 
+Question $113 
+Which formats are supported fot unloading data from Snowflake? (Choose two.) 
+A. Delimited (CSV, ISV, etc,) 
+Awo 
+C. JSON 
+D. ORC 
+Correct Answer: AC 
+Question #114 
+True or False Data Providers can share data with only the Data Consumer 
+8. False 
+Correct B 
+The fail-safe retention period is how many days? 
+A. I day 
+8.7 days 
+'5 days 
+D. 90 days 
+Correct 
+Cm.nity 
+Question 
+True False: Once created. a micro-partition will never be changed. 
+False 
+Correct Answer-. A 
+•tote 
+#117 
+What services does Sncmfake automatically prcwide for customers that they may have been responsible for with their on-premise system? 
+(Choose all that apply.) 
+A, Installing and configuring hardware 
+Patching software 
+C. Physical security 
+D_ Maintaining metadata and statistics 
+Correct Answer: ABD 
+Question 
+Which of the following statements would be used to export/unload data from Snowflake? 
+A. COPY INTO @stage 
+8. EXPORT TO @stage 
+C, INSERT INTO @stage 
+-s @stage. select 'select from 
+Correct Answer: 
+Community 
+Question 
+True False: A 4X-Large Warehouse may, at times, take longe to provision than a X-SmaII Warehouse. 
+False 
+Correct Answer-. A 
+Cm•nwmity vote 
+#120 
+How would determine the size of the virtual warehouse used for a task? 
+A. Root task may be executed concurrently Cie. multiple instances). it is recommended to leave some margins in the execution window to 
+avoid missing instances Of execution 
+Querying (SELECT) the size of the stream content would help detemine the warehouse size For example, if querying large stream content, 
+a larger warehouse Size 
+C. It using the stored procedure to execute multiple SQL statements, its best test run the stored procedure separately to size the compute 
+resource first 
+D. Since task infrastructure is based on running the task body on schedule, it's recommended to configure the virtual warehouse for automatic 
+concurrency handling using Multi-cluster warehouse (MC") to match the task schedule 
+Correct Answer; C 
+Questicm $171 
+The Information Schema and Account Usage Share provide storage information for which of the following objects? (Choose three.) 
+A. users 
+8. Tables 
+C, Databases 
+D. Internal Stages 
+Correct Answer-. BCD 
+Question $122 
+What is the default File Format used in the COPY command if one is not specified? 
+A. CSV 
+'SON 
+C, Parquet 
+XML 
+Correct Answer: A 
+'123 
+True o' False: Reader Accounts are able to extract data trom shared data objects for use outside ot Snowflake. 
+8. False 
+Correct 
+Cm-nnnity vote dis 
+True False; You Can define multiple columns Within Clustering on a table, 
+A. True 
+B, False 
+Correct Answer: 
+t:mnmuoyty vote 
+Question #125 
+True False: Snowflake enforces unique, primary key. and foreign key constraints during DML operations. 
+False 
+Correct Answer-. B 
+Question $125 
+True or False Loading data into Snm\'flake requires that source data files be no larger than 16M8 
+False 
+Correct Answer. B 
+Cwm•wmity '.øte 
+True False A Virtual Warehouse can be resized while suspended. 
+A. True 
+False 
+Correct Answer: 
+Question g12g 
+True False: When you cteate a custom role, it ig a best ptactice to •mmediately grant that role to ACCOUNTADUIN_ 
+False 
+Correct Answer: B 
+Community vote 
+#123 
+Which of the following accurately represents how a table fits into Snowflake's logical container hierarchy? 
+A. Account 
+8. Account 
+D. Database 
+> Schema Database -s Table 
+Database Schema Table 
+C, Database Table 
+> Table Schema Account 
+Account 
+Correct Answer-. B 
+Question É13C 
+True False All Snowflake table types include fail-safe storage. 
+False 
+Correct Answer. B 
+Cwm•wmity '.øte 
+#131 
+What are two ways to create and manage Data Shares in Snowflake? (Choose two) 
+A. Via the Snowfiake Web Interface (UI) 
+Via the parameter 
+Via SQL commands 
+D. Via Virtual Warehouses 
+Correct 
+Cm-nnnity vote dis 
+#132 
+True False; be disabled within a Snowflake account, 
+A. True 
+B, False 
+Correct Answer: g 
+t:mnmuoyty vote 
+Question #133 
+True False: It is possible for a user to lun a query against the query result cache without requiring an active Warehouse. 
+False 
+Correct Answer-. A 
+Question $134 
+True or False When Snowflake is configured to use Single Sign-On (SSO), Snowflake receives the usernames and credentials from the SSO service 
+and loads them into the customer'S Snowflake account. 
+A. True 
+False 
+Correct Answer: 8 
+Question #135 
+Which of the following are best practices for loading data into Snowflake? (Choose three.) 
+A. Aim to produce data files that are MB and 250 Mg in Size, compressed. 
+Load data trom files in a cloud storage service in a different region or cloud platform from the service or region containing the Snowflake 
+account, to save on cost 
+C. Enclose Welds that contain delimiter characters in single or double quotes. 
+D. Split large files into a greater number of smaller files to distribute the bad the Compute resources in an active warehouse. 
+E. When planning which warehouse(s) to use for data loading, start with the largest warehouse possible 
+F. Partition the staged data into large folders with random paths. allowing Snowflake to determine the best way to load each file. 
+Correct A CD 
+dis 
+Which feature is used both querying and restoring data? 
+A. Cluster keys 
+B, Time 
+Fail-safe 
+D. Cloning 
+Correct g 
+vote dis 
+Question $137 
+What do the terms scale up and scale out refer to in Snowflake? (Choose two.) 
+A, Scaling out adds Clusters Of the same Size to a Virtual warehouse 10 handle more concurrent 
+Scaling out adds clusters of varying sizes to a virtual warehouse. 
+C. Scaling Out adds additional database servers to an existing running cluster to handle more concurrent queries, 
+D. Snowflake recommends using both scaling up and scaling out handle more concurrent queries. 
+E. Scaling up resizes a virtual warehouse so it can handle mue complex nykloads. 
+F, Scaling up adds additional database Servers to an existing running Cluster handle larger 
+Correct Answer: AE 
+Cm•mnut'üy •Ote dist"bunon 
+Question #138 
+What is the minimum Snowflake edition that has column-level security enabled? 
+A, Standard 
+Enterprise 
+C. Business Critical 
+D. Virtual private Snowflake 
+Correct Answer: g 
+Cunmuody vote d,'stribunoo 
+Question #139 
+What parameter controls if the Virtual Warehouse starts immediately after the CREATE WAREHOUSE statement? 
+A, INITIALLV_SUSPENDED = TRUE}FALSE 
+TRUE/FALSE 
+C. START_THE 60 // (seconds from now) 
+D. START _TIUE CURRENT_DATEO 
+Correct Answer: A 
+Topm ; 
+Question 
+When cloning a database, what is cloned with the database? (Choose two ) 
+A, Privileges on the database 
+Elisting child objects within the database 
+C. Future child objects within the database 
+D_ Privileges on the schemas within the database 
+E. Only schemas and tables within the database 
+Correct 
+Cwm•wnity mte 
+#141 
+Which of the following describes the Snowflake Cloud Services 
+A. Coordinates activities in the Snowflake account 
+B, Executes queries submitted by the Snowflake users 
+Manages quotas on the Snowflake account storage 
+D. Manages the virtual warehouse cache to speed up queries 
+Correct 
+vote dis 
+What is the maximum total Continuous Data protection (CDP) Charges incurred for a temporary table? 
+A. 30 days 
+B, 7 days 
+48 hours 
+D. 24 hours 
+Correct D 
+vote dis 
+Question $143 
+"hen rewiewing a query profile. what is a symptom that a query is too large to fit into the memory? 
+A, A Single pin node more than Of the 
+Partitions scanned is equal to partitions u)tal 
+C. An Aggregateoperator node is present 
+D. The query is spilling to remote storage 
+Correct Answer: D 
+Questimn '144 
+What type of query benefits the MOST from search optimization? 
+A. A query that uses only disjunction (i.e„ OR) predicates 
+8. A query that includes analytical expressions 
+c, A that equality predicates or predicates that use IN 
+D. A querv that filters on semi-structured data types 
+Correct Answer; C 
+'145 
+What transformations are supported in a CREATE PIPE AS COPY FROM (T) statement? (Choose two.) 
+A. Data can be filtered by an optional WHERE clause. 
+8. Incoming data can bejoined with other tables. 
+C, Columns Can be 
+D. Columns can be omitted 
+E. Row level access can be defined. 
+Correct CD 
+vote dis 
+Question 
+Which of the following are characteristics of Sncwflake virtual warehouses? (Choose two ) 
+A, applies only to the last warehouse that Was Started in a multi-cluster warehouse, 
+The ability to auto-suspend a warehouse is only available in the Enterp«ise edition or above 
+C. SnowSQL Supports both a configuration file and a command line option for specifying a default warehouse. 
+D_ A user cannot specify a default warehouse when using the ODBC drivel. 
+E. The default virtual warehouse size can be changed at any time. 
+Correct c 
+Cwm•wnity mte 
+Which command should be used to load data from a file, located in an external stage, into a table in Sncmtlake? 
+A. INSERT 
+C GET 
+D. copy 
+Correct O 
+vote dis 
+The Cloud Data platform is described as having Which Of the following architectures? 
+A. Shared-disk 
+B, Shared-nothing 
+Multi-cluster shared data 
+D. Serverless query engine 
+Correct C 
+vote dis 
+Question 
+Which of the followir,g is a data tokenization integration partner? 
+A, Protegrity 
+Tableau 
+Correct Answer: 
+Queslimn 
+"hat versions of Snowfiake should be used to manage compliance with Personal Identifiable Information (PII) requirements? (Choose two) 
+A. Custom Edition 
+8. Virtual Private Snowflake 
+C, Business Critical Edition 
+D. Standard Edition 
+E. Enterprise Edition 
+Correct BC 
+vole dis 
+a ISI 
+What are supported file formats far unloading data from (Choose three.) 
+A. XML 
+B, 'SON 
+Parquet 
+ORC 
+E. AVRO 
+F. CSV 
+Correct BCE 
+Question $152 
+The Snowflake cloud services layer is responsible for which tasks? (Choose two.) 
+A, Local disk caching 
+Authentication and access control 
+C, Metadata management 
+D. Query grocessing 
+E. Database storage 
+Correct BC 
+Cwnmmity rote 
+What is a key feature of Snowflake architecture? 
+A. Zero-copy cloning creates a mirror copy of a database that updates with the original. 
+B, Software updates are automatically applied a quarterly basis. 
+Snowflake eliminates resource contention with its wirlual warehouse implementation 
+D. Multi-cluster warehouses allow users to run a query that spans across multiple clusters. 
+E. Sorts during ingest, for fast retrieval by date. 
+Correct Answer: C 
+vote 
+Question $154 
+When publishing a Snowflake Data Marketplace listing into a remote region what shculd be taken into consideration? (Choose twoJ 
+A, There is need to have in the target region, a Share Will be created far each 
+The listing is replicated into all selected regions automatically, the data is not. 
+C, The user must have the ORGADMIN role available in at least one account to link accounts for replication. 
+D. Shares attached to listings in remote regions Can be Viewed from any account in an 
+E. For a standard listing the user can wait until the first customer requests the data before replicating it to the target region. 
+Correct BE 
+Question $155 
+When loading data into Snowflake via Snowgipe what is the compressed file size recommendation? 
+A. 10-50 MB 
+100-250 MB 
+C. 300-500 MB 
+D_ 1000-1500 Mg 
+Correct Answer: B 
+Question 
+Which Snowflake feature al Ious a user to substitute a randomly generated identifier for sensitive data, in order to prevent unauthorized users 
+access to the data, before loading it into Snowflake? 
+A, External Tokenization 
+Eltemal Tables 
+C. Materialized Views 
+D. Table Functions (IJDTF) 
+Correct Answer: 
+•Ote d,'smbunon 
+Question #157 
+Which of the following are enmples of operations that require a Virtual Warehouse to complete, assuming no queries have been executed 
+previously? (Choose three,) 
+A. MIN(« column value 
+B, COPY 
+C SLIM(« column value > 
+D. UPDATE 
+Correct BCD 
+vote dis 
+Topic ; 
+Question $158 
+What is the SNOWFLAKLACCOIJNT_USAGE view that contains information about which objects were read by queries within the last 365 davs 
+A. VIEWS_HISTORY 
+OBJECT_HISTORV 
+C. ACCESS_HISTORY 
+D. LOGIN_HISTORY 
+Correct Answer: C 
+Question glSg 
+Which feature is only available in the Enterprise or higher editions Of Snowflake? 
+A, Column-level security 
+SOC 2 type Il certification 
+C. Multi-factor Authentication (MFA) 
+D. Object level control 
+Correct Answer: A 
+•Ote 
+Question #160 
+"ill data cached in a ware"ouse be lost when the warehouse is resized? 
+A, possibly, if the Warehouse is resized to a smaller Size the cache no fits, 
+Yes. because the compute resource is replaced in its entirety with a new compute resource. 
+C. No. because the size of the cache is independent from the warehouse size. 
+D. Yes, because the Compute resource Will no longer have access the cache encryption key, 
+Correct Answer: 
+Cwnmuody •ote 
+Topm ; 
+Question $161 
+Which semi-structured file formats are supported when unloading data from a table? (Choose two ) 
+A. ORC 
+XML 
+C, AWO 
+D. Parquet 
+E JSON 
+Correct OF 
+Cwnmmity vote 
+#162 
+A running virtual is Suspended, 
+What is the MINIMUM amount of time that the warehouse will incur charges for when it is restarted? 
+A. I second 
+8. 60 seconds 
+C, 5 minutes 
+D. 60 minutes 
+Correct Answer; B 
+Corm-nwmity Are 
+Q upsl 
+#163 
+What are the responsibilities of Snowflake's Cloud Service layer? (Choose three.) 
+A. Authentication 
+8. Resource management 
+Virtual warehouse caching 
+D. Query parsing and optimization 
+E, execution 
+K Physical storage of micro-partitions 
+Correct Answer; ABD 
+Question $164 
+How long is the Fail-safe period fo•r temporary and transient tables? 
+A, There is Fail-safe period these tables, 
+1 day 
+C. Ida" 
+D_ 31 days 
+E. go days 
+Correct A 
+Cwm•wnity 
+#165 
+Which command should be used to download from a Snowflake stage a local folder on a clienft machine? 
+A. PUT 
+8, GET 
+C copy 
+D. SELECT 
+Correct 
+vote dis 
+HOW does Snowflake Fail-sale protect in a table? 
+A. Fail-safe makes data available up to I day, recmerable by user operations. 
+B, Fail-safe makes data available for 7 days, recoverable by 
+Fail-safe makes data available for 7 days, recuerable only by Snowfake Suppcrt_ 
+D. Fail-safe makes data available up to I day. recoverable only by Snowflake Support. 
+Correct C 
+vote dis 
+Question $167 
+A virtual warehouse is created using the following command: 
+Create warehouse my_WH with 
+warehouse_size = MEDIUM 
+auto_suspend 60 
+auto_resume true; 
+The image below is a graphical representation Of the warehouse utilization two days, 
+6 
+4 
+3 
+2 
+• Sum Of 
+• Of 
+12 1 2 
+PM PM PM 
+1 
+8 9 10 11 12 1 2 8 9 10 11 
+AM AM AM AM PM PM PM AM AM AM AM 
+What action should be taken to address this situation? 
+A. Increase the warehouse size from Medium to 2.XL. 
+8. Increase the value for the parameter 
+C Configure the warehouse to a multi-cluster warehouse 
+D. Lower the value of the parameter 
+Correct c 
+Cwm•wmity 
+Question $168 
+Which minimum Sncnaflake edition allows for a dedicated metadata store? 
+A, Standard 
+Enterprise 
+C. Business Critical 
+D. Virtual Private Snowfake 
+Correct Answer: D 
+Question 
+Network policies can be set at which Snowflake levels? (Choose two) 
+A. Role 
+8. Schema 
+C, user 
+D. Database 
+E. Account 
+F, Tables 
+Correct Answer: CE 
+vote dust ribu%on 
+Question #170 
+What are the correctparameters for time travel and fail-safe in the Snowflake Enterprise Edition? 
+A, Default Time Travel Retention is Set 0 Maximum Time Travel Retention is 30 days, Fail Safe retention time is 1 day 
+Default Time Travel Retention is set to I day Maximum Time Travel Retention is 365 days. Fail Safe retention time is 7 days 
+C, Default Time Travel Retention is set to 0 days. Maximum Time Travel Retention is 90 days. Fail Safe retention time is 7 days. 
+D. Default Time Travel Retention is Set to 1 day. Maximum Time Retention is go days Fail Safe retention time is 7 days. 
+E. Default Time Travel Retention set to 7 days. Mavimum Time Travel Retention is I day. Fail Safe retention time is go days 
+F, Default Time Travel Retention is Set to 90 days. Maximum Time Travel Retention is 7 days, Fail Safe retention time is 356 days, 
+Correct Answer: D 
+Cm•nmundy vote 
+Question 
+Which of the following objects are contained within a schema? (Choose two ) 
+A. Role 
+C, Warehouse 
+D. External table 
+E user 
+F, Share 
+Correct Answer: YD 
+•Ote d,'smbunon 
+Question #172 
+Which of the following statements describe features of Snowflake data caching? (Choose 
+A, When a Virtual is suspended, the data cache is saved on the remote Storage 
+When the data cache is full. the least-recently used data will be cleared to make room 
+C. A user can only access their own queries from the query result cache. 
+D. A user must Set to TRUE to the metadata cache in 
+E. The RESIJLT_SCAN table function can access and filter the contents of the query result cache. 
+Correct Answer: BE 
+A table needs to be loaded. The input data is in 'SON format and is a concatenation of multiple JSON documents. The file size is 3 G8, A 
+warehouse size S is being used. The following COPY INTO command was executed: 
+COPY INTO SAMPLE FROM (TVPE=JSON) 
+The load failed with this error 
+Mai LOB size (1 6777216) exceeded. actual size of parsed column is 17894470. 
+How can this issue be resolved? 
+A, Compress the file and load the file. 
+Split the file into multiple files in the recommended size range (100 MB - 250 MB) 
+C. Use a larger-sized warehouse. 
+D. Set in the COPY INTO command, 
+Correct Answer: O 
+Topic 
+Question 
+What is a feature of a stored procedure in Snowflake? 
+A, They Can be as Secure and the underlying metadata from all 
+They can access tables from a single database. 
+C. They can only contain a single SQL statement. 
+D_ They can be created to run with a caller!s rights or an owner's rights 
+Correct Answer: O 
+Question t 175 
+Which columns are part of the result set of the Snowflake LATERAL FLATTEN command? (Choose two] 
+A. CONTENT 
+8. PATH 
+C, BYTF_SIZE 
+D. INDEX 
+E. DATATYPE 
+Correct 
+vote dis 
+#13b 
+What is the minimum edition required to Create materialized view? 
+A. Standard Edition 
+B, Enterprise Edition 
+Business Critical Edition 
+D. Virtual Private Snowflake Edition 
+Correct g 
+vote dis 
+Question $177 
+Which Snowflake function will interpret an input string as a JSON document, and produce a VARIANT value? 
+D. natter' 
+Correct Answer: 
+Question '178 
+How are serverless features billed" 
+A. Per second multiplied by an automatic Sizing for the job 
+8. Per minute multiplied by an automatic sizing for the jot, with a minimum ot one minute 
+C, per second multiplied by the Site, as by the parameter 
+D. Serverless features are not billed, unless the total cost for the month exceeds of the warehouse credits, on the account 
+Correct Answer; 
+Community 
+Question 
+Which Snowflake architectural layer is responsible for a query execution plan? 
+A. Compute 
+8. Data storage 
+C, Cloud Services 
+D. Cloud gtovider 
+Correct Answer; C 
+Question $180 
+"hen unloading to a stage, which of the following is a recommended practice or approach? 
+A. Set SINGLE = TRUE for larger files. 
+use men using Parquet. 
+C. Avoid the use Of the CAST function, 
+D. Define an individual file format. 
+Correct Answer; D 
+Question '181 
+Which SQL commands. when committed. will consume a stream and advance the stream offset? (Choose two.) 
+A. UPDATE TABLE FROM SIREAM 
+8. SELECT FROM STREAM 
+C, INSERT INTO TABLE SELECT FROM STREAM 
+D. ALTER TABLE AS SELECT FROM STREAM 
+E. BEGIN COMMIT 
+Correct A C 
+Cwnmuøity vole dis 
+Uuegllcn 
+Which methods Can be used to delete Staged files from a Snowflake Stage? (Choose two,) 
+A. Use the DROP If'lel command after the h3ad completes. 
+B, Specify the option When Creating the file format, 
+Specify the PURGE copy option in the COPY INTO [tablel command. 
+D. Use the REMOVE command aftethe load completes. 
+E. use the DELETE LOAD HISTORY command after the load completes. 
+Correct Answer: CO 
+Question $183 
+On which of the following cloud platforms can a Snowflake account be hosted? (Choose three) 
+A, Amazon neb Services 
+Private Virtual Cloud 
+C. Oracle Cloud 
+D. Microsoft Cloud 
+E. Google Cloud Platform 
+F. Alibaba Cloud 
+Correct A DE 
+dis 
+#101 
+What Snowflake must be granted for a user to Create and manage accounts? 
+A. ACCOUNTAUMIN 
+d, ORGAOMIN 
+C SECURITYADMIN 
+D. sysADMlN 
+Correct An SWer•_ B 
+vote dis 
+Question $185 
+Assume there is a table consisting of five micro-partitions with values ranging from A to 
+Which diagram indicates a well-clustered table? 
+Correct Answer: 
+Question $185 
+What feature can be used to reorganize a very large table on one or more columns? 
+A, Micro-partitions 
+Clustering keys 
+C. Key partitions 
+D_ Clustered partitions 
+Correct Answer: B 
+Question t 187 
+What is an advantage of using an explain plan instead of the query profiler to evaluate the perfo«mance of a query? 
+A. The plan output is available graphically. 
+8. An explain plan can be used to conduct performance analysis without executing a query 
+C, An explain plan Will handle queries With temporary tables and the Will not, 
+D. An uplain plans output will display automatic data skew optimization information. 
+Correct Answer; B 
+Community 
+Which data types are supported by Snowfake when using semi-structured data? (Choose two) 
+A. VARIANT 
+8. VARRAY 
+C, STRUCT 
+D. ARRAY 
+E. QUEUE 
+Correct AD 
+vote dis 
+Question $189 
+Why does Snowflake recommend file sizes of 100-250 MB compressed when loading data? 
+A, Optimizes the Virtual warehouse Size and multi-cluster setting to economy mode 
+Allows a user to import the files in a sequential Cider 
+C. Increases the latency staging and accuracy when loading the data 
+D. Allows optimization cf parallel operations 
+Correct Answer: D 
+Question 
+Which of the following features are available with the Snowmake Enterprise edition? (Choose two) 
+A. Database replication and failover 
+8. Automated index management 
+C, Customer managed (Tri secret secure) 
+D. Extended time travel 
+E. Native support for geospatial data 
+Correct DE 
+vote dis 
+What is the default file Size when unloading data Snowflake "Sing the COPY command? 
+B, BGB 
+C 16MB 
+D. 32 Ma 
+Correct C 
+vote dis 
+Question $192 
+"hat features that are part of the Continuous Data Protection (CDP) feature set in Snowflake dc not require additional configuration? (Choose 
+A. Row level access policies 
+Data masking policies 
+C. Data encryption 
+D. Time Travel 
+E. External tokenization 
+Correct Answer; CD 
+Commum'y 
+"193 
+Which Snowflake layer is always leveraged when accessing a query from the result cache? 
+A. Metadata 
+8. Data Storage 
+C, Compute 
+D. Cloud Services 
+Correct Answer; O 
+Community 
+#194 
+Which connectors are available in the downloads section of the SnoÆake web interface (UI)? (Choose two.) 
+A. SnowSQL 
+8. Joac 
+ODBC 
+D. HIVE 
+E. Scala 
+Correct Answer: AC 
+Question 
+A Snowflake Administrator needs to ensure that sensitive corporate data in Snowflake tables is not visible to end users, but is partially visible to 
+functional manage'S, 
+How can this requirement be met? 
+A. use data encryption 
+8. Use dynamic data masking. 
+C, Use Secure materialized views, 
+D. Revoke all roles fot functional managers and end users. 
+Correct Answer; B 
+Question ti9E 
+Users are responsible for data storage costs until what occurs? 
+A. Data expires from Time Travel 
+8. Data expires from Fail-safe 
+C, Data is deleted from a table 
+D. Data is truncated from a table 
+Correct Answer-. B 
+#197 
+A user has an application that writes a new file to a cloud storage location every 5 minutes. 
+What would be the MOST efficient to get the files into Snowflake? 
+A. Create a task that runs a COPY INTO Operation from an external stage every 5 minutes. 
+Create a task that PUTS the figs in an internal Stage and automate the data loading 
+C. Create a task that runs a GET operation to intermittently check for new files. 
+D. Set up Cloud provider notifications on the location and Snowpipe with auto-ingest, 
+Correct Answer: D 
+vote 
+Question $198 
+What affects whether the query results cache can be used? 
+A, If the query contains a deterministic function 
+If the virtual warehouse has been suspended 
+C. If the referenced data in the table has changed 
+D. If multiple users are using the game virtual warehouse 
+Correct Answer: C 
+Question 
+Which of the following is an example of an operation that can be completed without requiring compute, assuming no queries have been executed 
+previously? 
+A, SELECT (ORDER_AMT) FROM SALES; 
+SELECT FROM SALES 
+C. SELECT MIN(0RDEæAMT) FROM SALES 
+D. SELECT ORDER_AMT ORDER_QTY FROM SALES 
+Correct Answer: C 
+•Ote dist"buGan 
+Question g2dC 
+How many days is load history for Snowpige retained? 
+A, I day 
+go days 
+C. 14 days 
+D. days 
+Correct Answer: C 
+Cwnmuody •ole 
+Topm ; 
