@@ -3106,6 +3106,8 @@ C REMOVE
 D. DELETE 
 Correct C 
 vote dis 
+
+========================================================================================================
 Question 
 In a Snowflake role hierarchy, what is the top-level role? 
 A. SYSADMIN 
