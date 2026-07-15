@@ -3539,6 +3539,7 @@ C MODIFY
 CREATE 
 E. DROP 
 Correct Answer: BC 
+===============================================
 Question 
 "hat technique does Snowflake recommend for determining which virtual warehouse size to select? 
 A, Always Start With an X-Small and increase the Size if the query does not complete in 2 minutes 
@@ -4170,6 +4171,8 @@ A. ACCOUNTADMIN
 C. ORGADMIN 
 USERADMIN 
 Correct Answer; C 
+=======================================
+
 Question $552 
 Which data types in Snowfake are synonymous for FLOAT? (Choose two.) 
 A. DECIMAL 
@@ -4959,6 +4962,8 @@ C. Search optimization service
 D. Tagging 
 Correct Answer: C 
 •Ote 
+=================================================================================
+
 Question g6Sg 
 Whal is the name of the SnowSQL file that can store connection information? 
 A, history 

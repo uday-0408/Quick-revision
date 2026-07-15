@@ -1,1 +1,22 @@
-this is the poorly made question for the snowpro exam , you're task is to properly format this and then cross check it with the current documentation and fix if the answer is outdated and then give me entire questoin with proper wording and right answer in markdown file and make the answer hide in the drop down 
+**System Role & Task**
+Act as an expert technical editor and Snowflake database specialist. I will provide you with raw, garbled OCR text containing Snowflake practice questions. Your task is to reconstruct, correct, and format this text into a clean, highly readable Markdown document.
+
+**Strict Formatting & Content Rules:**
+
+1. **Clean the OCR Noise:** Remove all artifacts, garbled characters, and platform metadata (e.g., "Cm•nwmity vote", "vote dis", "Topm ;"). Fix numbering typos (e.g., "$102" should be "102").
+2. **Standardize Headings:** Format each question with a clear Markdown heading (e.g., `### Question 102`).
+3. **Reconstruct Options (New Lines Required):** Format the multiple-choice options clearly using standard lettering (A, B, C, D). **You must place every single option on a brand new line** as a bullet point. Fix any broken phrasing caused by the OCR.
+*Example:*
+`- A. First option here`
+`- B. Second option here`
+4. **Answer Masking:** Place the correct answer inside a collapsible HTML block to hide it during study. Use this exact syntax:
+`<details><summary>Show Answer</summary>`
+`Correct Answer: [Letter]. [Optional brief explanation]`
+`</details>`
+5. **Documentation Cross-Check (Crucial):** Evaluate the provided "Correct Answer" against current Snowflake documentation (as of July 2026). If the original answer is outdated, fundamentally wrong, or references retired features (like the Classic Console), correct it. Flag any corrections by adding **⚠ Updated:** inside the details block, followed by a brief explanation of the modern Snowflake behavior.
+6. **Separation:** Use a horizontal rule (`---`) between every question to maintain clean separation.
+
+**Input Data:**
+Process the following raw text according to the rules above:
+
+`[INSERT YOUR RAW TEXT HERE]`
