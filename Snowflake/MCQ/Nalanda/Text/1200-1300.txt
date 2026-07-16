@@ -1,0 +1,828 @@
+Here is the heavily cleaned, formatted, and corrected text for the next batch of 100 questions (Questions 1201 through 1300). All OCR artifacts, misspellings, corrupted characters, and pagination noise have been removed for readability.
+
+---
+
+**Question 1201**
+Which Snowflake keywords help retrieve data without the need to completely scan a table? (Choose two.)
+A. TOP [n]
+B. LIMIT
+C. FETCH
+D. SAMPLE
+E. TABLESAMPLE
+Correct Answer: DE
+
+**Question 1202**
+A security review identified several roles that are no longer being used. Which of the roles can be dropped?
+A. ACCOUNTADMIN
+B. USERADMIN
+C. FINANCEADMIN
+D. PUBLIC
+Correct Answer: C
+
+**Question 1203**
+A complex query has been running in Snowsight for more than one hour. At the same time, several other queries from other worksheets ran successfully. What is the FASTEST way to cancel the long-running query?
+A. Immediately suspend the virtual warehouse that the query is running on.
+B. Return to the worksheet and abort the query.
+C. Set auto_suspend virtual property to 0.
+D. Find the query in the query activity view and cancel the query.
+Correct Answer: B
+
+**Question 1204**
+How can a Snowflake user automate virtual warehouse operations for optimal credit consumption? (Choose two.)
+A. Auto-resume when a query is in a queue.
+B. Auto-resume after a set time period.
+C. Auto-resume when the query is being written.
+D. Auto-suspend after a set time period.
+E. Auto-suspend after a specified period of inactivity.
+Correct Answer: AE
+
+**Question 1205**
+Which data protection feature should only be used when all other data recovery options have been attempted?
+A. Time Travel
+B. Cloning
+C. Replication
+D. Fail-safe
+Correct Answer: D
+
+**Question 1206**
+A single cluster virtual warehouse has no free resources. What will happen to new queries that are run against this warehouse?
+A. The queries will be assigned to another virtual warehouse.
+B. The queries will be skipped.
+C. The queries will be placed in a queue.
+D. The warehouse will automatically resize and execute the queries.
+Correct Answer: C
+
+**Question 1207**
+How does the search optimization service improve query performance?
+A. By clustering the tables.
+B. By creating a persistent data structure.
+C. By using caching.
+D. By optimizing the use of micro-partitions.
+Correct Answer: B
+
+**Question 1208**
+What parameter will allow files to be loaded even if the file metadata has expired?
+A. MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+B. ENFORCE_LENGTH = TRUE
+C. PURGE = TRUE
+D. FORCE = TRUE
+Correct Answer: D
+
+**Question 1209**
+How can a Data Exchange Administrator provide a user with account access to a Data Exchange?
+A. Grant the user the USERADMIN role.
+B. Add the user to the Data Exchange.
+C. Enable the IMPORT SHARE privilege and grant this privilege to the user.
+D. Create a new database for the Data Exchange and provide access to the user.
+Correct Answer: C
+
+**Question 1210**
+Which features can be used with the Snowflake Standard edition? (Choose two.)
+A. Materialized Views
+B. External functions
+C. Multi-cluster virtual warehouses
+D. Fail-safe
+E. Row level security
+Correct Answer: BD
+
+**Question 1211**
+Which function will generate a URL that can be accessed by a non-Snowflake user?
+A. GET_STAGE_URL
+B. GET_PRESIGNED_URL
+C. BUILD_SCOPED_FILE_URL
+D. GET_ABSOLUTE_PATH
+Correct Answer: B
+
+**Question 1212**
+What are valid values for the NULL_IF option in the COPY INTO [location] command used during data unloading? (Choose two.)
+A. Single quote character ('')
+B. NULL
+C. 'NULL'
+D. NONE
+E. 'NONE'
+Correct Answer: AD
+
+**Question 1213**
+What identifiers are supported when creating a Snowflake account hostname? (Choose two.)
+A. Cloud region
+B. Snowflake domain
+C. Account name
+D. Account locator
+E. Account cloud platform
+Correct Answer: CD
+
+**Question 1214**
+Which virtual warehouse auto-suspend configurations will result in a warehouse that runs continually, 24 hours a day, 7 days a week? (Choose two.)
+A. 0
+B. 3600
+C. FALSE
+D. 172800
+E. NULL
+Correct Answer: AE
+
+**Question 1215**
+What kind of value does a User-Defined Function (UDF) return? (Choose two.)
+A. List
+B. Array
+C. Object
+D. Scalar
+E. Tabular
+Correct Answer: DE
+
+**Question 1216**
+Which command can be performed on a Snowflake secure view?
+A. SELECT
+B. INSERT
+C. UPDATE
+D. DELETE
+Correct Answer: A
+
+**Question 1217**
+Which database objects can be shared with Secure Data Sharing? (Choose two.)
+A. Views
+B. Materialized views
+C. External Stages
+D. External tables
+E. Secure views
+Correct Answer: BE
+
+**Question 1218**
+When a transient table in Snowflake is dropped, what happens to the table?
+A. The table is no longer available.
+B. The table can be undropped using Fail-safe.
+C. The table can be recovered for 1 day only and after that it is no longer available.
+D. The table can be recovered only with the assistance of Snowflake Support.
+Correct Answer: C
+
+**Question 1219**
+A data provider needs to securely collaborate with data consumers who do not reside in the same region. What Snowflake sharing mechanism should be used?
+A. Direct share
+B. Data Exchange
+C. Data replication
+D. Listing
+Correct Answer: C
+
+**Question 1220**
+A user needs to know the maximum of a date field in a table, and runs the following: `SELECT MAX(date_field) FROM ORDERS;`. Which part of Snowflake architecture will this query use?
+A. Database Storage
+B. Query processing
+C. Cloud Services
+D. Compute
+Correct Answer: C
+
+**Question 1221**
+A Snowflake user accidentally deleted a table. The table no longer exists but the session is within the data retention period. How can the table be restored using the LEAST amount of operational overhead?
+A. Clone the table schema as it existed before the table was dropped.
+B. Clone the database as it existed before the table was dropped.
+C. Recreate the table and reload the data.
+D. Run the UNDROP command against the table.
+Correct Answer: D
+
+**Question 1222**
+When cloning a schema, which Snowflake object will not be included in the clone?
+A. External stage
+B. A named internal stage
+C. A task
+D. A User-Defined Function (UDF)
+Correct Answer: B
+
+**Question 1223**
+Which command will change the name of database role r1 to r4?
+A. ALTER ROLE d1_r1 RENAME TO d1_r4;
+B. ALTER ROLE d1.r1 RENAME TO r4;
+C. ALTER DATABASE ROLE d1.r1 RENAME TO r4;
+D. ALTER DATABASE ROLE d1_r1 RENAME TO r4;
+Correct Answer: C
+
+**Question 1224**
+What does the Remote Disk I/O statistic in the Query Profile indicate?
+A. Time spent reading from the result cache.
+B. Time spent reading from the virtual warehouse cache.
+C. Time when the query processing was blocked by remote disk access.
+D. The level of network activity between the Cloud Services layer and the virtual warehouse.
+Correct Answer: C
+
+**Question 1225**
+Use of which virtual warehouse or warehouse configuration will improve the performance of workloads that have large memory requirements, such as Machine Learning (ML) training using a stored procedure?
+A. Snowpark-optimized warehouse
+B. Standard warehouse
+C. Multi-cluster warehouse
+D. Compute
+Correct Answer: A
+
+**Question 1226**
+Which role has the privileges to describe a share?
+A. ORGADMIN
+B. SECURITYADMIN
+C. SYSADMIN
+D. ACCOUNTADMIN
+Correct Answer: D
+
+**Question 1227**
+The following command is executed: `CREATE TABLE new_table CLONE existing_table COPY GRANTS;`. What will happen to the privileges of the cloned object?
+A. The clone will only inherit SELECT privileges from the source object.
+B. The clone will inherit all privileges, including OWNERSHIP, from the source object.
+C. The clone will inherit all privileges except OWNERSHIP from the source object.
+D. The clone will inherit no privileges.
+Correct Answer: C
+
+**Question 1228**
+Where does Snowflake store the data output from a query that was executed in the past 24 hours?
+A. In a remote disk
+B. In the virtual warehouse cache
+C. In the result cache layer
+D. In the local disk cache
+Correct Answer: C
+
+**Question 1229**
+What is the default authenticator while using the JDBC driver connection in Snowflake?
+A. externalbrowser
+B. snowflake
+C. oauth
+D. okta
+Correct Answer: B
+
+**Question 1230**
+When will Snowflake charge credits for the use of the Cloud Services layer?
+A. Credits will be charged whenever the Cloud Services layer is used.
+B. Credits will be charged only when running a Snowflake-provisioned compute warehouse COMPUTE_WH.
+C. Credits will be charged when the daily consumption of cloud services resources exceeds 10% of the daily warehouse usage.
+D. Credits will be charged only when a virtual warehouse consumes serverless compute services.
+Correct Answer: C
+
+**Question 1231**
+What is the primary purpose of using a masking policy in Snowflake?
+A. To protect sensitive data from unauthorized access when queries are executed.
+B. To automatically encrypt sensitive data when data is stored in Snowflake.
+C. To protect multiple columns that have different data types in a given table.
+D. To protect both column-level and row-level data.
+Correct Answer: A
+
+**Question 1232**
+How can the performance of point lookup queries run on tables be optimized?
+A. Cluster the tables
+B. Create materialized views on the tables
+C. Use the metadata cache
+D. Enable the Search Optimization Service
+Correct Answer: D
+
+**Question 1233**
+What are the recommended alternative data types in Snowflake for unsupported large object data types such as BLOB and CLOB? (Choose two.)
+A. VARIANT
+B. ARRAY
+C. BINARY
+D. OBJECT
+E. VARCHAR
+Correct Answer: CE
+
+**Question 1234**
+A network policy set at which level will override all other network policies?
+A. Account
+B. User
+C. Security integration
+D. Database
+Correct Answer: B
+
+**Question 1235**
+A company wants to share sales data with multiple marketing agency partners. Which Snowflake data share mechanism is recommended for this use case?
+A. A shared Amazon S3 bucket
+B. Direct share
+C. A reader account
+D. Data Exchange
+Correct Answer: D
+
+**Question 1236**
+Which role can create and manage Snowflake accounts?
+A. SYSADMIN
+B. ACCOUNTADMIN
+C. ORGADMIN
+D. SECURITYADMIN
+Correct Answer: C
+
+**Question 1237**
+Which security feature is available in all Snowflake editions?
+A. Data masking policies
+B. Object level access control
+C. Object tagging
+D. Customer-managed encryption keys
+Correct Answer: B
+
+**Question 1238**
+A table named car_sales contains a single VARIANT column named SRC. Below is the output of the query `SELECT * FROM car_sales;`
+`{"address" : "San Francisco, CA", "phone": "16504378989", "date": "2017-04-28", "dealership": "Valley View Auto Sales"}`
+Which queries will return the element "phone" from the data? (Choose two.)
+A. SELECT SRC:phone FROM car_sales;
+B. SELECT SRC['phone'] FROM car_sales;
+C. SELECT SRC.phone FROM car_sales;
+D. SELECT SRC.customer.phone FROM car_sales;
+E. SELECT SRC[0].phone FROM car_sales;
+Correct Answer: AB
+
+**Question 1239**
+Which strings will be converted to TRUE using the TO_BOOLEAN or CAST() functions when unloading data? (Choose two.)
+A. 'T'
+B. '1'
+C. 'Y'
+D. 'true'
+E. 'yes'
+Correct Answer: DE
+
+**Question 1240**
+Which authentication method requires access to a secure file that is only stored on the user's local device?
+A. Password
+B. Key-pair authentication
+C. Multi-Factor Authentication (MFA)
+D. Federated authentication
+Correct Answer: B
+
+**Question 1241**
+Which drivers or connectors are supported by Snowflake? (Choose two.)
+A. Perl Connector
+B. MongoDB Rust Driver
+C. Go Snowflake Driver
+D. Cobol Driver
+E. Snowflake Connector for Python
+Correct Answer: CE
+
+**Question 1242**
+If a source table is updated while cloning is in progress, what data will be included in the cloned table?
+A. All data from the timestamp when the user runs the query.
+B. All data from the timestamp when the user session was created.
+C. All data from the timestamp when the clone statement was initiated.
+D. All data from the timestamp when the clone statement was completed.
+Correct Answer: C
+
+**Question 1243**
+The CUSTOMER table in the T1 database is accidentally dropped. Which privileges are required to restore this table? (Choose two.)
+A. SELECT privilege on the CUSTOMER table
+B. OWNERSHIP privilege on the CUSTOMER table
+C. All privileges on the CUSTOMER table
+D. All privileges on the T1 database
+E. CREATE TABLE privilege on the schema
+Correct Answer: BE
+
+**Question 1244**
+Which ACCOUNT_USAGE view can be used to identify the masking policy assigned to an object?
+A. ACCESS_HISTORY
+B. OBJECT_DEPENDENCIES
+C. POLICY_REFERENCES
+D. TAG_REFERENCES
+Correct Answer: C
+
+**Question 1245**
+A stream object will advance its offset when it is used in which statement?
+A. SELECT
+B. INSERT
+C. CREATE
+D. COPY INTO [location]
+Correct Answer: B
+
+**Question 1246**
+Where is metadata management handled in Snowflake?
+A. Cloud Services
+B. Compute
+C. Database Storage
+D. Query Processing
+Correct Answer: A
+
+**Question 1247**
+What does an integration between Snowflake and Microsoft Private Link or AWS PrivateLink support?
+A. The isolation of data within a Snowflake account.
+B. Secure Data Sharing among Snowflake accounts.
+C. A Virtual Private Network (VPN) between a user and Snowflake.
+D. A secure, direct connection to Snowflake that does not use the public internet.
+Correct Answer: D
+
+**Question 1248**
+Which type of URL gives permanent access to files in Cloud Storage?
+A. Stage URL
+B. Account URL
+C. Scoped URL
+D. File URL
+Correct Answer: D
+
+**Question 1249**
+Which Snowflake data governance feature supports resource usage monitoring?
+A. Data Classification
+B. Column lineage
+C. Access history
+D. Object tagging
+Correct Answer: C
+
+**Question 1250**
+Which steps will help optimize query performance? (Choose two.)
+A. Using the query acceleration service
+B. Clustering a table
+C. Indexing a column
+D. Increasing the size of the micro-partitions
+E. Decreasing the size of the virtual warehouse
+Correct Answer: AB
+
+**Question 1251**
+Which functions can be used to identify the data type stored in a VARIANT column? (Choose two.)
+A. IS_GEOGRAPHY
+B. IS_OBJECT
+C. IS_ARRAY
+D. IS_XML
+E. IS_JSON
+Correct Answer: BE
+
+**Question 1252**
+What is the MINIMUM Snowflake edition that supports data sharing?
+A. Standard
+B. Enterprise
+C. Business Critical
+D. Virtual Private Snowflake (VPS)
+Correct Answer: A
+
+**Question 1253**
+Who can access the data published in a Data Exchange?
+A. Only the data provider who published the data
+B. Any Snowflake user, regardless of their role or permissions
+C. Any user who has a unique Data Exchange URL
+D. Only the users that the data provider has invited to the Data Exchange
+Correct Answer: D
+
+**Question 1254**
+How can data be shared between users who have different Snowflake accounts?
+A. Create a share with the same name as the original database.
+B. Create a Share and ensure the proper role is assigned.
+C. Ensure both users' accounts are using the same cloud provider and region.
+D. Use the PUT command to create a shared account.
+Correct Answer: B
+
+**Question 1255**
+Which view will show the MOST recent information about table-level storage utilization?
+A. The TABLES view in a Snowflake data Share
+B. The STORAGE_USAGE view in the ACCOUNT_USAGE schema
+C. The TABLE_STORAGE_METRICS view in the INFORMATION_SCHEMA
+D. The TABLES view in the INFORMATION_SCHEMA
+Correct Answer: C
+
+**Question 1256**
+A user executed a SELECT query in Snowsight which returned a 1 GB result set. The user then downloads the files. What will occur?
+A. The result set will be successfully downloaded from Snowsight.
+B. The result set will be paginated and the data will be downloaded as individual files.
+C. The download will fail because the result set needs to be broken up into files no greater than 50 MB before downloading.
+D. The download will result in an error because the filters of the SELECT query need to be changed so that Snowsight returns a smaller result.
+Correct Answer: A
+
+**Question 1257**
+Which command can be used to unload data into an external named stage in Snowflake?
+A. PUT
+B. CREATE STAGE
+C. COPY INTO [table]
+D. COPY INTO [location]
+Correct Answer: D
+
+**Question 1258**
+Which file format option should be used when unloading data into a stage to create a CSV or a JSON file?
+A. PARSE_HEADER
+B. TRIM_SPACE
+C. FILE_EXTENSION
+D. SKIP_HEADER
+Correct Answer: C
+
+**Question 1259**
+When creating a virtual warehouse, what setting should be used to avoid both over-provisioning resources and auto-scaling when there is increased load?
+A. WAREHOUSE_SIZE = LARGE
+B. WAREHOUSE_TYPE = SNOWPARK-OPTIMIZED
+C. Set MIN_CLUSTER_COUNT and MAX_CLUSTER_COUNT to the same value (Maximized mode)
+D. WAIT_FOR_COMPLETION = TRUE
+Correct Answer: C
+
+**Question 1260**
+What is the MINIMUM Snowflake edition required to add masking policies to selectively mask plain-text data in a table or in view columns at query time?
+A. Standard
+B. Enterprise
+C. Business Critical
+D. Virtual Private Snowflake (VPS)
+Correct Answer: B
+
+**Question 1261**
+Which command can be used to determine if data from a file has been previously loaded?
+A. COPY_HISTORY view or VALIDATE function
+B. DESCRIBE STAGE
+C. SHOW FILES
+D. LIST_HISTORY
+Correct Answer: A
+
+**Question 1262**
+What does Snowflake recommend when configuring the auto-suspend parameter for a virtual warehouse?
+A. Set auto-suspend to the maximum possible duration for optimal resource utilization.
+B. Enable auto-suspend to a high value to maximize warehouse availability.
+C. Enable a low value to minimize credit consumption during inactivity.
+D. Disable auto-suspend to ensure continuous availability of the warehouse.
+Correct Answer: C
+
+**Question 1263**
+Which URL identifies the database, schema, stage, and file path to a set of files for accessing the unstructured data files in Snowflake?
+A. Scoped URL
+B. File URL
+C. Pre-signed URL
+D. HTTPS URL
+Correct Answer: B
+
+**Question 1264**
+Which Snowflake feature or service is primarily used for managing and monitoring data and user activities?
+A. Snowsight
+B. SnowSQL
+C. Marketplace
+D. Streamlit
+Correct Answer: A
+
+**Question 1265**
+Which URL should be used for custom applications that need to access unstructured data files without Snowflake authentication?
+A. Scoped URL
+B. File URL
+C. Pre-signed URL
+D. Relative URL
+Correct Answer: C
+
+**Question 1266**
+When would creating and using a Standard View be preferable to using a Materialized View?
+A. The underlying query takes a lot of time to execute.
+B. The underlying query of the view is resource-intensive.
+C. The underlying query of the view is run on large data sets.
+D. The view results change often.
+Correct Answer: D
+
+**Question 1267**
+When using a direct share, what privileges does a role need to control access to the objects that are in a share that is using database roles? (Choose two.)
+A. CREATE PIPE
+B. CREATE STREAM
+C. CREATE TASK
+D. CREATE SHARE
+E. CREATE DATABASE
+Correct Answer: DE
+
+**Question 1268**
+What actions can be performed by consumers of shared databases? (Choose two.)
+A. Create a clone of the database.
+B. Edit the comments for the database.
+C. Use Time Travel data on the database.
+D. Create streams on objects in the database.
+E. Query data from the objects in the database.
+Correct Answer: DE
+
+**Question 1269**
+A Snowflake user is actively logged into Snowflake when a user-level network policy is assigned to that user. What will Snowflake do if the user's IP address does not match the user-level network policy rules?
+A. Log the user out immediately.
+B. Deactivate the network policy.
+C. Prevent the user from executing additional queries.
+D. Allow the user to continue until the session or login token expires.
+Correct Answer: C
+
+**Question 1270**
+At what level is the DATA_RETENTION_TIME_IN_DAYS parameter configurable in Snowflake?
+A. User
+B. Session
+C. Account, Database, Schema, Table
+D. Virtual warehouse
+Correct Answer: C
+
+**Question 1271**
+How can data be securely shared across regions and cloud platforms in Snowflake?
+A. Use Cross-Cloud Auto-fulfillment.
+B. Use database replication.
+C. Use the CREATE SHARE command.
+D. Use the GRANT command to share selected objects.
+Correct Answer: B
+
+**Question 1272**
+What factors affect how many credits will be charged for virtual warehouse usage? (Choose two.)
+A. Number of queries being executed
+B. Number of users running queries
+C. Snowflake edition being used
+D. Size of the warehouse
+E. Length of time the warehouse runs
+Correct Answer: DE
+
+**Question 1273**
+What privilege is required to view the load statistics on a virtual warehouse?
+A. MODIFY
+B. OPERATE
+C. MONITOR
+D. USAGE
+Correct Answer: C
+
+**Question 1274**
+Which command will indicate whether a materialized view is being used in a query?
+A. SHOW
+B. DESCRIBE
+C. EXPLAIN
+D. USE
+Correct Answer: C
+
+**Question 1275**
+A size X-Small Virtual warehouse ran for 90 seconds and was shut down. The warehouse was then run for another 30 seconds before being shut down again. How many seconds will be billed?
+A. 90 seconds
+B. 120 seconds
+C. 150 seconds
+D. 180 seconds
+Correct Answer: C
+
+**Question 1276**
+Which virtual warehouse configuration is recommended specifically for a steady workload that has no execution lag?
+A. AUTO_RESUME = FALSE
+B. AUTO_SUSPEND = 0 (or FALSE)
+C. STATEMENT_TIMEOUT_IN_SECONDS = 3600
+D. MAX_CLUSTER_COUNT = 1
+Correct Answer: B
+
+**Question 1277**
+Which role allows a Snowflake user to view table-level storage utilization information from the ACCOUNT_USAGE view by default?
+A. ACCOUNTADMIN
+B. SECURITYADMIN
+C. SYSADMIN
+D. USERADMIN
+Correct Answer: A
+
+**Question 1278**
+This statement is run: `SELECT mycolumn FROM table;`. What notations will retrieve the 'value' from the VARIANT column assuming the structure is `{"key": {"subkey": "value"}}`? (Choose two.)
+A. mycolumn:key[0]
+B. mycolumn:key.subkey
+C. mycolumn.key.subkey
+D. mycolumn['key'].subkey
+E. mycolumn['key']['subkey']
+Correct Answer: BE
+
+**Question 1279**
+Which multi-cluster virtual warehouse setting will help process queued queries as quickly as possible?
+A. An economy scaling policy
+B. A standard scaling policy
+C. Maximized mode
+D. Auto-scale mode
+Correct Answer: B
+
+**Question 1280**
+Which Snowflake tool provides detailed execution statistics of a query with no cost to the user?
+A. Query Profile
+B. Query history
+C. Visualization chart
+D. Query acceleration service
+Correct Answer: A
+
+**Question 1281**
+How can a Snowflake user access near real-time metrics that can be used to identify queries affected by disk spilling?
+A. Use a load monitoring chart.
+B. Review the history section of the Query Profile.
+C. Implement a Snowsight dashboard.
+D. Use a worksheet.
+Correct Answer: B
+
+**Question 1282**
+Which table type is used in the file processing pipeline to expose unstructured data?
+A. Directory table
+B. External table
+C. Standard table
+D. Transient table
+Correct Answer: A
+
+**Question 1283**
+Which metrics in the QUERY_HISTORY Account_Usage View can be used to assess the pruning efficiency of a query? (Choose two.)
+A. EXECUTION_TIME
+B. PARTITIONS_TOTAL
+C. COMPILATION_TIME
+D. BYTES_SCANNED
+E. PARTITIONS_SCANNED
+Correct Answer: BE
+
+**Question 1284**
+How should a data provider securely share Snowflake objects with a data consumer who does not have a Snowflake account?
+A. Give the consumer owner rights on the provider's Snowflake account.
+B. Unload the data into the consumer's Cloud Storage.
+C. Create a reader account for the consumer.
+D. Create and replicate a share, then give the consumer access to the replication.
+Correct Answer: C
+
+**Question 1285**
+When unloading Snowflake relational data to a parquet file format, why should the PARTITION BY clause be used?
+A. It will provide a mechanism to encrypt each micro-partition with a unique key.
+B. It will guarantee data integrity by splitting the data into smaller, manageable chunks.
+C. It will increase storage efficiency by automatically compressing data based on access patterns.
+D. It will optimize query performance by filtering relevant partitions without scanning the entire dataset.
+Correct Answer: D
+
+**Question 1286**
+How can a user access information about a query execution plan without consuming virtual warehouse compute resources?
+A. Use the EXPLAIN function.
+B. Review the Query Profile metrics.
+C. Review the data in the Account_Usage view.
+D. Use the Snowsight dashboard.
+Correct Answer: A
+
+**Question 1287**
+If a query is being used to unload a 1 TB table into a stage, which DML operator will be shown in the Query Profile?
+A. INSERT
+B. UNLOAD
+C. COPY
+D. UPDATE
+Correct Answer: C
+
+**Question 1288**
+At what levels can network policies be defined in Snowflake? (Choose two.)
+A. User
+B. Account
+C. Table
+D. Schema
+E. Database
+Correct Answer: AB
+
+**Question 1289**
+A Snowflake table that is loaded using a Kafka connector has a schema consisting of which two VARIANT columns? (Choose two.)
+A. RECORD_TIMESTAMP
+B. RECORD_CONTENT
+C. RECORD_KEY
+D. RECORD_PARTITION
+E. RECORD_METADATA
+Correct Answer: BE
+
+**Question 1290**
+When working with table MY_TABLE that contains 10 rows, which sampling query will always return exactly 5 rows?
+A. SELECT * FROM MY_TABLE SAMPLE SYSTEM (50);
+B. SELECT * FROM MY_TABLE SAMPLE BERNOULLI (50);
+C. SELECT * FROM MY_TABLE SAMPLE (5 ROWS);
+D. SELECT * FROM MY_TABLE SAMPLE SYSTEM (1) SEED 1;
+Correct Answer: C
+
+**Question 1291**
+How can files in a Stage be loaded after the file metadata has expired? (Choose two.)
+A. Set the RETURN_FAILED_ONLY parameter to TRUE.
+B. Remove the files from the stage and reload them.
+C. Set the FORCE parameter to TRUE.
+D. Truncate the target table and reload the files.
+E. Use the ALTER command.
+Correct Answer: BC
+
+**Question 1292**
+How should a Snowflake user access a third-party SaaS service to process unstructured data?
+A. Use internal functions.
+B. Use external functions.
+C. Use process functions.
+D. Use an API gateway natively.
+Correct Answer: B
+
+**Question 1293**
+What statement describes Snowflake data architecture?
+A. NOSQL warehouse as a service
+B. Single-node, isolated data
+C. Multi-cluster, Shared data
+D. Centralized data storage and processing
+Correct Answer: C
+
+**Question 1294**
+Which command will list all of the dropped accounts in an organization that have been deleted?
+A. SHOW MANAGED ACCOUNTS;
+B. SHOW ORGANIZATION ACCOUNTS;
+C. SHOW ORGANIZATION ACCOUNTS HISTORY;
+D. SHOW ORGANIZATION ACCOUNTS LIKE 'dropped%';
+Correct Answer: C
+
+**Question 1295**
+What privileges are required to activate a network policy for an individual user within a Snowflake account?
+A. A role that has been granted the global ATTACH POLICY privilege
+B. A role that has been granted the CREATE SESSION POLICY privilege
+C. A role that has been granted the CREATE NETWORK POLICY privilege
+D. A role that has been granted the OWNERSHIP privilege on both the user and the network policy
+Correct Answer: D
+
+**Question 1296**
+How does Snowflake use Multi-Factor Authentication (MFA)?
+A. MFA is an integrated feature powered by the Duo service.
+B. MFA is enabled by default for any user having the ACCOUNTADMIN role.
+C. An MFA login is designed to log in to Snowflake only through Snowsight.
+D. MFA is enabled by default for each user and does not require activation.
+Correct Answer: A
+
+**Question 1297**
+Which command is used to download data from Snowflake to a client machine?
+A. COPY INTO [location]
+B. EXPORT
+C. DROP
+D. GET
+Correct Answer: D
+
+**Question 1298**
+Which function, when added to a SELECT statement, will return a randomly-selected, specified number of rows from a table?
+A. AVERAGE([num] ROWS)
+B. RANDOM([num] ROWS)
+C. SAMPLE([num] ROWS)
+D. LIMIT([num] ROWS)
+Correct Answer: C
+
+**Question 1299**
+Which data governance feature supports the tracking of sensitive data for compliance, discovery, and resource usage?
+A. Row access policies
+B. Data Classification
+C. Object dependencies
+D. Object tagging
+Correct Answer: D
+
+**Question 1300**
+When an ACCOUNTADMIN gives a user a Custom role, what privilege is provided by default?
+A. All privileges that have been granted to the ACCOUNTADMIN
+B. All objects allowed by the custom role
+C. Access to the PUBLIC role
+D. Access to all the objects by the USERADMIN role
+Correct Answer: C

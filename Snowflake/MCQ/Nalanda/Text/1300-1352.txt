@@ -1,0 +1,432 @@
+Here is the heavily cleaned, formatted, and corrected text for the final batch of questions (Questions 1301 through 1352). All OCR artifacts, misspellings, corrupted characters, and pagination noise have been removed for readability.
+
+---
+
+**Question 1301**
+Which query metric can be used to monitor the health of a large table?
+A. Clustering depth
+B. Clustering key
+C. Total partition count
+D. Total number of rows
+Correct Answer: A
+
+**Question 1302**
+What function should be used to convert JSON NULL values to SQL NULL values when loading data into a Snowflake table?
+A. TRY_CAST
+B. STRIP_NULL_VALUE
+C. FLATTEN
+D. PARSE_JSON
+Correct Answer: B
+
+**Question 1303**
+What is the recommended way to insert a VARIANT value into a Snowflake table?
+A. Use a SELECT statement to convert data to a VARIANT data type before inserting it.
+B. Use the TO_VARIANT function in the INSERT statement.
+C. Cast the data to a VARIANT data type within the INSERT statement.
+D. Use a subquery to convert the data to a VARIANT data type and then insert it.
+Correct Answer: B
+
+**Question 1304**
+Which process does Snowflake follow when a stored procedure with owner's rights is called within a session?
+A. The procedure will be run with the privileges of the caller.
+B. The procedure is run with the privileges of the owner.
+C. The procedure will inherit the caller's current virtual warehouse.
+D. The owner can set the caller's session variables.
+Correct Answer: B
+
+**Question 1305**
+Which view can be used to track the read and write operations that have been performed on a table?
+A. COPY_HISTORY
+B. ACCESS_HISTORY
+C. QUERY_HISTORY
+D. TASK_HISTORY
+Correct Answer: B
+
+**Question 1306**
+What object does Snowflake recommend using when planning to unload similarly-formatted data on a regular basis?
+A. Stream
+B. Task
+C. Storage integration
+D. Named file format
+Correct Answer: D
+
+**Question 1307**
+How should the [delimited] function be called?
+A. SELECT DUAL;
+B. SELECT [function];
+C. SELECT * FROM TABLE([function]);
+D. SELECT * by [function];
+Correct Answer: C
+
+**Question 1308**
+Which of the following functions will retrieve a valid SQL NULL?
+A. SELECT NULL;
+B. SELECT 'NULL';
+C. SELECT NULL('l');
+D. SELECT parse_json('null');
+Correct Answer: A
+
+**Question 1309**
+What is the MINIMUM Snowflake edition that supports the periodic rekeying of encrypted data?
+A. Standard
+B. Enterprise
+C. Business Critical
+D. Virtual Private Snowflake (VPS)
+Correct Answer: B
+
+**Question 1310**
+While preparing to unload data in Snowflake, the file format option can be specified in which commands? (Choose two.)
+A. GET
+B. CREATE STAGE
+C. PUT
+D. COPY INTO [location]
+E. CREATE PIPE
+Correct Answer: BD
+
+**Question 1311**
+Which Query Profile operator provides information on pruning efficiency?
+A. TableScan
+B. InternalObject
+C. Join
+D. Generator
+Correct Answer: A
+
+**Question 1312**
+What metadata is stored for each micro-partition? (Choose two.)
+A. The number of distinct values
+B. The clustering key used in the table
+C. The average depth of values for each of the columns
+D. The range of values for each of the columns in the full table
+E. The minimum and maximum values for each of the columns
+Correct Answer: AE
+
+**Question 1313**
+Which role has the HIGHEST precedence among roles that will serve as the owners of securable objects?
+A. USERADMIN
+B. SYSADMIN
+C. SECURITYADMIN
+D. ACCOUNTADMIN
+Correct Answer: D
+
+**Question 1314**
+How is data protected in transit and at rest throughout its lifecycle? (Choose two.)
+A. Users are responsible for encrypting data before uploading to Snowflake.
+B. Snowflake automatically tags and masks Personal Identifiable Information (PII).
+C. Snowflake automatically encrypts data before copying the data to the cloud over an encrypted connection.
+D. Snowflake automatically rotates key pairs regularly, using a hierarchical key model stored in a hardware security module.
+E. Users are responsible for uploading and configuring key pair rotation schedules and key sizes to encrypt stored data.
+Correct Answer: CD
+
+**Question 1315**
+Which Snowflake virtual warehouse configuration enables horizontal scaling?
+A. Increasing the WAREHOUSE_SIZE
+B. Increasing the MAX_CLUSTER_COUNT
+C. Increasing the MIN_CLUSTER_COUNT
+D. Increasing the STATEMENT_TIMEOUT_IN_SECONDS
+Correct Answer: B
+
+**Question 1316**
+Which Snowflake objects can execute both DDL and DML statements?
+A. External functions
+B. Stored procedures
+C. User-Defined Functions (UDFs)
+D. Table Functions
+Correct Answer: B
+
+**Question 1317**
+Which object consumes Snowflake credits for its maintenance?
+A. Materialized view
+B. View
+C. External table
+D. Table
+Correct Answer: A
+
+**Question 1318**
+To log into Snowflake using SnowSQL, what are methods to explicitly specify the connection parameters? (Choose two.)
+A. Use public and private key pair authentication
+B. Run a web-based authorization
+C. Use an auth token
+D. Enter through an interactive prompt
+E. Specify using SNOWSQL_PWD and environment variables
+Correct Answer: DE
+
+**Question 1319**
+A team is developing a machine learning model by training on the latest Snowflake features. The training is taking much longer than expected to complete. Which step will accelerate the model training?
+A. Increase the size of the virtual warehouse.
+B. Add additional clusters to the virtual warehouse.
+C. Use a Snowpark-optimized virtual warehouse.
+D. Enable the query acceleration service.
+Correct Answer: C
+
+**Question 1320**
+Which object can be shared using Secure Data Sharing?
+A. Secure view
+B. Materialized view
+C. External function
+D. User-Defined Function (UDF)
+Correct Answer: A
+
+**Question 1321**
+How is Single Sign-on (SSO) authentication used in Snowflake?
+A. SSO is an authentication method which uses a pair of keys, a public key and a private key, to verify the identity of a user.
+B. SSO is an authentication method that uses a username and password in the API request header.
+C. SSO is an authentication method that allows a user to sign into multiple applications with a single set of credentials.
+D. SSO is an integrated Snowflake feature, managed entirely by Snowflake natively.
+Correct Answer: C
+
+**Question 1322**
+Which clause is used to define a function that may return different values for different rows?
+A. IMMUTABLE
+B. RETURNS
+C. COMMENT
+D. VOLATILE
+Correct Answer: D
+
+**Question 1323**
+In Snowflake, how can query pruning information statistics be identified?
+A. Partitions scanned
+B. Bytes scanned
+C. Bytes spilled to remote storage
+D. Percentage scanned from cache
+Correct Answer: A
+
+**Question 1324**
+How does the authorization associated with a URL for an unstructured file work?
+A. Anyone who has the URL can access the referenced file for the life of the token.
+B. Only the user who created the URL can use it to access the referenced file.
+C. Only the users who have roles with sufficient privileges on the URL can access the referenced file.
+D. The role specified in the GET REST API call must have sufficient privileges on the stage to access the referenced file using the URL.
+Correct Answer: D
+
+**Question 1325**
+What will happen if the volume of data stored in Snowflake increases over time?
+A. Snowflake will automatically increase the size of the virtual warehouse used to run queries against the storage data.
+B. The number of clusters in the active virtual warehouse being used will scale automatically to accommodate the increased storage data volume.
+C. As the stored data volume increases, the warehouse performance will decline.
+D. The warehouse performance and size will not be affected when the volume of stored data increases.
+Correct Answer: D
+
+**Question 1326**
+What can a reader account user do when accessing shared data? (Choose two.)
+A. Insert new data using the COPY INTO [location] command
+B. Execute secure User-Defined Functions (UDFs)
+C. Remove records using the DELETE command
+D. Select data from secure views
+E. Modify records using the UPDATE and MERGE commands
+Correct Answer: BD
+
+**Question 1327**
+What is a fundamental characteristic of Snowflake micro-partitions?
+A. They can be read directly as files.
+B. They serve as an index for Snowflake tables.
+C. They are sized based on Time Travel requirements.
+D. Once established, they cannot be changed (they are immutable).
+Correct Answer: D
+
+**Question 1328**
+What happens when a multi-cluster virtual warehouse is resized?
+A. The auto-suspend feature is automatically enabled for inactive clusters.
+B. The scaling policy of the warehouse is updated.
+C. The new size applies to all clusters within that configuration.
+D. The minimum and maximum number of clusters is automatically adjusted.
+Correct Answer: C
+
+**Question 1329**
+Using which copy option when unloading data allows users to include a Universally Unique Identifier (UUID) in the names of unloaded files?
+A. VALIDATION_MODE
+B. SINGLE = TRUE
+C. HEADER = TRUE
+D. INCLUDE_QUERY_ID
+Correct Answer: D
+
+**Question 1330**
+Which Snowflake objects use storage? (Choose two.)
+A. Regular table
+B. Regular view
+C. Cached query result
+D. Materialized view
+E. External table
+Correct Answer: AD
+
+**Question 1331**
+What type of access control states that each object within Snowflake has a unique owner who can grant access to that object?
+A. Role-Based Access Control (RBAC)
+B. Discretionary Access Control (DAC)
+C. Mandatory Access Control (MAC)
+D. Rule-Based Access Control (RuBAC)
+Correct Answer: B
+
+**Question 1332**
+Which Snowflake multi-cluster virtual warehouse scaling policy or mode will MINIMIZE query queuing by prioritizing the startup of additional clusters?
+A. Custom policy
+B. Standard policy
+C. Economy mode
+D. Maximized mode
+Correct Answer: B
+
+**Question 1333**
+Which default warehouse configuration has the highest precedence whenever a new session is created by a user?
+A. Default warehouse for the user
+B. Default warehouse in the configuration file of the client utilities
+C. Default warehouse specified on a CLI or in drivers/connectors parameters
+D. Default warehouse of the role assigned to the user
+Correct Answer: C
+
+**Question 1334**
+What type of authentication is recommended when creating a Snowflake service account that will connect to a third-party application?
+A. Username and password
+B. Key-pair authentication
+C. Multi-Factor Authentication (MFA)
+D. Single Sign-on (SSO)
+Correct Answer: B
+
+**Question 1335**
+Which type of query would benefit from enabling the query acceleration service on the virtual warehouse?
+A. Queries with no filters or aggregation
+B. Queries that are queued in the warehouse
+C. Queries that use less memory than the typical query
+D. Queries that contain a high cardinality GROUP BY expression
+Correct Answer: D
+
+**Question 1336**
+Which table function will return the output of a previously-run command?
+A. FLATTEN
+B. QUERY_HISTORY
+C. TASK_HISTORY
+D. RESULT_SCAN
+Correct Answer: D
+
+**Question 1337**
+How can a relational table be unloaded into a JSON file?
+A. Use the OBJECT_CONSTRUCT function in conjunction with the COPY INTO command.
+B. Use the COPY INTO [location] command with the file_format set to JSON.
+C. Use the PUT command with the format set as JSON.
+D. Use the GET command with the file format set as JSON.
+Correct Answer: A
+
+**Question 1338**
+When do Snowflake object owners lose their ability to make grant decisions?
+A. When the object owner has been granted a database role.
+B. When the object owner has been granted an account role.
+C. When the object is part of a managed access schema.
+D. When the object is part of a regular schema.
+Correct Answer: C
+
+**Question 1339**
+Which command allows a user to unload data from a Snowflake database table into one or more files in a Snowflake external stage?
+A. GET
+B. LIST
+C. PUT
+D. COPY INTO [location]
+Correct Answer: D
+
+**Question 1340**
+Which Snowflake feature enables loading data from Cloud Storage as files are available in a Stage?
+A. COPY INTO [location] command
+B. Data replication
+C. Snowpipe
+D. Direct Share
+Correct Answer: C
+
+**Question 1341**
+Which JSON paths are considered to be equivalent in Snowflake? (Choose two.)
+A. src:Customer['EMAIL']
+B. SRC:Customer.Email
+C. src['customer']['email']
+D. src:customer.email
+E. SRC:customer.email
+Correct Answer: DE
+
+**Question 1342**
+Which privilege is required for a user to be able to view a resource monitor?
+A. USAGE
+B. SELECT
+C. MONITOR
+D. OPERATE
+Correct Answer: C
+
+**Question 1343**
+What happens when a table or schema with a standard retention period is dropped?
+A. The object is immediately removed from the system.
+B. The object is instantaneously moved to Fail-safe.
+C. The object is retained but all associated data is immediately purged.
+D. The object is retained in Time Travel for the data retention period.
+Correct Answer: D
+
+**Question 1344**
+When cloning tables, which INFORMATION_SCHEMA view will show different columns for owned storage and referenced storage?
+A. TABLES
+B. TABLE_HISTORY
+C. TABLE_STORAGE_METRICS
+D. STORAGE_USAGE
+Correct Answer: C
+
+**Question 1345**
+Based on a review of a Query Profile, which scenarios will benefit the MOST from the use of a data clustering key? (Choose two.)
+A. A column that appears most frequently in ORDER BY operations
+B. A column that appears most frequently in WHERE operations
+C. A column that is used most frequently in GROUP BY operations
+D. A column that appears most frequently in AGGREGATE operations
+E. A column that appears most frequently in JOIN operations
+Correct Answer: BE
+
+**Question 1346**
+When working with dimension tables that change frequently, what is the recommended way to manage costs?
+A. Keep the Time Travel retention period on the dimension tables to 1 day or less.
+B. Make the dimension tables transient with a retention period of 0 days, and backup the table daily to a permanent table. Delete all but the latest backup.
+C. Make the dimension tables transient and back-up the data daily into a permanent table using cloning.
+D. Make the dimension tables permanent with a retention period of 7 days. Replicate the database to a secondary database once a week.
+Correct Answer: B
+
+**Question 1347**
+What Snowflake privilege should be granted to allow a non-ACCOUNTADMIN to access billing and credit usage?
+A. OPERATE
+B. MONITOR USAGE
+C. OWNERSHIP
+D. USAGE
+Correct Answer: B
+
+**Question 1348**
+A stream can be created on which Snowflake objects to record data manipulation language (DML) changes? (Choose two.)
+A. Databases
+B. Standard tables
+C. Standard views
+D. Schemas
+E. Pipes
+Correct Answer: BC
+
+**Question 1349**
+When creating a file format to load JSON data into Snowflake, what command will remove brackets from the data array structure?
+A. REMOVE_BRACKETS = TRUE
+B. TRIM_SPACE = TRUE
+C. IGNORE_UTF8_ERRORS = TRUE
+D. STRIP_OUTER_ARRAY = TRUE
+Correct Answer: D
+
+**Question 1350**
+Which virtual warehouse feature setting will reduce the performance impact when running larger-than-average queries, offloading portions of the query processing work to shared compute resources?
+A. Using a multi-cluster virtual warehouse
+B. Using the query acceleration service
+C. Using the search optimization service
+D. Disabling auto-suspend
+Correct Answer: B
+
+**Question 1351**
+Which schema-level objects allow the user to periodically perform an action under specific conditions, based on data within Snowflake?
+A. Alerts
+B. External tables
+C. Secure Views
+D. Materialized views
+Correct Answer: A
+
+**Question 1352**
+Which privilege must be granted to show data categories in a Data Exchange?
+A. MONITOR PRIVILEGE
+B. USAGE PRIVILEGE
+C. OWNERSHIP PRIVILEGE
+D. IMPORTED PRIVILEGES
+Correct Answer: D
+
+---
+
+*(End of document)*
