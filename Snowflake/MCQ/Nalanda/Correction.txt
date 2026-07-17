@@ -1,0 +1,39 @@
+629
+What happens when a user exits Snowsight during a session where a query is running?
+
+A. Snowflake executes the query during the same session immediately.
+B. Snowflake cancels any queries submitted during this session that are still running.
+C. Snowflake will cancel any queries submitted during this session after 24 hours.
+D. Snowflake will continue to execute and complete upon the next login.
+
+ans:D
+C_ans:B
+
+What operations can be performed while loading a simple CSV file into a Snowflake table using the COPY INTO command? (Choose two.)
+
+A. Performing aggregate calculations
+B. Reordering the columns
+C. Grouping by operations
+D. Converting the datatypes
+E. Selecting the first few rows
+
+
+Which commands support a multiple-statement request to run and update Snowflake data? (Choose two.)
+
+A. CALL
+B. COMMIT
+C. GET
+D. ROLLBACK
+E. EXPLAIN
+
+
+The Activity section is for monitoring query performance, query history, and copy history.
+
+How can a Snowflake user access a JSON object, given the following table? (Choose two.)
+
+{ "id": "1234", "customer": { "name": "user" } }
+
+A. src:customer.name
+B. src:customer.name::string
+C. src['customer']['name']
+D. src.customer.name
