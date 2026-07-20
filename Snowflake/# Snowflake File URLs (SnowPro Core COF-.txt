@@ -1,0 +1,465 @@
+# Snowflake File URLs (SnowPro Core COF-C03 Revision)
+ 
+> **Exam Weight:** ⭐⭐⭐⭐ (Frequently tested)
+ 
+---
+ 
+# Why do File URLs exist?
+ 
+Unstructured data (PDF, Images, Videos, Audio, etc.) is stored in **Stages**, not tables.
+ 
+To access those files, Snowflake provides **File URLs**.
+ 
+Think :
+ 
+```text
+Table
+   │
+SELECT
+ 
+Stage
+   │
+File URL
+```
+ 
+---
+ 
+# There are 3 types of File URLs
+ 
+```
+                Stage
+                  │
+     ┌────────────┼────────────┐
+     │            │            │
+     ▼            ▼            ▼
+ File URL    Scoped URL   Pre-Signed URL
+```
+ 
+---
+ 
+# 1. File URL
+ 
+## Function
+ 
+```sql
+BUILD_STAGE_FILE_URL()
+```
+ 
+## Purpose
+ 
+Returns the permanent URL of a file stored in a stage.
+ 
+Example
+ 
+```sql
+SELECT BUILD_STAGE_FILE_URL(
+    '@docs_stage',
+    'invoice.pdf'
+);
+```
+ 
+Output
+ 
+```
+https://<account>/api/files/docs_stage/invoice.pdf
+```
+ 
+---
+ 
+## Characteristics
+ 
+✅ Permanent URL
+ 
+✅ No expiration
+ 
+✅ Works with Internal & External Stages
+ 
+❌ Doesn't contain a security token
+ 
+Access permissions are checked **when the URL is used**.
+ 
+---
+ 
+## Internal Working
+ 
+```
+File
+ │
+Stage
+ │
+BUILD_STAGE_FILE_URL()
+ │
+Permanent URL
+ │
+User opens URL
+ │
+Snowflake checks privileges
+ │
+If allowed → File opens
+```
+ 
+---
+ 
+## Use Cases
+ 
+- Internal company applications
+- Bookmarking file locations
+- When users are already authenticated
+ 
+---
+ 
+## Exam Keywords
+ 
+- Permanent URL
+- Doesn't expire
+- Access checked at request time
+ 
+---
+ 
+# 2. Scoped File URL ⭐⭐⭐⭐⭐
+ 
+## Function
+ 
+```sql
+BUILD_SCOPED_FILE_URL()
+```
+ 
+## Purpose
+ 
+Generates a **temporary secure URL**.
+ 
+Example
+ 
+```sql
+SELECT BUILD_SCOPED_FILE_URL(
+    '@docs_stage',
+    'invoice.pdf'
+);
+```
+ 
+---
+ 
+## Characteristics
+ 
+✅ Temporary
+ 
+✅ Contains security token
+ 
+✅ Prevents unauthorized access
+ 
+✅ Recommended for secure sharing
+ 
+---
+ 
+## Internal Working
+ 
+```
+File
+ │
+Stage
+ │
+BUILD_SCOPED_FILE_URL()
+ │
+Temporary Token Generated
+ │
+Temporary Secure URL
+ │
+User opens URL
+ │
+Snowflake validates token
+ │
+File returned
+```
+ 
+---
+ 
+## Use Cases
+ 
+- Streamlit in Snowflake
+- Snowpark
+- Native Apps
+- Secure file sharing
+ 
+---
+ 
+## Exam Keywords
+ 
+- Secure
+- Temporary
+- Token-based
+- Recommended
+ 
+---
+ 
+# 3. Pre-Signed URL
+ 
+## Function
+ 
+```sql
+GET_PRESIGNED_URL()
+```
+ 
+## Purpose
+ 
+Generates a temporary signed URL for files stored in **External Stages**.
+ 
+Example
+ 
+```sql
+SELECT GET_PRESIGNED_URL(
+    @s3_stage,
+    'invoice.pdf'
+);
+```
+ 
+---
+ 
+## Characteristics
+ 
+✅ Temporary
+ 
+✅ Expires automatically
+ 
+✅ Generated using cloud provider credentials
+ 
+Mainly used with:
+ 
+- AWS S3
+- Azure Blob
+- Google Cloud Storage
+ 
+---
+ 
+## Internal Working
+ 
+```
+External Stage
+      │
+Cloud Storage
+      │
+GET_PRESIGNED_URL()
+      │
+Cloud Provider signs URL
+      │
+Temporary URL
+      │
+User downloads file
+```
+ 
+---
+ 
+## Use Cases
+ 
+- Share S3 file temporarily
+- Download from external applications
+- REST APIs
+ 
+---
+ 
+## Exam Keywords
+ 
+- External Stage
+- Temporary
+- Signed URL
+- Cloud provider
+ 
+---
+ 
+# Complete Comparison
+ 
+| Feature | File URL | Scoped File URL | Pre-Signed URL |
+|----------|----------|-----------------|----------------|
+| Function | BUILD_STAGE_FILE_URL | BUILD_SCOPED_FILE_URL | GET_PRESIGNED_URL |
+| Permanent | ✅ Yes | ❌ No | ❌ No |
+| Temporary | ❌ | ✅ | ✅ |
+| Security Token | ❌ | ✅ | Cloud Signed |
+| Expires | ❌ | ✅ | ✅ |
+| Internal Stage | ✅ | ✅ | ❌ |
+| External Stage | ✅ | ✅ | ✅ (Primary Use) |
+| Best For | Permanent location | Secure sharing | External cloud access |
+ 
+---
+ 
+# Which URL should you choose?
+ 
+Need a permanent file location?
+ 
+➡️ **BUILD_STAGE_FILE_URL**
+ 
+---
+ 
+Need secure access inside Snowflake?
+ 
+➡️ **BUILD_SCOPED_FILE_URL**
+ 
+---
+ 
+Need temporary access to an S3/Azure/GCS file?
+ 
+➡️ **GET_PRESIGNED_URL**
+ 
+---
+ 
+# SnowPro Decision Tree
+ 
+```
+Need a File URL?
+       │
+       ▼
+ 
+Permanent?
+ 
+YES
+ │
+ ▼
+BUILD_STAGE_FILE_URL
+ 
+NO
+ │
+ ▼
+ 
+Secure temporary access?
+ 
+YES
+ │
+ ▼
+BUILD_SCOPED_FILE_URL
+ 
+NO
+ │
+ ▼
+ 
+External Stage download?
+ 
+YES
+ │
+ ▼
+GET_PRESIGNED_URL
+```
+ 
+---
+ 
+# Common Exam Traps
+ 
+## Trap 1
+ 
+Question:
+ 
+Need a **permanent** URL.
+ 
+❌ BUILD_SCOPED_FILE_URL
+ 
+✅ BUILD_STAGE_FILE_URL
+ 
+---
+ 
+## Trap 2
+ 
+Question:
+ 
+Need **secure temporary** access.
+ 
+❌ BUILD_STAGE_FILE_URL
+ 
+✅ BUILD_SCOPED_FILE_URL
+ 
+---
+ 
+## Trap 3
+ 
+Question:
+ 
+Need temporary download from **S3**.
+ 
+❌ BUILD_STAGE_FILE_URL
+ 
+✅ GET_PRESIGNED_URL
+ 
+---
+ 
+## Trap 4
+ 
+Question:
+ 
+Which function contains a security token?
+ 
+✅ BUILD_SCOPED_FILE_URL
+ 
+---
+ 
+## Trap 5
+ 
+Question:
+ 
+Which URL expires automatically?
+ 
+✅ Scoped File URL
+ 
+✅ Pre-Signed URL
+ 
+---
+ 
+# Memory Tricks
+ 
+### File URL
+ 
+🏠 Home Address
+ 
+Permanent.
+ 
+---
+ 
+### Scoped File URL
+ 
+🎟️ Movie Ticket
+ 
+Temporary.
+ 
+Only valid for a limited scope.
+ 
+---
+ 
+### Pre-Signed URL
+ 
+☁️ Cloud Guest Pass
+ 
+Temporary.
+ 
+Issued by AWS/Azure/GCP.
+ 
+---
+ 
+# Must Memorize
+ 
+✅ BUILD_STAGE_FILE_URL → Permanent URL
+ 
+✅ BUILD_SCOPED_FILE_URL → Secure temporary URL (Most Recommended)
+ 
+✅ GET_PRESIGNED_URL → External Stage temporary download
+ 
+---
+ 
+# SnowPro Probability
+ 
+| Topic | Probability |
+|---------|------------|
+| Scoped File URL | ⭐⭐⭐⭐⭐ |
+| File URL | ⭐⭐⭐⭐ |
+| Pre-Signed URL | ⭐⭐⭐⭐ |
+ 
+### Final 10-Second Revision
+ 
+```
+Permanent
+↓
+BUILD_STAGE_FILE_URL
+ 
+Secure Temporary
+↓
+BUILD_SCOPED_FILE_URL
+ 
+External Cloud Temporary
+↓
+GET_PRESIGNED_URL
+```
+ 
