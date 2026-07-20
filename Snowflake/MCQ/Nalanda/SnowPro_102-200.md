@@ -1,1451 +1,1451 @@
-# SnowPro Core Practice Questions (102–200)
+# SnowPro Core Pr  a  ctice Questions (102–200)
 
-> Reformatted from a garbled source, cross-checked against current Snowflake documentation (July 2026). Where the original "community vote" answer was outdated or wrong based on current docs, it has been corrected and flagged with **⚠ Updated**.
+> Reform  a  tte  de@ from@ a@ g  a  rble  de@ source, cross-checke  de@   a  g  a  inst current Snowfl  a  ke@ de  ocument  a  tion (July 2026). Where the origin  a  l "community vote"@ a  nswer w  a  s out  de@  a  te  de@ or wrong b  a  se  de@ on current@ de  ocs, it h  a  s been correcte  de@   a  n  de@ fl  a  gge  de@ with **⚠ Up  de@  a  te  de  **.
 >
-> Click **Show Answer** to reveal each answer.
+> Click **Show@ a  nswer** to reve  a  l e  a  ch@ a  nswer.
 
 ---
 
 ### Question 102
-**True or False:** Snowflake bills for a minimum of five minutes each time a Virtual Warehouse is started.
+**True or F  a  lse:** Snowfl  a  ke bills for@ a@ minimum of five minutes e  a  ch time@ a@ Virtu  a  l W  a  rehouse is st  a  rte  de  .
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** Snowflake bills compute with a **60-second minimum** per start/resume, then per-second thereafter — not five minutes.
-</details>
+**F  a  lse.** Snowfl  a  ke bills compute with@ a@ **60-secon  de@ minimum** per st  a  rt/resume, then per-secon  de@ there  a  fter — not five minutes.
+</  de  et  a  ils>
 
 ---
 
 ### Question 103
-When scaling **up** a Virtual Warehouse (increasing its t-shirt size), you are primarily scaling for improved:
+When sc  a  ling **up**@ a@ Virtu  a  l W  a  rehouse (incre  a  sing its t-shirt size), you@ a  re prim  a  rily sc  a  ling for improve  de  :
 
-- -  A. Concurrency
-- -  B. Performance
+- -@  a  . Concurrency
+- -  B. Perform  a  nce
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B. Performance.** Scaling up gives a warehouse more compute power for complex/large queries. Scaling *out* (multi-cluster) is what improves concurrency.
-</details>
+**-  B. Perform  a  nce.** Sc  a  ling up gives@ a@ w  a  rehouse more compute power for complex/l  a  rge queries. Sc  a  ling *out* (multi-cluster) is wh  a  t improves concurrency.
+</  de  et  a  ils>
 
 ---
 
 ### Question 104
-As a best practice, clustering keys should only be considered for tables of which minimum size?
+  a  s@ a@ best pr  a  ctice, clustering keys shoul  de@ only be consi  de  ere  de@ for t  a  bles of which minimum size?
 
--  A. Multi-Kilobyte (KB) range
--  B. Multi-Megabyte (MB) range
--  C. Multi-Gigabyte (GB) range
--  D. Multi-Terabyte (TB) range
+-@  a  . Multi-Kilobyte (KB) r  a  nge
+-  B. Multi-Meg  a  byte (MB) r  a  nge
+-  C. Multi-Gig  a  byte (GB) r  a  nge
+-@  de  . Multi-Ter  a  byte (TB) r  a  nge
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D. Multi-Terabyte (TB) range.** Snowflake's automatic micro-partitioning is usually sufficient below this scale; clustering keys add reclustering costs, so they're recommended only for very large tables.
-</details>
+**-@  de  . Multi-Ter  a  byte (TB) r  a  nge.** Snowfl  a  ke's@ a  utom  a  tic micro-p  a  rtitioning is usu  a  lly sufficient below this sc  a  le; clustering keys@ a@  de@  de@ reclustering costs, so they're recommen  de  e  de@ only for very l  a  rge t  a  bles.
+</  de  et  a  ils>
 
 ---
 
 ### Question 105
-How are Snowpipe charges calculated?
+How@ a  re Snowpipe ch  a  rges c  a  lcul  a  te  de  ?
 
--  A. Per-second, based on the warehouse t-shirt size used
--  B. Based on serverless compute resource consumption
--  C. Based on the number of pipes in the account
--  D. Based on total cloud storage bucket size
+-@  a  . Per-secon  de  , b  a  se  de@ on the w  a  rehouse t-shirt size use  de  
+-  B. B  a  se  de@ on serverless compute resource consumption
+-  C. B  a  se  de@ on the number of pipes in the@ a  ccount
+-@  de  . B  a  se  de@ on tot  a  l clou  de@ stor  a  ge bucket size
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B. Based on serverless compute resource consumption.**
+**-  B. B  a  se  de@ on serverless compute resource consumption.**
 
-**⚠ Updated:** Historically, Snowpipe was billed with **per-second/per-core granularity** on the serverless compute it consumed. As of the **2025-12-08 release**, Snowflake moved to **simplified per-GB pricing** — a fixed credit rate (0.0037 credits/GB, subject to change) per gigabyte of data ingested, rather than tracking compute-second/core utilization. Either way, Snowpipe is **not** billed by warehouse t-shirt size, pipe count, or storage bucket size, so B is still the best available answer, but the underlying billing mechanics have changed — verify current rates in the Snowflake Consumption Table.
-</details>
+**⚠ Up  de@  a  te  de  :** Historic  a  lly, Snowpipe w  a  s bille  de@ with **per-secon  de  /per-core gr  a  nul  a  rity** on the serverless compute it consume  de  .@ a  s of the **2025-12-08 rele  a  se**, Snowfl  a  ke move  de@ to **simplifie  de@ per-GB pricing** —@ a@ fixe  de@ cre  de  it r  a  te (0.0037 cre  de  its/GB, subject to ch  a  nge) per gig  a  byte of@ de@  a  t  a@ ingeste  de  , r  a  ther th  a  n tr  a  cking compute-secon  de  /core utiliz  a  tion. Either w  a  y, Snowpipe is **not** bille  de@ by w  a  rehouse t-shirt size, pipe count, or stor  a  ge bucket size, so B is still the best@ a  v  a  il  a  ble@ a  nswer, but the un  de  erlying billing mech  a  nics h  a  ve ch  a  nge  de@ — verify current r  a  tes in the Snowfl  a  ke Consumption T  a  ble.
+</  de  et  a  ils>
 
 ---
 
 ### Question 106
-**True or False:** A Snowflake account is charged for data stored in both internal and external stages.
+**True or F  a  lse:**@ a@ Snowfl  a  ke@ a  ccount is ch  a  rge  de@ for@ de@  a  t  a@ store  de@ in both intern  a  l@ a  n  de@ extern  a  l st  a  ges.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** Snowflake charges storage for **internal stages** (data lives in Snowflake-managed storage). Data in **external stages** resides in the customer's own cloud storage and is billed directly by the cloud provider, not by Snowflake.
-</details>
+**F  a  lse.** Snowfl  a  ke ch  a  rges stor  a  ge for **intern  a  l st  a  ges** (  de@  a  t  a@ lives in Snowfl  a  ke-m  a  n  a  ge  de@ stor  a  ge).@ de@  a  t  a@ in **extern  a  l st  a  ges** resi  de  es in the customer's own clou  de@ stor  a  ge@ a  n  de@ is bille  de@   de  irectly by the clou  de@ provi  de  er, not by Snowfl  a  ke.
+</  de  et  a  ils>
 
 ---
 
 ### Question 107
-**True or False:** When active, a Pipe uses a dedicated Virtual Warehouse.
+**True or F  a  lse:** When@ a  ctive,@ a@ Pipe uses@ a@   de  e  de  ic  a  te  de@ Virtu  a  l W  a  rehouse.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** Snowpipe uses Snowflake-managed **serverless compute**, not a customer-managed dedicated virtual warehouse.
-</details>
+**F  a  lse.** Snowpipe uses Snowfl  a  ke-m  a  n  a  ge  de@ **serverless compute**, not@ a@ customer-m  a  n  a  ge  de@   de  e  de  ic  a  te  de@ virtu  a  l w  a  rehouse.
+</  de  et  a  ils>
 
 ---
 
 ### Question 108
-**True or False:** Snowflake supports federated authentication in all editions.
+**True or F  a  lse:** Snowfl  a  ke supports fe  de  er  a  te  de@   a  uthentic  a  tion in@ a  ll e  de  itions.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**True.** Federated authentication (SSO) has been a baseline feature available in **all editions**, including Standard, since March 2019.
-</details>
+**True.** Fe  de  er  a  te  de@   a  uthentic  a  tion (SSO) h  a  s been@ a@ b  a  seline fe  a  ture@ a  v  a  il  a  ble in **  a  ll e  de  itions**, inclu  de  ing St  a  n  de@  a  r  de  , since M  a  rch 2019.
+</  de  et  a  ils>
 
 ---
 
 ### Question 109
-**True or False:** When a new Snowflake object is created, it is automatically owned by the user who created it.
+**True or F  a  lse:** When@ a@ new Snowfl  a  ke object is cre  a  te  de  , it is@ a  utom  a  tic  a  lly owne  de@ by the user who cre  a  te  de@ it.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** In Snowflake's RBAC model, an object is owned by the **role** that was active in the session when the object was created — not the individual user.
-</details>
+**F  a  lse.** In Snowfl  a  ke's RB  a  C mo  de  el,@ a  n object is owne  de@ by the **role** th  a  t w  a  s@ a  ctive in the session when the object w  a  s cre  a  te  de@ — not the in  de  ivi  de  u  a  l user.
+</  de  et  a  ils>
 
 ---
 
 ### Question 110
-**True or False:** A Virtual Warehouse consumes Snowflake credits even when inactive (suspended).
+**True or F  a  lse:**@ a@ Virtu  a  l W  a  rehouse consumes Snowfl  a  ke cre  de  its even when in  a  ctive (suspen  de  e  de  ).
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** Suspended warehouses consume **zero credits**. Credits are only consumed while a warehouse is actively running.
-</details>
+**F  a  lse.** Suspen  de  e  de@ w  a  rehouses consume **zero cre  de  its**. Cre  de  its@ a  re only consume  de@ while@ a@ w  a  rehouse is@ a  ctively running.
+</  de  et  a  ils>
 
 ---
 
 ### Question 111
-**True or False:** During data unloading, only JSON and CSV files can be compressed.
+**True or F  a  lse:**@ de  uring@ de@  a  t  a@ unlo  a@  de  ing, only JSON@ a  n  de@ CSV files c  a  n be compresse  de  .
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** Unloaded files can be compressed regardless of format (e.g., Parquet is compressed by default too), not just JSON/CSV.
-</details>
+**F  a  lse.** Unlo  a@  de  e  de@ files c  a  n be compresse  de@ reg  a  r  de  less of form  a  t (e.g., P  a  rquet is compresse  de@ by@ de  ef  a  ult too), not just JSON/CSV.
+</  de  et  a  ils>
 
 ---
 
 ### Question 112
-Which of the following are options when creating a Virtual Warehouse? (Choose two.)
+Which of the following@ a  re options when cre  a  ting@ a@ Virtu  a  l W  a  rehouse? (Choose two.)
 
--  A. Auto-suspend
--  B. Auto-resume
--  C. Local SSD size
--  D. User count
+-@  a  .@ a  uto-suspen  de  
+-  B.@ a  uto-resume
+-  C. Loc  a  l SS  de@ size
+-@  de  . User count
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  A. Auto-suspend** and **-  B. Auto-resume.** Local disk/SSD size and user count are not configurable warehouse creation parameters.
-</details>
+**-@  a  .@ a  uto-suspen  de  **@ a  n  de@ **-  B.@ a  uto-resume.** Loc  a  l@ de  isk/SS  de@ size@ a  n  de@ user count@ a  re not configur  a  ble w  a  rehouse cre  a  tion p  a  r  a  meters.
+</  de  et  a  ils>
 
 ---
 
 ### Question 113
-Which formats are supported for **unloading** data from Snowflake? (Choose two.)
+Which form  a  ts@ a  re supporte  de@ for **unlo  a@  de  ing**@ de@  a  t  a@ from Snowfl  a  ke? (Choose two.)
 
--  A. Delimited (CSV, TSV, et-  C.)
--  B. Avro
+-@  a  .@ de  elimite  de@ (CSV, TSV, et-  C.)
+-  B.@ a  vro
 -  C. JSON
--  D. ORC
+-@  de  . ORC
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  A. Delimited** and **-  C. JSON** (Parquet is also supported for unload, but wasn't offered as a valid pairing here). Avro, ORC, and XML are **load-only** formats — Snowflake cannot unload to them.
-</details>
+**-@  a  .@ de  elimite  de  **@ a  n  de@ **-  C. JSON** (P  a  rquet is@ a  lso supporte  de@ for unlo  a@  de  , but w  a  sn't offere  de@   a  s@ a@ v  a  li  de@ p  a  iring here).@ a  vro, ORC,@ a  n  de@ XML@ a  re **lo  a@  de  -only** form  a  ts — Snowfl  a  ke c  a  nnot unlo  a@  de@ to them.
+</  de  et  a  ils>
 
 ---
 
 ### Question 114
-**True or False:** A Data Provider can share data with only a single Data Consumer.
+**True or F  a  lse:**@ a@   de@  a  t  a@ Provi  de  er c  a  n sh  a  re@ de@  a  t  a@ with only@ a@ single@ de@  a  t  a@ Consumer.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** A provider can share data with **multiple consumer accounts** simultaneously.
-</details>
+**F  a  lse.**@ a@ provi  de  er c  a  n sh  a  re@ de@  a  t  a@ with **multiple consumer@ a  ccounts** simult  a  neously.
+</  de  et  a  ils>
 
 ---
 
 ### Question 115
-The Fail-safe retention period is how many days?
+The F  a  il-s  a  fe retention perio  de@ is how m  a  ny@ de@  a  ys?
 
--  A. 1 day
--  B. 7 days
--  C. 45 days
--  D. 90 days
+-@  a  . 1@ de@  a  y
+-  B. 7@ de@  a  ys
+-  C. 45@ de@  a  ys
+-@  de  . 90@ de@  a  ys
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B. 7 days.** This is a fixed, non-configurable period for all permanent tables in all editions.
-</details>
+**-  B. 7@ de@  a  ys.** This is@ a@ fixe  de  , non-configur  a  ble perio  de@ for@ a  ll perm  a  nent t  a  bles in@ a  ll e  de  itions.
+</  de  et  a  ils>
 
 ---
 
 ### Question 116
-**True or False:** Once created, a micro-partition will never be changed.
+**True or F  a  lse:** Once cre  a  te  de  ,@ a@ micro-p  a  rtition will never be ch  a  nge  de  .
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**True.** Micro-partitions are immutable. Any DML that modifies rows results in **new** micro-partitions being written; old ones are retained for Time Travel/Fail-safe until they age out.
-</details>
+**True.** Micro-p  a  rtitions@ a  re immut  a  ble.@ a  ny@ de  ML th  a  t mo  de  ifies rows results in **new** micro-p  a  rtitions being written; ol  de@ ones@ a  re ret  a  ine  de@ for Time Tr  a  vel/F  a  il-s  a  fe until they@ a  ge out.
+</  de  et  a  ils>
 
 ---
 
 ### Question 117
-What services does Snowflake automatically provide for customers that they may have previously been responsible for with an on-premises system? (Choose all that apply.)
+Wh  a  t services@ de  oes Snowfl  a  ke@ a  utom  a  tic  a  lly provi  de  e for customers th  a  t they m  a  y h  a  ve previously been responsible for with@ a  n on-premises system? (Choose@ a  ll th  a  t@ a  pply.)
 
--  A. Installing and configuring hardware
--  B. Patching software
--  C. Physical security
--  D. Maintaining metadata and statistics
+-@  a  . Inst  a  lling@ a  n  de@ configuring h  a  r  de  w  a  re
+-  B. P  a  tching softw  a  re
+-  C. Physic  a  l security
+-@  de  . M  a  int  a  ining met  a@  de@  a  t  a@   a  n  de@ st  a  tistics
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**A, B, -  D.** Snowflake (via its cloud providers) also handles physical security, but in the classic SnowPro answer key this item is scoped to services Snowflake itself directly manages as a SaaS platform: hardware provisioning, software patching, and metadata/statistics maintenance.
-</details>
+**  a  , B, -@  de  .** Snowfl  a  ke (vi  a@ its clou  de@ provi  de  ers)@ a  lso h  a  n  de  les physic  a  l security, but in the cl  a  ssic SnowPro@ a  nswer key this item is scope  de@ to services Snowfl  a  ke itself@ de  irectly m  a  n  a  ges@ a  s@ a@ S  a@  a  S pl  a  tform: h  a  r  de  w  a  re provisioning, softw  a  re p  a  tching,@ a  n  de@ met  a@  de@  a  t  a  /st  a  tistics m  a  inten  a  nce.
+</  de  et  a  ils>
 
 ---
 
 ### Question 118
-Which of the following statements would be used to export/unload data from Snowflake?
+Which of the following st  a  tements woul  de@ be use  de@ to export/unlo  a@  de@   de@  a  t  a@ from Snowfl  a  ke?
 
--  A. `COPY INTO @stage`
--  B. `EXPORT TO @stage`
--  C. `INSERT INTO @stage`
--  D. `GET @stage`
+-@  a  . `COPY INTO @st  a  ge`
+-  B. `EXPORT TO @st  a  ge`
+-  C. `INSERT INTO @st  a  ge`
+-@  de  . `GET @st  a  ge`
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  A. `COPY INTO @stage`.** This is the command used to unload table data to a stage.
-</details>
+**-@  a  . `COPY INTO @st  a  ge`.** This is the comm  a  n  de@ use  de@ to unlo  a@  de@ t  a  ble@ de@  a  t  a@ to@ a@ st  a  ge.
+</  de  et  a  ils>
 
 ---
 
 ### Question 119
-**True or False:** A 4X-Large Warehouse may, at times, take longer to provision than an X-Small Warehouse.
+**True or F  a  lse:**@ a@ 4X-L  a  rge W  a  rehouse m  a  y,@ a  t times, t  a  ke longer to provision th  a  n@ a  n X-Sm  a  ll W  a  rehouse.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**True.** Larger warehouses require more compute nodes to be provisioned, which can take more time, especially if there isn't spare capacity immediately available.
-</details>
+**True.** L  a  rger w  a  rehouses require more compute no  de  es to be provisione  de  , which c  a  n t  a  ke more time, especi  a  lly if there isn't sp  a  re c  a  p  a  city imme  de  i  a  tely@ a  v  a  il  a  ble.
+</  de  et  a  ils>
 
 ---
 
 ### Question 120
-How would you determine the appropriate size of the virtual warehouse used for a task?
+How woul  de@ you@ de  etermine the@ a  ppropri  a  te size of the virtu  a  l w  a  rehouse use  de@ for@ a@ t  a  sk?
 
--  A. Since a root task may execute concurrently, leave margin in the execution window to avoid missed executions
--  B. Query the size of a stream's content to help determine warehouse size
--  C. If using a stored procedure to execute multiple SQL statements, test-run the procedure separately first to size the compute resource
--  D. Configure the warehouse for automatic concurrency handling using a multi-cluster warehouse to match the task schedule
+-@  a  . Since@ a@ root t  a  sk m  a  y execute concurrently, le  a  ve m  a  rgin in the execution win  de  ow to@ a  voi  de@ misse  de@ executions
+-  B. Query the size of@ a@ stre  a  m's content to help@ de  etermine w  a  rehouse size
+-  C. If using@ a@ store  de@ proce  de  ure to execute multiple SQL st  a  tements, test-run the proce  de  ure sep  a  r  a  tely first to size the compute resource
+-@  de  . Configure the w  a  rehouse for@ a  utom  a  tic concurrency h  a  n  de  ling using@ a@ multi-cluster w  a  rehouse to m  a  tch the t  a  sk sche  de  ule
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C.** Test-run the stored procedure separately (outside the task) to correctly size the warehouse before scheduling it as a task.
-</details>
+**-  C.** Test-run the store  de@ proce  de  ure sep  a  r  a  tely (outsi  de  e the t  a  sk) to correctly size the w  a  rehouse before sche  de  uling it@ a  s@ a@ t  a  sk.
+</  de  et  a  ils>
 
 ---
 
 ### Question 121
-The Information Schema and Account Usage share provide storage information for which of the following objects? (Choose three.)
+The Inform  a  tion Schem  a@   a  n  de@   a  ccount Us  a  ge sh  a  re provi  de  e stor  a  ge inform  a  tion for which of the following objects? (Choose three.)
 
--  A. Users
--  B. Tables
--  C. Databases
--  D. Internal Stages
+-@  a  . Users
+-  B. T  a  bles
+-  C.@ de@  a  t  a  b  a  ses
+-@  de  . Intern  a  l St  a  ges
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**B, C, D** — Tables, Databases, and Internal Stages. User objects don't have "storage" metrics tracked this way.
-</details>
+**B, C,@ de  ** — T  a  bles,@ de@  a  t  a  b  a  ses,@ a  n  de@ Intern  a  l St  a  ges. User objects@ de  on't h  a  ve "stor  a  ge" metrics tr  a  cke  de@ this w  a  y.
+</  de  et  a  ils>
 
 ---
 
 ### Question 122
-What is the default file format used in the `COPY INTO` command if one is not specified?
+Wh  a  t is the@ de  ef  a  ult file form  a  t use  de@ in the `COPY INTO` comm  a  n  de@ if one is not specifie  de  ?
 
--  A. CSV
+-@  a  . CSV
 -  B. JSON
--  C. Parquet
--  D. XML
+-  C. P  a  rquet
+-@  de  . XML
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  A. CSV.**
-</details>
+**-@  a  . CSV.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 123
-**True or False:** Reader Accounts are able to extract data from shared data objects for use outside of Snowflake.
+**True or F  a  lse:** Re  a@  de  er@ a  ccounts@ a  re@ a  ble to extr  a  ct@ de@  a  t  a@ from sh  a  re  de@   de@  a  t  a@ objects for use outsi  de  e of Snowfl  a  ke.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** Reader accounts can only **query** shared data from within Snowflake — they cannot unload/export it for use outside the platform.
-</details>
+**F  a  lse.** Re  a@  de  er@ a  ccounts c  a  n only **query** sh  a  re  de@   de@  a  t  a@ from within Snowfl  a  ke — they c  a  nnot unlo  a@  de  /export it for use outsi  de  e the pl  a  tform.
+</  de  et  a  ils>
 
 ---
 
 ### Question 124
-**True or False:** You can define multiple columns within a clustering key on a table.
+**True or F  a  lse:** You c  a  n@ de  efine multiple columns within@ a@ clustering key on@ a@ t  a  ble.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**True.** A clustering key can be composed of multiple columns or expressions.
-</details>
+**True.**@ a@ clustering key c  a  n be compose  de@ of multiple columns or expressions.
+</  de  et  a  ils>
 
 ---
 
 ### Question 125
-**True or False:** Snowflake enforces unique, primary key, and foreign key constraints during DML operations.
+**True or F  a  lse:** Snowfl  a  ke enforces unique, prim  a  ry key,@ a  n  de@ foreign key constr  a  ints@ de  uring@ de  ML oper  a  tions.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** These constraint types are supported for **documentation/informational purposes** and by some tools, but are **not enforced** by Snowflake at DML time (NOT NULL is the exception — it *is* enforced).
-</details>
+**F  a  lse.** These constr  a  int types@ a  re supporte  de@ for **  de  ocument  a  tion/inform  a  tion  a  l purposes**@ a  n  de@ by some tools, but@ a  re **not enforce  de  ** by Snowfl  a  ke@ a  t@ de  ML time (NOT NULL is the exception — it *is* enforce  de  ).
+</  de  et  a  ils>
 
 ---
 
 ### Question 126
-**True or False:** Loading data into Snowflake requires that source data files be no larger than 16 M-  B.
+**True or F  a  lse:** Lo  a@  de  ing@ de@  a  t  a@ into Snowfl  a  ke requires th  a  t source@ de@  a  t  a@ files be no l  a  rger th  a  n 16 M-  B.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** There's no hard 16 MB limit on source file size for loading. Snowflake *recommends* compressed files in the 100–250 MB range for load efficiency, but larger files are allowed (they just load less efficiently/in parallel).
-</details>
+**F  a  lse.** There's no h  a  r  de@ 16 MB limit on source file size for lo  a@  de  ing. Snowfl  a  ke *recommen  de  s* compresse  de@ files in the 100–250 MB r  a  nge for lo  a@  de@ efficiency, but l  a  rger files@ a  re@ a  llowe  de@ (they just lo  a@  de@ less efficiently/in p  a  r  a  llel).
+</  de  et  a  ils>
 
 ---
 
 ### Question 127
-**True or False:** A Virtual Warehouse can be resized while suspended.
+**True or F  a  lse:**@ a@ Virtu  a  l W  a  rehouse c  a  n be resize  de@ while suspen  de  e  de  .
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**True.** `ALTER WAREHOUSE ... SET WAREHOUSE_SIZE = ...` works whether the warehouse is running or suspended.
-</details>
+**True.** `  a  LTER W  a  REHOUSE ... SET W  a  REHOUSE_SIZE = ...` works whether the w  a  rehouse is running or suspen  de  e  de  .
+</  de  et  a  ils>
 
 ---
 
 ### Question 128
-**True or False:** When you create a custom role, it is a best practice to immediately grant that role to ACCOUNTADMIN.
+**True or F  a  lse:** When you cre  a  te@ a@ custom role, it is@ a@ best pr  a  ctice to imme  de  i  a  tely gr  a  nt th  a  t role to@ a  CCOUNT  a@  de  MIN.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** Best practice is to build a role hierarchy under **SYSADMIN**, not to grant custom roles directly to ACCOUNTADMIN (which should be reserved for account-level administration, not day-to-day object ownership).
-</details>
+**F  a  lse.** Best pr  a  ctice is to buil  de@   a@ role hier  a  rchy un  de  er **SYS  a@  de  MIN**, not to gr  a  nt custom roles@ de  irectly to@ a  CCOUNT  a@  de  MIN (which shoul  de@ be reserve  de@ for@ a  ccount-level@ a@  de  ministr  a  tion, not@ de@  a  y-to-  de@  a  y object ownership).
+</  de  et  a  ils>
 
 ---
 
 ### Question 129
-Which of the following accurately represents how a table fits into Snowflake's logical container hierarchy?
+Which of the following@ a  ccur  a  tely represents how@ a@ t  a  ble fits into Snowfl  a  ke's logic  a  l cont  a  iner hier  a  rchy?
 
--  A. Account → Table → Schema → Database
--  B. Account → Database → Schema → Table
--  C. Database → Table → Schema → Account
--  D. Table → Schema → Account → Database
+-@  a  .@ a  ccount → T  a  ble → Schem  a@ →@ de@  a  t  a  b  a  se
+-  B.@ a  ccount →@ de@  a  t  a  b  a  se → Schem  a@ → T  a  ble
+-  C.@ de@  a  t  a  b  a  se → T  a  ble → Schem  a@ →@ a  ccount
+-@  de  . T  a  ble → Schem  a@ →@ a  ccount →@ de@  a  t  a  b  a  se
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B. Account → Database → Schema → Table.**
-</details>
+**-  B.@ a  ccount →@ de@  a  t  a  b  a  se → Schem  a@ → T  a  ble.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 130
-**True or False:** All Snowflake table types include Fail-safe storage.
+**True or F  a  lse:**@ a  ll Snowfl  a  ke t  a  ble types inclu  de  e F  a  il-s  a  fe stor  a  ge.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** Only **permanent** tables have Fail-safe. Temporary and transient tables do not.
-</details>
+**F  a  lse.** Only **perm  a  nent** t  a  bles h  a  ve F  a  il-s  a  fe. Tempor  a  ry@ a  n  de@ tr  a  nsient t  a  bles@ de  o not.
+</  de  et  a  ils>
 
 ---
 
 ### Question 131
-What are two ways to create and manage Data Shares in Snowflake? (Choose two.)
+Wh  a  t@ a  re two w  a  ys to cre  a  te@ a  n  de@ m  a  n  a  ge@ de@  a  t  a@ Sh  a  res in Snowfl  a  ke? (Choose two.)
 
--  A. Via the Snowflake Web Interface (Snowsight)
--  B. Via a session parameter
--  C. Via SQL commands
--  D. Via Virtual Warehouses
+-@  a  . Vi  a@ the Snowfl  a  ke Web Interf  a  ce (Snowsight)
+-  B. Vi  a@   a@ session p  a  r  a  meter
+-  C. Vi  a@ SQL comm  a  n  de  s
+-@  de  . Vi  a@ Virtu  a  l W  a  rehouses
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**A** and **C** — through Snowsight or via SQL (`CREATE SHARE`, `GRANT ... TO SHARE`, et-  C.).
-</details>
+**  a  **@ a  n  de@ **C** — through Snowsight or vi  a@ SQL (`CRE  a  TE SH  a  RE`, `GR  a  NT ... TO SH  a  RE`, et-  C.).
+</  de  et  a  ils>
 
 ---
 
 ### Question 132
-**True or False:** Time Travel can be completely disabled for a Snowflake account.
+**True or F  a  lse:** Time Tr  a  vel c  a  n be completely@ de  is  a  ble  de@ for@ a@ Snowfl  a  ke@ a  ccount.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** Time Travel cannot be turned off entirely. You can set `DATA_RETENTION_TIME_IN_DAYS = 0` at the account level (which effectively minimizes it for new objects), but the feature itself, and Fail-safe, cannot be disabled outright.
-</details>
+**F  a  lse.** Time Tr  a  vel c  a  nnot be turne  de@ off entirely. You c  a  n set `  de@  a  T  a  _RETENTION_TIME_IN_  de@  a  YS = 0`@ a  t the@ a  ccount level (which effectively minimizes it for new objects), but the fe  a  ture itself,@ a  n  de@ F  a  il-s  a  fe, c  a  nnot be@ de  is  a  ble  de@ outright.
+</  de  et  a  ils>
 
 ---
 
 ### Question 133
-**True or False:** It is possible for a user to run a query against the query result cache without requiring an active Warehouse.
+**True or F  a  lse:** It is possible for@ a@ user to run@ a@ query@ a  g  a  inst the query result c  a  che without requiring@ a  n@ a  ctive W  a  rehouse.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**True.** The result cache is served by the Cloud Services layer, so a **running warehouse is not required** to retrieve a previously cached result.
-</details>
+**True.** The result c  a  che is serve  de@ by the Clou  de@ Services l  a  yer, so@ a@ **running w  a  rehouse is not require  de  ** to retrieve@ a@ previously c  a  che  de@ result.
+</  de  et  a  ils>
 
 ---
 
 ### Question 134
-**True or False:** When Snowflake is configured to use Single Sign-On (SSO), Snowflake receives the usernames and credentials from the SSO service and loads them into the customer's Snowflake account.
+**True or F  a  lse:** When Snowfl  a  ke is configure  de@ to use Single Sign-On (SSO), Snowfl  a  ke receives the usern  a  mes@ a  n  de@ cre  de  enti  a  ls from the SSO service@ a  n  de@ lo  a@  de  s them into the customer's Snowfl  a  ke@ a  ccount.
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**False.** In federated authentication, Snowflake never receives or stores the user's IdP credentials — only a signed SAML assertion confirming successful authentication.
-</details>
+**F  a  lse.** In fe  de  er  a  te  de@   a  uthentic  a  tion, Snowfl  a  ke never receives or stores the user's I  de  P cre  de  enti  a  ls — only@ a@ signe  de@ S  a  ML@ a  ssertion confirming successful@ a  uthentic  a  tion.
+</  de  et  a  ils>
 
 ---
 
 ### Question 135
-Which of the following are best practices for loading data into Snowflake? (Choose three.)
+Which of the following@ a  re best pr  a  ctices for lo  a@  de  ing@ de@  a  t  a@ into Snowfl  a  ke? (Choose three.)
 
--  A. Aim to produce compressed data files in the 100–250 MB range
--  B. Load data from a cloud storage service in a different region/platform than your Snowflake account, to save on cost
--  C. Enclose fields that contain delimiter characters in single or double quotes
--  D. Split large files into a greater number of smaller files to better distribute the load across compute resources
--  E. When planning warehouse size for loading, start with the largest warehouse possible
--  F. Partition staged data into large folders with random paths, letting Snowflake determine the best load strategy
+-@  a  .@ a  im to pro  de  uce compresse  de@   de@  a  t  a@ files in the 100–250 MB r  a  nge
+-  B. Lo  a@  de@   de@  a  t  a@ from@ a@ clou  de@ stor  a  ge service in@ a@   de  ifferent region/pl  a  tform th  a  n your Snowfl  a  ke@ a  ccount, to s  a  ve on cost
+-  C. Enclose fiel  de  s th  a  t cont  a  in@ de  elimiter ch  a  r  a  cters in single or@ de  ouble quotes
+-@  de  . Split l  a  rge files into@ a@ gre  a  ter number of sm  a  ller files to better@ de  istribute the lo  a@  de@   a  cross compute resources
+-  E. When pl  a  nning w  a  rehouse size for lo  a@  de  ing, st  a  rt with the l  a  rgest w  a  rehouse possible
+-  F. P  a  rtition st  a  ge  de@   de@  a  t  a@ into l  a  rge fol  de  ers with r  a  n  de  om p  a  ths, letting Snowfl  a  ke@ de  etermine the best lo  a@  de@ str  a  tegy
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**A, C, -  D.**
-</details>
+**  a  , C, -@  de  .**
+</  de  et  a  ils>
 
 ---
 
 ### Question 136
-Which feature is used both for querying and for restoring data?
+Which fe  a  ture is use  de@ both for querying@ a  n  de@ for restoring@ de@  a  t  a  ?
 
--  A. Clustering keys
--  B. Time Travel
--  C. Fail-safe
--  D. Cloning
+-@  a  . Clustering keys
+-  B. Time Tr  a  vel
+-  C. F  a  il-s  a  fe
+-@  de  . Cloning
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B. Time Travel** — you can both query historical data (`AT`/`BEFORE`) and restore dropped objects (`UNDROP`) with it. Fail-safe is restore-only (and only by Snowflake Support), not queryable by users.
-</details>
+**-  B. Time Tr  a  vel** — you c  a  n both query historic  a  l@ de@  a  t  a@ (`  a  T`/`BEFORE`)@ a  n  de@ restore@ de  roppe  de@ objects (`UN  de  ROP`) with it. F  a  il-s  a  fe is restore-only (  a  n  de@ only by Snowfl  a  ke Support), not query  a  ble by users.
+</  de  et  a  ils>
 
 ---
 
 ### Question 137
-What do the terms "scale up" and "scale out" refer to in Snowflake? (Choose two.)
+Wh  a  t@ de  o the terms "sc  a  le up"@ a  n  de@ "sc  a  le out" refer to in Snowfl  a  ke? (Choose two.)
 
--  A. Scaling out adds clusters of the same size to a virtual warehouse to handle more concurrent queries
--  B. Scaling out adds clusters of varying sizes to a virtual warehouse
--  C. Scaling out adds additional database servers to an existing running cluster
--  D. Snowflake recommends using both scaling up and scaling out together to handle more concurrent queries
--  E. Scaling up resizes a virtual warehouse so it can handle more complex workloads
--  F. Scaling up adds additional database servers to an existing running cluster
+-@  a  . Sc  a  ling out@ a@  de@  de  s clusters of the s  a  me size to@ a@ virtu  a  l w  a  rehouse to h  a  n  de  le more concurrent queries
+-  B. Sc  a  ling out@ a@  de@  de  s clusters of v  a  rying sizes to@ a@ virtu  a  l w  a  rehouse
+-  C. Sc  a  ling out@ a@  de@  de  s@ a@  de@  de  ition  a  l@ de@  a  t  a  b  a  se servers to@ a  n existing running cluster
+-@  de  . Snowfl  a  ke recommen  de  s using both sc  a  ling up@ a  n  de@ sc  a  ling out together to h  a  n  de  le more concurrent queries
+-  E. Sc  a  ling up resizes@ a@ virtu  a  l w  a  rehouse so it c  a  n h  a  n  de  le more complex worklo  a@  de  s
+-  F. Sc  a  ling up@ a@  de@  de  s@ a@  de@  de  ition  a  l@ de@  a  t  a  b  a  se servers to@ a  n existing running cluster
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**A** and **-  E.**
-</details>
+**  a  **@ a  n  de@ **-  E.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 138
-What is the minimum Snowflake edition that has column-level security enabled?
+Wh  a  t is the minimum Snowfl  a  ke e  de  ition th  a  t h  a  s column-level security en  a  ble  de  ?
 
--  A. Standard
+-@  a  . St  a  n  de@  a  r  de  
 -  B. Enterprise
--  C. Business Critical
--  D. Virtual Private Snowflake
+-  C. Business Critic  a  l
+-@  de  . Virtu  a  l Priv  a  te Snowfl  a  ke
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B. Enterprise** (or higher). Confirmed current in Snowflake's edition documentation.
-</details>
+**-  B. Enterprise** (or higher). Confirme  de@ current in Snowfl  a  ke's e  de  ition@ de  ocument  a  tion.
+</  de  et  a  ils>
 
 ---
 
 ### Question 139
-What parameter controls whether a virtual warehouse starts immediately after the `CREATE WAREHOUSE` statement runs?
+Wh  a  t p  a  r  a  meter controls whether@ a@ virtu  a  l w  a  rehouse st  a  rts imme  de  i  a  tely@ a  fter the `CRE  a  TE W  a  REHOUSE` st  a  tement runs?
 
--  A. `INITIALLY_SUSPENDED = TRUE | FALSE`
--  B. `AUTO_RESUME = TRUE | FALSE`
--  C. `START_TIME = 60` (seconds from now)
--  D. `START_TIME = CURRENT_DATE()`
+-@  a  . `INITI  a  LLY_SUSPEN  de  E  de@ = TRUE | F  a  LSE`
+-  B. `  a  UTO_RESUME = TRUE | F  a  LSE`
+-  C. `ST  a  RT_TIME = 60` (secon  de  s from now)
+-@  de  . `ST  a  RT_TIME = CURRENT_  de@  a  TE()`
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  A. `INITIALLY_SUSPENDED`.**
-</details>
+**-@  a  . `INITI  a  LLY_SUSPEN  de  E  de  `.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 140
-When cloning a database, what is cloned with it? (Choose two.)
+When cloning@ a@   de@  a  t  a  b  a  se, wh  a  t is clone  de@ with it? (Choose two.)
 
--  A. Privileges granted **on** the database object itself
--  B. Existing child objects within the database
--  C. Future child objects (created after the clone) within the database
--  D. Privileges on the schemas/objects **within** the database
--  E. Only schemas and tables (no other object types)
+-@  a  . Privileges gr  a  nte  de@ **on** the@ de@  a  t  a  b  a  se object itself
+-  B. Existing chil  de@ objects within the@ de@  a  t  a  b  a  se
+-  C. Future chil  de@ objects (cre  a  te  de@   a  fter the clone) within the@ de@  a  t  a  b  a  se
+-@  de  . Privileges on the schem  a  s/objects **within** the@ de@  a  t  a  b  a  se
+-  E. Only schem  a  s@ a  n  de@ t  a  bles (no other object types)
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**B** and **-  D.** Existing child objects are copied into the clone, and grants that exist on those child objects carry over — but privileges granted directly **on** the database object itself are not copied, and future objects obviously aren't included since they didn't exist yet.
-</details>
+**B**@ a  n  de@ **-@  de  .** Existing chil  de@ objects@ a  re copie  de@ into the clone,@ a  n  de@ gr  a  nts th  a  t exist on those chil  de@ objects c  a  rry over — but privileges gr  a  nte  de@   de  irectly **on** the@ de@  a  t  a  b  a  se object itself@ a  re not copie  de  ,@ a  n  de@ future objects obviously@ a  ren't inclu  de  e  de@ since they@ de  i  de  n't exist yet.
+</  de  et  a  ils>
 
 ---
 
 ### Question 141
-Which of the following describes the Snowflake Cloud Services layer?
+Which of the following@ de  escribes the Snowfl  a  ke Clou  de@ Services l  a  yer?
 
--  A. Coordinates activities across the Snowflake account (authentication, metadata, optimization, et-  C.)
--  B. Executes queries submitted by Snowflake users
--  C. Manages quotas on Snowflake account storage
--  D. Manages the virtual warehouse cache to speed up queries
+-@  a  . Coor  de  in  a  tes@ a  ctivities@ a  cross the Snowfl  a  ke@ a  ccount (  a  uthentic  a  tion, met  a@  de@  a  t  a  , optimiz  a  tion, et-  C.)
+-  B. Executes queries submitte  de@ by Snowfl  a  ke users
+-  C. M  a  n  a  ges quot  a  s on Snowfl  a  ke@ a  ccount stor  a  ge
+-@  de  . M  a  n  a  ges the virtu  a  l w  a  rehouse c  a  che to spee  de@ up queries
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  A.** The Cloud Services layer coordinates the platform (auth, metadata, query parsing/optimization, security) — it does **not** execute queries (that's compute) or manage the local warehouse cache.
-</details>
+**-@  a  .** The Clou  de@ Services l  a  yer coor  de  in  a  tes the pl  a  tform (  a  uth, met  a@  de@  a  t  a  , query p  a  rsing/optimiz  a  tion, security) — it@ de  oes **not** execute queries (th  a  t's compute) or m  a  n  a  ge the loc  a  l w  a  rehouse c  a  che.
+</  de  et  a  ils>
 
 ---
 
 ### Question 142
-What is the maximum total Continuous Data Protection (CDP) time incurred for a temporary table?
+Wh  a  t is the m  a  ximum tot  a  l Continuous@ de@  a  t  a@ Protection (C  de  P) time incurre  de@ for@ a@ tempor  a  ry t  a  ble?
 
--  A. 30 days
--  B. 7 days
+-@  a  . 30@ de@  a  ys
+-  B. 7@ de@  a  ys
 -  C. 48 hours
--  D. 24 hours
+-@  de  . 24 hours
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D. 24 hours.** Temporary tables get up to 1 day of Time Travel and no Fail-safe, since they don't persist beyond the session/24 hours.
-</details>
+**-@  de  . 24 hours.** Tempor  a  ry t  a  bles get up to 1@ de@  a  y of Time Tr  a  vel@ a  n  de@ no F  a  il-s  a  fe, since they@ de  on't persist beyon  de@ the session/24 hours.
+</  de  et  a  ils>
 
 ---
 
 ### Question 143
-When reviewing a Query Profile, what is a symptom that a query is too large to fit into memory?
+When reviewing@ a@ Query Profile, wh  a  t is@ a@ symptom th  a  t@ a@ query is too l  a  rge to fit into memory?
 
--  A. A single join node uses more than [X]% of query time
--  B. Partitions scanned equals partitions total
--  C. An Aggregate operator node is present
--  D. The query is spilling to local or remote storage
+-@  a  .@ a@ single join no  de  e uses more th  a  n [X]% of query time
+-  B. P  a  rtitions sc  a  nne  de@ equ  a  ls p  a  rtitions tot  a  l
+-  C.@ a  n@ a  ggreg  a  te oper  a  tor no  de  e is present
+-@  de  . The query is spilling to loc  a  l or remote stor  a  ge
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D. The query is spilling to storage.** Spilling (especially to remote/cloud storage) indicates the warehouse doesn't have enough memory for the operation and is a classic sign to resize up.
-</details>
+**-@  de  . The query is spilling to stor  a  ge.** Spilling (especi  a  lly to remote/clou  de@ stor  a  ge) in  de  ic  a  tes the w  a  rehouse@ de  oesn't h  a  ve enough memory for the oper  a  tion@ a  n  de@ is@ a@ cl  a  ssic sign to resize up.
+</  de  et  a  ils>
 
 ---
 
 ### Question 144
-What type of query benefits the **most** from Search Optimization?
+Wh  a  t type of query benefits the **most** from Se  a  rch Optimiz  a  tion?
 
--  A. A query using only disjunction (OR) predicates
--  B. A query that includes analytical expressions
--  C. A query that uses equality predicates or predicates using `IN`
--  D. A query that filters on semi-structured data types
+-@  a  .@ a@ query using only@ de  isjunction (OR) pre  de  ic  a  tes
+-  B.@ a@ query th  a  t inclu  de  es@ a  n  a  lytic  a  l expressions
+-  C.@ a@ query th  a  t uses equ  a  lity pre  de  ic  a  tes or pre  de  ic  a  tes using `IN`
+-@  de  .@ a@ query th  a  t filters on semi-structure  de@   de@  a  t  a@ types
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C.** Search Optimization is designed for point-lookup queries — equality and `IN` predicates on high-cardinality columns.
-</details>
+**-  C.** Se  a  rch Optimiz  a  tion is@ de  esigne  de@ for point-lookup queries — equ  a  lity@ a  n  de@ `IN` pre  de  ic  a  tes on high-c  a  r  de  in  a  lity columns.
+</  de  et  a  ils>
 
 ---
 
 ### Question 145
-What transformations are supported in a `CREATE PIPE AS COPY FROM (SELECT ...)` statement? (Choose two.)
+Wh  a  t tr  a  nsform  a  tions@ a  re supporte  de@ in@ a@ `CRE  a  TE PIPE@ a  S COPY FROM (SELECT ...)` st  a  tement? (Choose two.)
 
--  A. Data can be filtered by an optional `WHERE` clause
--  B. Incoming data can be joined with other tables
--  C. Columns can be reordered
--  D. Columns can be omitted
--  E. Row-level access can be defined
+-@  a  .@ de@  a  t  a@ c  a  n be filtere  de@ by@ a  n option  a  l `WHERE` cl  a  use
+-  B. Incoming@ de@  a  t  a@ c  a  n be joine  de@ with other t  a  bles
+-  C. Columns c  a  n be reor  de  ere  de  
+-@  de  . Columns c  a  n be omitte  de  
+-  E. Row-level@ a  ccess c  a  n be@ de  efine  de  
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**C** and **-  D.** Snowpipe's `COPY` transformation supports column reordering, casting, and omission — but not joins, filters, or row access policies during the copy.
-</details>
+**C**@ a  n  de@ **-@  de  .** Snowpipe's `COPY` tr  a  nsform  a  tion supports column reor  de  ering, c  a  sting,@ a  n  de@ omission — but not joins, filters, or row@ a  ccess policies@ de  uring the copy.
+</  de  et  a  ils>
 
 ---
 
 ### Question 146
-Which of the following are characteristics of Snowflake virtual warehouses? (Choose two.)
+Which of the following@ a  re ch  a  r  a  cteristics of Snowfl  a  ke virtu  a  l w  a  rehouses? (Choose two.)
 
--  A. Auto-suspend applies only to the last-started warehouse in a multi-cluster warehouse
--  B. The ability to auto-suspend is only available in Enterprise Edition or above
--  C. SnowSQL supports both a configuration file and a command-line option for specifying a default warehouse
--  D. A user cannot specify a default warehouse when using the ODBC driver
--  E. The default virtual warehouse size can be changed at any time
+-@  a  .@ a  uto-suspen  de@   a  pplies only to the l  a  st-st  a  rte  de@ w  a  rehouse in@ a@ multi-cluster w  a  rehouse
+-  B. The@ a  bility to@ a  uto-suspen  de@ is only@ a  v  a  il  a  ble in Enterprise E  de  ition or@ a  bove
+-  C. SnowSQL supports both@ a@ configur  a  tion file@ a  n  de@   a@ comm  a  n  de  -line option for specifying@ a@   de  ef  a  ult w  a  rehouse
+-@  de  .@ a@ user c  a  nnot specify@ a@   de  ef  a  ult w  a  rehouse when using the O  de  BC@ de  river
+-  E. The@ de  ef  a  ult virtu  a  l w  a  rehouse size c  a  n be ch  a  nge  de@   a  t@ a  ny time
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**C** and **-  E.**
-</details>
+**C**@ a  n  de@ **-  E.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 147
-Which command should be used to load data from a file located in an external stage into a table in Snowflake?
+Which comm  a  n  de@ shoul  de@ be use  de@ to lo  a@  de@   de@  a  t  a@ from@ a@ file loc  a  te  de@ in@ a  n extern  a  l st  a  ge into@ a@ t  a  ble in Snowfl  a  ke?
 
--  A. `INSERT`
+-@  a  . `INSERT`
 -  B. `PUT`
 -  C. `GET`
--  D. `COPY INTO`
+-@  de  . `COPY INTO`
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D. `COPY INTO <table>`.**
-</details>
+**-@  de  . `COPY INTO <t  a  ble>`.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 148
-The Snowflake Data Cloud platform is described as having which of the following architectures?
+The Snowfl  a  ke@ de@  a  t  a@ Clou  de@ pl  a  tform is@ de  escribe  de@   a  s h  a  ving which of the following@ a  rchitectures?
 
--  A. Shared-disk
--  B. Shared-nothing
--  C. Multi-cluster, shared data
--  D. Serverless query engine
+-@  a  . Sh  a  re  de  -  de  isk
+-  B. Sh  a  re  de  -nothing
+-  C. Multi-cluster, sh  a  re  de@   de@  a  t  a  
+-@  de  . Serverless query engine
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C. Multi-cluster, shared data architecture.**
-</details>
+**-  C. Multi-cluster, sh  a  re  de@   de@  a  t  a@   a  rchitecture.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 149
-Which of the following is a data tokenization integration partner?
+Which of the following is@ a@   de@  a  t  a@ tokeniz  a  tion integr  a  tion p  a  rtner?
 
--  A. Protegrity
--  B. Tableau
+-@  a  . Protegrity
+-  B. T  a  ble  a  u
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  A. Protegrity.**
-</details>
+**-@  a  . Protegrity.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 150
-Which editions of Snowflake are commonly used to help manage compliance with Personal Identifiable Information (PII) requirements? (Choose two.)
+Which e  de  itions of Snowfl  a  ke@ a  re commonly use  de@ to help m  a  n  a  ge compli  a  nce with Person  a  l I  de  entifi  a  ble Inform  a  tion (PII) requirements? (Choose two.)
 
--  A. Custom Edition
--  B. Virtual Private Snowflake
--  C. Business Critical Edition
--  D. Standard Edition
--  E. Enterprise Edition
+-@  a  . Custom E  de  ition
+-  B. Virtu  a  l Priv  a  te Snowfl  a  ke
+-  C. Business Critic  a  l E  de  ition
+-@  de  . St  a  n  de@  a  r  de@ E  de  ition
+-  E. Enterprise E  de  ition
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**B** and **C** — Virtual Private Snowflake and Business Critical Edition provide the enhanced data protection features most relevant to sensitive/PII data compliance requirements.
-</details>
+**B**@ a  n  de@ **C** — Virtu  a  l Priv  a  te Snowfl  a  ke@ a  n  de@ Business Critic  a  l E  de  ition provi  de  e the enh  a  nce  de@   de@  a  t  a@ protection fe  a  tures most relev  a  nt to sensitive/PII@ de@  a  t  a@ compli  a  nce requirements.
+</  de  et  a  ils>
 
 ---
 
 ### Question 151
-What are supported file formats for **unloading** data from Snowflake? (Choose three.)
+Wh  a  t@ a  re supporte  de@ file form  a  ts for **unlo  a@  de  ing**@ de@  a  t  a@ from Snowfl  a  ke? (Choose three.)
 
--  A. XML
+-@  a  . XML
 -  B. JSON
--  C. Parquet
--  D. ORC
--  E. Avro
+-  C. P  a  rquet
+-@  de  . ORC
+-  E.@ a  vro
 -  F. CSV
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**B, C, F — JSON, Parquet, and CSV.**
+**B, C, F — JSON, P  a  rquet,@ a  n  de@ CSV.**
 
-**⚠ Updated:** The original source listed the answer as JSON/Parquet/Avro. Per current Snowflake documentation, `COPY INTO <location>` only supports **delimited (CSV/TSV), JSON, and Parquet** for unloading. XML, ORC, and Avro are **load-only** formats and cannot be used to unload dat-  A.
-</details>
+**⚠ Up  de@  a  te  de  :** The origin  a  l source liste  de@ the@ a  nswer@ a  s JSON/P  a  rquet/  a  vro. Per current Snowfl  a  ke@ de  ocument  a  tion, `COPY INTO <loc  a  tion>` only supports **  de  elimite  de@ (CSV/TSV), JSON,@ a  n  de@ P  a  rquet** for unlo  a@  de  ing. XML, ORC,@ a  n  de@   a  vro@ a  re **lo  a@  de  -only** form  a  ts@ a  n  de@ c  a  nnot be use  de@ to unlo  a@  de@   de@  a  t-@  a  .
+</  de  et  a  ils>
 
 ---
 
 ### Question 152
-The Snowflake Cloud Services layer is responsible for which two of the following tasks?
+The Snowfl  a  ke Clou  de@ Services l  a  yer is responsible for which two of the following t  a  sks?
 
--  A. Local disk caching
--  B. Authentication and access control
--  C. Metadata management
--  D. Query processing (execution)
--  E. Database storage
+-@  a  . Loc  a  l@ de  isk c  a  ching
+-  B.@ a  uthentic  a  tion@ a  n  de@   a  ccess control
+-  C. Met  a@  de@  a  t  a@ m  a  n  a  gement
+-@  de  . Query processing (execution)
+-  E.@ de@  a  t  a  b  a  se stor  a  ge
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**B** and **-  C.**
-</details>
+**B**@ a  n  de@ **-  C.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 153
-What is a key feature of Snowflake's architecture?
+Wh  a  t is@ a@ key fe  a  ture of Snowfl  a  ke's@ a  rchitecture?
 
--  A. Zero-copy cloning creates a mirror copy of a database that updates with the original
--  B. Software updates are automatically applied on a quarterly basis
--  C. Snowflake eliminates resource contention with its virtual warehouse implementation
--  D. Multi-cluster warehouses allow users to run a single query that spans across multiple clusters
--  E. Snowflake sorts data on ingest for fast retrieval by date
+-@  a  . Zero-copy cloning cre  a  tes@ a@ mirror copy of@ a@   de@  a  t  a  b  a  se th  a  t up  de@  a  tes with the origin  a  l
+-  B. Softw  a  re up  de@  a  tes@ a  re@ a  utom  a  tic  a  lly@ a  pplie  de@ on@ a@ qu  a  rterly b  a  sis
+-  C. Snowfl  a  ke elimin  a  tes resource contention with its virtu  a  l w  a  rehouse implement  a  tion
+-@  de  . Multi-cluster w  a  rehouses@ a  llow users to run@ a@ single query th  a  t sp  a  ns@ a  cross multiple clusters
+-  E. Snowfl  a  ke sorts@ de@  a  t  a@ on ingest for f  a  st retriev  a  l by@ de@  a  te
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C.** Because each virtual warehouse is an independent compute cluster operating on the same shared storage layer, workloads in one warehouse don't compete for resources with workloads in another.
-</details>
+**-  C.** Bec  a  use e  a  ch virtu  a  l w  a  rehouse is@ a  n in  de  epen  de  ent compute cluster oper  a  ting on the s  a  me sh  a  re  de@ stor  a  ge l  a  yer, worklo  a@  de  s in one w  a  rehouse@ de  on't compete for resources with worklo  a@  de  s in@ a  nother.
+</  de  et  a  ils>
 
 ---
 
 ### Question 154
-When publishing a Snowflake Data Marketplace listing into a remote region, what should be taken into consideration? (Choose two.)
+When publishing@ a@ Snowfl  a  ke@ de@  a  t  a@ M  a  rketpl  a  ce listing into@ a@ remote region, wh  a  t shoul  de@ be t  a  ken into consi  de  er  a  tion? (Choose two.)
 
--  A. There is a need to have, in the target region, a share created for each consumer
--  B. The listing metadata is replicated into all selected regions automatically, but the underlying data is not replicated until requested
--  C. The user must have the ORGADMIN role in at least one account to link accounts for replication
--  D. Shares attached to listings in remote regions can be viewed from any account in the organization
--  E. For a standard listing, the provider can wait until the first customer requests the data before replicating it to the target region
+-@  a  . There is@ a@ nee  de@ to h  a  ve, in the t  a  rget region,@ a@ sh  a  re cre  a  te  de@ for e  a  ch consumer
+-  B. The listing met  a@  de@  a  t  a@ is replic  a  te  de@ into@ a  ll selecte  de@ regions@ a  utom  a  tic  a  lly, but the un  de  erlying@ de@  a  t  a@ is not replic  a  te  de@ until requeste  de  
+-  C. The user must h  a  ve the ORG  a@  de  MIN role in@ a  t le  a  st one@ a  ccount to link@ a  ccounts for replic  a  tion
+-@  de  . Sh  a  res@ a  tt  a  che  de@ to listings in remote regions c  a  n be viewe  de@ from@ a  ny@ a  ccount in the org  a  niz  a  tion
+-  E. For@ a@ st  a  n  de@  a  r  de@ listing, the provi  de  er c  a  n w  a  it until the first customer requests the@ de@  a  t  a@ before replic  a  ting it to the t  a  rget region
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**B** and **-  E.**
-</details>
+**B**@ a  n  de@ **-  E.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 155
-When loading data into Snowflake via Snowpipe, what is the recommended compressed file size?
+When lo  a@  de  ing@ de@  a  t  a@ into Snowfl  a  ke vi  a@ Snowpipe, wh  a  t is the recommen  de  e  de@ compresse  de@ file size?
 
--  A. 10–50 MB
+-@  a  . 10–50 MB
 -  B. 100–250 MB
 -  C. 300–500 MB
--  D. 1000–1500 MB
+-@  de  . 1000–1500 MB
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
 **-  B. 100–250 M-  B.**
-</details>
+</  de  et  a  ils>
 
 ---
 
 ### Question 156
-Which Snowflake feature allows a user to substitute a randomly generated identifier for sensitive data — to prevent unauthorized users from accessing the real data — **before** loading it into Snowflake?
+Which Snowfl  a  ke fe  a  ture@ a  llows@ a@ user to substitute@ a@ r  a  n  de  omly gener  a  te  de@ i  de  entifier for sensitive@ de@  a  t  a@ — to prevent un  a  uthorize  de@ users from@ a  ccessing the re  a  l@ de@  a  t  a@ — **before** lo  a@  de  ing it into Snowfl  a  ke?
 
--  A. External Tokenization
--  B. External Tables
--  C. Materialized Views
--  D. Table Functions (UDTFs)
+-@  a  . Extern  a  l Tokeniz  a  tion
+-  B. Extern  a  l T  a  bles
+-  C. M  a  teri  a  lize  de@ Views
+-@  de  . T  a  ble Functions (U  de  TFs)
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  A. External Tokenization.**
-</details>
+**-@  a  . Extern  a  l Tokeniz  a  tion.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 157
-Which of the following are examples of operations that require an active Virtual Warehouse to complete, assuming no queries have been executed previously (i.e., nothing is cached)? (Choose three.)
+Which of the following@ a  re ex  a  mples of oper  a  tions th  a  t require@ a  n@ a  ctive Virtu  a  l W  a  rehouse to complete,@ a  ssuming no queries h  a  ve been execute  de@ previously (i.e., nothing is c  a  che  de  )? (Choose three.)
 
--  A. `MIN(<column>)`
+-@  a  . `MIN(<column>)`
 -  B. `COPY`
 -  C. `SUM(<column>)`
--  D. `UPDATE`
+-@  de  . `UP  de@  a  TE`
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**B, C, -  D.** `COPY`, `SUM()`, and `UPDATE` all require compute. A simple `MIN()`/`MAX()` with no `WHERE` clause can sometimes be resolved directly from micro-partition metadata (which Snowflake maintains regardless of warehouse state), without needing an active warehouse.
-</details>
+**B, C, -@  de  .** `COPY`, `SUM()`,@ a  n  de@ `UP  de@  a  TE`@ a  ll require compute.@ a@ simple `MIN()`/`M  a  X()` with no `WHERE` cl  a  use c  a  n sometimes be resolve  de@   de  irectly from micro-p  a  rtition met  a@  de@  a  t  a@ (which Snowfl  a  ke m  a  int  a  ins reg  a  r  de  less of w  a  rehouse st  a  te), without nee  de  ing@ a  n@ a  ctive w  a  rehouse.
+</  de  et  a  ils>
 
 ---
 
 ### Question 158
-What `SNOWFLAK-  E.ACCOUNT_USAGE` view contains information about which objects were read by queries within the last 365 days?
+Wh  a  t `SNOWFL  a  K-  E.  a  CCOUNT_US  a  GE` view cont  a  ins inform  a  tion@ a  bout which objects were re  a@  de@ by queries within the l  a  st 365@ de@  a  ys?
 
--  A. `VIEWS_HISTORY`
+-@  a  . `VIEWS_HISTORY`
 -  B. `OBJECT_HISTORY`
--  C. `ACCESS_HISTORY`
--  D. `LOGIN_HISTORY`
+-  C. `  a  CCESS_HISTORY`
+-@  de  . `LOGIN_HISTORY`
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C. `ACCESS_HISTORY`.**
-</details>
+**-  C. `  a  CCESS_HISTORY`.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 159
-Which feature is only available in the Enterprise Edition or higher?
+Which fe  a  ture is only@ a  v  a  il  a  ble in the Enterprise E  de  ition or higher?
 
--  A. Column-level security
--  B. SOC 2 Type II certification
--  C. Multi-factor Authentication (MFA)
--  D. Object-level access control
+-@  a  . Column-level security
+-  B. SOC 2 Type II certific  a  tion
+-  C. Multi-f  a  ctor@ a  uthentic  a  tion (MF  a  )
+-@  de  . Object-level@ a  ccess control
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  A. Column-level security.** SOC 2 Type II, MFA, and object-level access control are available in all editions, including Standard.
-</details>
+**-@  a  . Column-level security.** SOC 2 Type II, MF  a  ,@ a  n  de@ object-level@ a  ccess control@ a  re@ a  v  a  il  a  ble in@ a  ll e  de  itions, inclu  de  ing St  a  n  de@  a  r  de  .
+</  de  et  a  ils>
 
 ---
 
 ### Question 160
-Will data cached in a warehouse be lost when the warehouse is resized?
+Will@ de@  a  t  a@ c  a  che  de@ in@ a@ w  a  rehouse be lost when the w  a  rehouse is resize  de  ?
 
--  A. Possibly — if resized to a smaller size, the cache may no longer fit
--  B. Yes, because the compute resource is replaced in its entirety with a new compute resource
--  C. No, because the size of the cache is independent from the warehouse size
--  D. Yes, because the compute resource will no longer have access to the cache encryption key
+-@  a  . Possibly — if resize  de@ to@ a@ sm  a  ller size, the c  a  che m  a  y no longer fit
+-  B. Yes, bec  a  use the compute resource is repl  a  ce  de@ in its entirety with@ a@ new compute resource
+-  C. No, bec  a  use the size of the c  a  che is in  de  epen  de  ent from the w  a  rehouse size
+-@  de  . Yes, bec  a  use the compute resource will no longer h  a  ve@ a  ccess to the c  a  che encryption key
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B.** Resizing a warehouse provisions new compute nodes, so the previous local disk cache is lost regardless of direction (larger or smaller).
-</details>
+**-  B.** Resizing@ a@ w  a  rehouse provisions new compute no  de  es, so the previous loc  a  l@ de  isk c  a  che is lost reg  a  r  de  less of@ de  irection (l  a  rger or sm  a  ller).
+</  de  et  a  ils>
 
 ---
 
 ### Question 161
-Which semi-structured file formats are supported when **unloading** data from a table? (Choose two.)
+Which semi-structure  de@ file form  a  ts@ a  re supporte  de@ when **unlo  a@  de  ing**@ de@  a  t  a@ from@ a@ t  a  ble? (Choose two.)
 
--  A. ORC
+-@  a  . ORC
 -  B. XML
--  C. Avro
--  D. Parquet
+-  C.@ a  vro
+-@  de  . P  a  rquet
 -  E. JSON
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**D** and **E — Parquet and JSON.** ORC, XML, and Avro are load-only formats.
-</details>
+**  de  **@ a  n  de@ **E — P  a  rquet@ a  n  de@ JSON.** ORC, XML,@ a  n  de@   a  vro@ a  re lo  a@  de  -only form  a  ts.
+</  de  et  a  ils>
 
 ---
 
 ### Question 162
-A running virtual warehouse is suspended, then restarted. What is the **minimum** amount of time that the warehouse will be billed for upon restart?
+  a@ running virtu  a  l w  a  rehouse is suspen  de  e  de  , then rest  a  rte  de  . Wh  a  t is the **minimum**@ a  mount of time th  a  t the w  a  rehouse will be bille  de@ for upon rest  a  rt?
 
--  A. 1 second
--  B. 60 seconds
+-@  a  . 1 secon  de  
+-  B. 60 secon  de  s
 -  C. 5 minutes
--  D. 60 minutes
+-@  de  . 60 minutes
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B. 60 seconds.** Per-second billing kicks in after the first minute.
-</details>
+**-  B. 60 secon  de  s.** Per-secon  de@ billing kicks in@ a  fter the first minute.
+</  de  et  a  ils>
 
 ---
 
 ### Question 163
-What are the responsibilities of Snowflake's Cloud Services layer? (Choose three.)
+Wh  a  t@ a  re the responsibilities of Snowfl  a  ke's Clou  de@ Services l  a  yer? (Choose three.)
 
--  A. Authentication
--  B. Resource management
--  C. Virtual warehouse local disk caching
--  D. Query parsing and optimization
+-@  a  .@ a  uthentic  a  tion
+-  B. Resource m  a  n  a  gement
+-  C. Virtu  a  l w  a  rehouse loc  a  l@ de  isk c  a  ching
+-@  de  . Query p  a  rsing@ a  n  de@ optimiz  a  tion
 -  E. Query execution
--  F. Physical storage of micro-partitions
+-  F. Physic  a  l stor  a  ge of micro-p  a  rtitions
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**A, B, -  D.** Query execution (E) happens in the compute layer, and warehouse-local caching (C) and micro-partition storage (F) belong to the compute and storage layers respectively — not Cloud Services.
-</details>
+**  a  , B, -@  de  .** Query execution (E) h  a  ppens in the compute l  a  yer,@ a  n  de@ w  a  rehouse-loc  a  l c  a  ching (C)@ a  n  de@ micro-p  a  rtition stor  a  ge (F) belong to the compute@ a  n  de@ stor  a  ge l  a  yers respectively — not Clou  de@ Services.
+</  de  et  a  ils>
 
 ---
 
 ### Question 164
-How long is the Fail-safe period for temporary and transient tables?
+How long is the F  a  il-s  a  fe perio  de@ for tempor  a  ry@ a  n  de@ tr  a  nsient t  a  bles?
 
--  A. There is no Fail-safe period for these tables
--  B. 1 day
--  C. 14 days
--  D. 31 days
--  E. 90 days
+-@  a  . There is no F  a  il-s  a  fe perio  de@ for these t  a  bles
+-  B. 1@ de@  a  y
+-  C. 14@ de@  a  ys
+-@  de  . 31@ de@  a  ys
+-  E. 90@ de@  a  ys
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  A. No Fail-safe period.** Only permanent tables have Fail-safe.
-</details>
+**-@  a  . No F  a  il-s  a  fe perio  de  .** Only perm  a  nent t  a  bles h  a  ve F  a  il-s  a  fe.
+</  de  et  a  ils>
 
 ---
 
 ### Question 165
-Which command should be used to download files from a Snowflake stage to a local folder on a client machine?
+Which comm  a  n  de@ shoul  de@ be use  de@ to@ de  ownlo  a@  de@ files from@ a@ Snowfl  a  ke st  a  ge to@ a@ loc  a  l fol  de  er on@ a@ client m  a  chine?
 
--  A. `PUT`
+-@  a  . `PUT`
 -  B. `GET`
 -  C. `COPY INTO`
--  D. `SELECT`
+-@  de  . `SELECT`
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
 **-  B. `GET`.**
-</details>
+</  de  et  a  ils>
 
 ---
 
 ### Question 166
-How does Snowflake Fail-safe protect data in a table?
+How@ de  oes Snowfl  a  ke F  a  il-s  a  fe protect@ de@  a  t  a@ in@ a@ t  a  ble?
 
--  A. Fail-safe makes data available for up to 1 day, recoverable by user operations
--  B. Fail-safe makes data available for 7 days, recoverable by user operations
--  C. Fail-safe makes data available for 7 days, recoverable only by Snowflake Support
--  D. Fail-safe makes data available for up to 1 day, recoverable only by Snowflake Support
+-@  a  . F  a  il-s  a  fe m  a  kes@ de@  a  t  a@   a  v  a  il  a  ble for up to 1@ de@  a  y, recover  a  ble by user oper  a  tions
+-  B. F  a  il-s  a  fe m  a  kes@ de@  a  t  a@   a  v  a  il  a  ble for 7@ de@  a  ys, recover  a  ble by user oper  a  tions
+-  C. F  a  il-s  a  fe m  a  kes@ de@  a  t  a@   a  v  a  il  a  ble for 7@ de@  a  ys, recover  a  ble only by Snowfl  a  ke Support
+-@  de  . F  a  il-s  a  fe m  a  kes@ de@  a  t  a@   a  v  a  il  a  ble for up to 1@ de@  a  y, recover  a  ble only by Snowfl  a  ke Support
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C.** Fail-safe is a non-configurable, 7-day, disaster-recovery-only mechanism that requires contacting Snowflake Support — end users cannot self-service recover from it.
-</details>
+**-  C.** F  a  il-s  a  fe is@ a@ non-configur  a  ble, 7-  de@  a  y,@ de  is  a  ster-recovery-only mech  a  nism th  a  t requires cont  a  cting Snowfl  a  ke Support — en  de@ users c  a  nnot self-service recover from it.
+</  de  et  a  ils>
 
 ---
 
 ### Question 167
-A virtual warehouse is created:
+  a@ virtu  a  l w  a  rehouse is cre  a  te  de  :
 ```sql
-CREATE WAREHOUSE my_wh WITH
-  WAREHOUSE_SIZE = MEDIUM
-  AUTO_SUSPEND = 60
-  AUTO_RESUME = TRUE;
+CRE  a  TE W  a  REHOUSE my_wh WITH
+  W  a  REHOUSE_SIZE = ME  de  IUM
+@  a  UTO_SUSPEN  de@ = 60
+@  a  UTO_RESUME = TRUE;
 ```
-Its utilization graph over two days shows frequent, spiky bursts of concurrent activity throughout the day. What action should be taken to address this situation?
+Its utiliz  a  tion gr  a  ph over two@ de@  a  ys shows frequent, spiky bursts of concurrent@ a  ctivity throughout the@ de@  a  y. Wh  a  t@ a  ction shoul  de@ be t  a  ken to@ a@  de@  de  ress this situ  a  tion?
 
--  A. Increase the warehouse size from Medium to 2X-Large
--  B. Increase the value of `AUTO_SUSPEND`
--  C. Configure the warehouse as a multi-cluster warehouse
--  D. Lower the value of `AUTO_SUSPEND`
+-@  a  . Incre  a  se the w  a  rehouse size from Me  de  ium to 2X-L  a  rge
+-  B. Incre  a  se the v  a  lue of `  a  UTO_SUSPEN  de  `
+-  C. Configure the w  a  rehouse@ a  s@ a@ multi-cluster w  a  rehouse
+-@  de  . Lower the v  a  lue of `  a  UTO_SUSPEN  de  `
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C.** Bursty, concurrent workload patterns are best handled by **multi-cluster warehouses**, which spin additional clusters up/down automatically to absorb concurrency spikes — resizing (A) helps single-query performance, not concurrency.
-</details>
+**-  C.** Bursty, concurrent worklo  a@  de@ p  a  tterns@ a  re best h  a  n  de  le  de@ by **multi-cluster w  a  rehouses**, which spin@ a@  de@  de  ition  a  l clusters up/  de  own@ a  utom  a  tic  a  lly to@ a  bsorb concurrency spikes — resizing (  a  ) helps single-query perform  a  nce, not concurrency.
+</  de  et  a  ils>
 
 ---
 
 ### Question 168
-Which minimum Snowflake edition provides a fully dedicated, isolated environment (including a dedicated metadata/cloud services layer not shared with other accounts)?
+Which minimum Snowfl  a  ke e  de  ition provi  de  es@ a@ fully@ de  e  de  ic  a  te  de  , isol  a  te  de@ environment (inclu  de  ing@ a@   de  e  de  ic  a  te  de@ met  a@  de@  a  t  a  /clou  de@ services l  a  yer not sh  a  re  de@ with other@ a  ccounts)?
 
--  A. Standard
+-@  a  . St  a  n  de@  a  r  de  
 -  B. Enterprise
--  C. Business Critical
--  D. Virtual Private Snowflake
+-  C. Business Critic  a  l
+-@  de  . Virtu  a  l Priv  a  te Snowfl  a  ke
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D. Virtual Private Snowflake (VPS).** VPS is Snowflake's highest tier, offering a completely separate environment with no shared hardware/resources with accounts outside the VPS.
-</details>
+**-@  de  . Virtu  a  l Priv  a  te Snowfl  a  ke (VPS).** VPS is Snowfl  a  ke's highest tier, offering@ a@ completely sep  a  r  a  te environment with no sh  a  re  de@ h  a  r  de  w  a  re/resources with@ a  ccounts outsi  de  e the VPS.
+</  de  et  a  ils>
 
 ---
 
 ### Question 169
-Network policies can be set at which Snowflake levels? (Choose two.)
+Network policies c  a  n be set@ a  t which Snowfl  a  ke levels? (Choose two.)
 
--  A. Role
--  B. Schema
+-@  a  . Role
+-  B. Schem  a  
 -  C. User
--  D. Database
--  E. Account
--  F. Table
+-@  de  .@ de@  a  t  a  b  a  se
+-  E.@ a  ccount
+-  F. T  a  ble
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**C** and **E** — User and Account levels (network policies can also be attached to security integrations in current Snowflake, but of the options given, User and Account are correct).
-</details>
+**C**@ a  n  de@ **E** — User@ a  n  de@   a  ccount levels (network policies c  a  n@ a  lso be@ a  tt  a  che  de@ to security integr  a  tions in current Snowfl  a  ke, but of the options given, User@ a  n  de@   a  ccount@ a  re correct).
+</  de  et  a  ils>
 
 ---
 
 ### Question 170
-What are the correct default parameters for Time Travel and Fail-safe in Snowflake **Enterprise Edition**?
+Wh  a  t@ a  re the correct@ de  ef  a  ult p  a  r  a  meters for Time Tr  a  vel@ a  n  de@ F  a  il-s  a  fe in Snowfl  a  ke **Enterprise E  de  ition**?
 
--  A. Default Time Travel = 0 days, Max Time Travel = 30 days, Fail-safe = 1 day
--  B. Default Time Travel = 1 day, Max Time Travel = 365 days, Fail-safe = 7 days
--  C. Default Time Travel = 0 days, Max Time Travel = 90 days, Fail-safe = 7 days
--  D. Default Time Travel = 1 day, Max Time Travel = 90 days, Fail-safe = 7 days
--  E. Default Time Travel = 7 days, Max Time Travel = 1 day, Fail-safe = 90 days
+-@  a  .@ de  ef  a  ult Time Tr  a  vel = 0@ de@  a  ys, M  a  x Time Tr  a  vel = 30@ de@  a  ys, F  a  il-s  a  fe = 1@ de@  a  y
+-  B.@ de  ef  a  ult Time Tr  a  vel = 1@ de@  a  y, M  a  x Time Tr  a  vel = 365@ de@  a  ys, F  a  il-s  a  fe = 7@ de@  a  ys
+-  C.@ de  ef  a  ult Time Tr  a  vel = 0@ de@  a  ys, M  a  x Time Tr  a  vel = 90@ de@  a  ys, F  a  il-s  a  fe = 7@ de@  a  ys
+-@  de  .@ de  ef  a  ult Time Tr  a  vel = 1@ de@  a  y, M  a  x Time Tr  a  vel = 90@ de@  a  ys, F  a  il-s  a  fe = 7@ de@  a  ys
+-  E.@ de  ef  a  ult Time Tr  a  vel = 7@ de@  a  ys, M  a  x Time Tr  a  vel = 1@ de@  a  y, F  a  il-s  a  fe = 90@ de@  a  ys
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D.** Default Time Travel retention is 1 day, extendable up to a maximum of 90 days with Enterprise Edition or higher, and Fail-safe is a fixed 7 days. Confirmed current against Snowflake's Time Travel documentation.
-</details>
+**-@  de  .**@ de  ef  a  ult Time Tr  a  vel retention is 1@ de@  a  y, exten  de@  a  ble up to@ a@ m  a  ximum of 90@ de@  a  ys with Enterprise E  de  ition or higher,@ a  n  de@ F  a  il-s  a  fe is@ a@ fixe  de@ 7@ de@  a  ys. Confirme  de@ current@ a  g  a  inst Snowfl  a  ke's Time Tr  a  vel@ de  ocument  a  tion.
+</  de  et  a  ils>
 
 ---
 
 ### Question 171
-Which of the following objects are contained within a schema? (Choose two.)
+Which of the following objects@ a  re cont  a  ine  de@ within@ a@ schem  a  ? (Choose two.)
 
--  A. Role
--  B. Table
--  C. Warehouse
--  D. External table
+-@  a  . Role
+-  B. T  a  ble
+-  C. W  a  rehouse
+-@  de  . Extern  a  l t  a  ble
 -  E. User
--  F. Share
+-  F. Sh  a  re
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**B** and **D** — Tables and External Tables. Roles, warehouses, users, and shares are all account-level objects, not schema-level objects.
-</details>
+**B**@ a  n  de@ **  de  ** — T  a  bles@ a  n  de@ Extern  a  l T  a  bles. Roles, w  a  rehouses, users,@ a  n  de@ sh  a  res@ a  re@ a  ll@ a  ccount-level objects, not schem  a  -level objects.
+</  de  et  a  ils>
 
 ---
 
 ### Question 172
-Which of the following statements describe features of Snowflake data caching? (Choose two.)
+Which of the following st  a  tements@ de  escribe fe  a  tures of Snowfl  a  ke@ de@  a  t  a@ c  a  ching? (Choose two.)
 
--  A. When a virtual warehouse is suspended, its local disk data cache is saved to remote storage
--  B. When the data cache is full, the least-recently-used data is cleared to make room
--  C. A user can only access their own queries from the query result cache
--  D. A user must set a parameter to `TRUE` to enable the metadata cache
--  E. The `RESULT_SCAN` table function can access and filter the contents of the query result cache
+-@  a  . When@ a@ virtu  a  l w  a  rehouse is suspen  de  e  de  , its loc  a  l@ de  isk@ de@  a  t  a@ c  a  che is s  a  ve  de@ to remote stor  a  ge
+-  B. When the@ de@  a  t  a@ c  a  che is full, the le  a  st-recently-use  de@   de@  a  t  a@ is cle  a  re  de@ to m  a  ke room
+-  C.@ a@ user c  a  n only@ a  ccess their own queries from the query result c  a  che
+-@  de  .@ a@ user must set@ a@ p  a  r  a  meter to `TRUE` to en  a  ble the met  a@  de@  a  t  a@ c  a  che
+-  E. The `RESULT_SC  a  N` t  a  ble function c  a  n@ a  ccess@ a  n  de@ filter the contents of the query result c  a  che
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**B** and **-  E.**
-</details>
+**B**@ a  n  de@ **-  E.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 173
-A table needs to be loaded. The input data is in JSON format, consisting of a concatenation of multiple JSON documents. The file is 3 GB, and an X-Small warehouse is being used with:
+  a@ t  a  ble nee  de  s to be lo  a@  de  e  de  . The input@ de@  a  t  a@ is in JSON form  a  t, consisting of@ a@ conc  a  ten  a  tion of multiple JSON@ de  ocuments. The file is 3 GB,@ a  n  de@   a  n X-Sm  a  ll w  a  rehouse is being use  de@ with:
 ```sql
-COPY INTO sample FROM @stage FILE_FORMAT = (TYPE = JSON)
+COPY INTO s  a  mple FROM @st  a  ge FILE_FORM  a  T = (TYPE = JSON)
 ```
-The load fails with:
+The lo  a@  de@ f  a  ils with:
 ```
-Max LOB size (16777216) exceeded. Actual size of parsed column is 17894470.
+M  a  x LOB size (16777216) excee  de  e  de  .@ a  ctu  a  l size of p  a  rse  de@ column is 17894470.
 ```
-How can this issue be resolved?
+How c  a  n this issue be resolve  de  ?
 
--  A. Compress the file before loading it
--  B. Split the file into multiple files in the recommended 100–250 MB size range
--  C. Use a larger-sized warehouse
--  D. Set `STRIP_OUTER_ARRAY = TRUE` in the `COPY INTO` command
+-@  a  . Compress the file before lo  a@  de  ing it
+-  B. Split the file into multiple files in the recommen  de  e  de@ 100–250 MB size r  a  nge
+-  C. Use@ a@ l  a  rger-size  de@ w  a  rehouse
+-@  de  . Set `STRIP_OUTER_  a  RR  a  Y = TRUE` in the `COPY INTO` comm  a  n  de  
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D.** The error means a single parsed VARIANT value exceeds the 16 MB limit — this happens when multiple JSON documents are wrapped/concatenated into one oversized structure. `STRIP_OUTER_ARRAY = TRUE` breaks the outer array into individual rows so each parsed value stays under the limit.
-</details>
+**-@  de  .** The error me  a  ns@ a@ single p  a  rse  de@ V  a  RI  a  NT v  a  lue excee  de  s the 16 MB limit — this h  a  ppens when multiple JSON@ de  ocuments@ a  re wr  a  ppe  de  /conc  a  ten  a  te  de@ into one oversize  de@ structure. `STRIP_OUTER_  a  RR  a  Y = TRUE` bre  a  ks the outer@ a  rr  a  y into in  de  ivi  de  u  a  l rows so e  a  ch p  a  rse  de@ v  a  lue st  a  ys un  de  er the limit.
+</  de  et  a  ils>
 
 ---
 
 ### Question 174
-What is a feature of a stored procedure in Snowflake?
+Wh  a  t is@ a@ fe  a  ture of@ a@ store  de@ proce  de  ure in Snowfl  a  ke?
 
--  A. They can access secured metadata across all databases regardless of role
--  B. They can only access tables from a single database
--  C. They can only contain a single SQL statement
--  D. They can be created to run with either the caller's rights or the owner's rights
+-@  a  . They c  a  n@ a  ccess secure  de@ met  a@  de@  a  t  a@   a  cross@ a  ll@ de@  a  t  a  b  a  ses reg  a  r  de  less of role
+-  B. They c  a  n only@ a  ccess t  a  bles from@ a@ single@ de@  a  t  a  b  a  se
+-  C. They c  a  n only cont  a  in@ a@ single SQL st  a  tement
+-@  de  . They c  a  n be cre  a  te  de@ to run with either the c  a  ller's rights or the owner's rights
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D.** Stored procedures support both **caller's rights** and **owner's rights** execution contexts.
-</details>
+**-@  de  .** Store  de@ proce  de  ures support both **c  a  ller's rights**@ a  n  de@ **owner's rights** execution contexts.
+</  de  et  a  ils>
 
 ---
 
 ### Question 175
-Which columns are part of the result set of the `LATERAL FLATTEN` command? (Choose two.)
+Which columns@ a  re p  a  rt of the result set of the `L  a  TER  a  L FL  a  TTEN` comm  a  n  de  ? (Choose two.)
 
--  A. `CONTENT`
--  B. `PATH`
+-@  a  . `CONTENT`
+-  B. `P  a  TH`
 -  C. `BYTE_SIZE`
--  D. `INDEX`
--  E. `DATATYPE`
+-@  de  . `IN  de  EX`
+-  E. `  de@  a  T  a  TYPE`
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**B** and **D** — `PATH` and `INDEX`. The full `FLATTEN` output includes `SEQ`, `KEY`, `PATH`, `INDEX`, `VALUE`, and `THIS` — not `CONTENT`, `BYTE_SIZE`, or `DATATYPE`.
-</details>
+**B**@ a  n  de@ **  de  ** — `P  a  TH`@ a  n  de@ `IN  de  EX`. The full `FL  a  TTEN` output inclu  de  es `SEQ`, `KEY`, `P  a  TH`, `IN  de  EX`, `V  a  LUE`,@ a  n  de@ `THIS` — not `CONTENT`, `BYTE_SIZE`, or `  de@  a  T  a  TYPE`.
+</  de  et  a  ils>
 
 ---
 
 ### Question 176
-What is the minimum edition required to create a materialized view?
+Wh  a  t is the minimum e  de  ition require  de@ to cre  a  te@ a@ m  a  teri  a  lize  de@ view?
 
--  A. Standard Edition
--  B. Enterprise Edition
--  C. Business Critical Edition
--  D. Virtual Private Snowflake Edition
+-@  a  . St  a  n  de@  a  r  de@ E  de  ition
+-  B. Enterprise E  de  ition
+-  C. Business Critic  a  l E  de  ition
+-@  de  . Virtu  a  l Priv  a  te Snowfl  a  ke E  de  ition
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B. Enterprise Edition** (or higher). Confirmed current.
-</details>
+**-  B. Enterprise E  de  ition** (or higher). Confirme  de@ current.
+</  de  et  a  ils>
 
 ---
 
 ### Question 177
-Which Snowflake function interprets an input string as a JSON document and produces a VARIANT value?
+Which Snowfl  a  ke function interprets@ a  n input string@ a  s@ a@ JSON@ de  ocument@ a  n  de@ pro  de  uces@ a@ V  a  RI  a  NT v  a  lue?
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**`PARSE_JSON`.**
-</details>
+**`P  a  RSE_JSON`.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 178
-How are serverless features generally billed?
+How@ a  re serverless fe  a  tures gener  a  lly bille  de  ?
 
--  A. Per second, multiplied by an automatic sizing determined for the job
--  B. Per minute, multiplied by an automatic sizing, with a minimum of one minute
--  C. Per second, multiplied by a fixed size set by a parameter
--  D. Serverless features are not billed unless the total monthly cost exceeds a set percentage of warehouse credits
+-@  a  . Per secon  de  , multiplie  de@ by@ a  n@ a  utom  a  tic sizing@ de  etermine  de@ for the job
+-  B. Per minute, multiplie  de@ by@ a  n@ a  utom  a  tic sizing, with@ a@ minimum of one minute
+-  C. Per secon  de  , multiplie  de@ by@ a@ fixe  de@ size set by@ a@ p  a  r  a  meter
+-@  de  . Serverless fe  a  tures@ a  re not bille  de@ unless the tot  a  l monthly cost excee  de  s@ a@ set percent  a  ge of w  a  rehouse cre  de  its
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  A.** Most serverless features (Automatic Clustering, Search Optimization, Query Acceleration, et-  C.) bill per-second based on compute that Snowflake automatically sizes for the job — with no fixed minimum.
+**-@  a  .** Most serverless fe  a  tures (  a  utom  a  tic Clustering, Se  a  rch Optimiz  a  tion, Query@ a  cceler  a  tion, et-  C.) bill per-secon  de@ b  a  se  de@ on compute th  a  t Snowfl  a  ke@ a  utom  a  tic  a  lly sizes for the job — with no fixe  de@ minimum.
 
-**Note:** Snowpipe specifically switched to a flat **per-GB** pricing model as of December 2025 (see Question 105), so it's now an exception to this general per-second serverless billing pattern.
-</details>
+**Note:** Snowpipe specific  a  lly switche  de@ to@ a@ fl  a  t **per-GB** pricing mo  de  el@ a  s of@ de  ecember 2025 (see Question 105), so it's now@ a  n exception to this gener  a  l per-secon  de@ serverless billing p  a  ttern.
+</  de  et  a  ils>
 
 ---
 
 ### Question 179
-Which Snowflake architectural layer is responsible for generating a query execution plan?
+Which Snowfl  a  ke@ a  rchitectur  a  l l  a  yer is responsible for gener  a  ting@ a@ query execution pl  a  n?
 
--  A. Compute
--  B. Data storage
--  C. Cloud Services
--  D. Cloud provider
+-@  a  . Compute
+-  B.@ de@  a  t  a@ stor  a  ge
+-  C. Clou  de@ Services
+-@  de  . Clou  de@ provi  de  er
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C. Cloud Services.** Query parsing and optimization happen here before execution is handed off to the compute (warehouse) layer.
-</details>
+**-  C. Clou  de@ Services.** Query p  a  rsing@ a  n  de@ optimiz  a  tion h  a  ppen here before execution is h  a  n  de  e  de@ off to the compute (w  a  rehouse) l  a  yer.
+</  de  et  a  ils>
 
 ---
 
 ### Question 180
-When unloading data to a stage, which of the following is a recommended practice?
+When unlo  a@  de  ing@ de@  a  t  a@ to@ a@ st  a  ge, which of the following is@ a@ recommen  de  e  de@ pr  a  ctice?
 
--  A. Set `SINGLE = TRUE` for larger files
--  B. Use headers when unloading with Parquet
--  C. Avoid the use of the `CAST` function
--  D. Define an individual, explicit file format
+-@  a  . Set `SINGLE = TRUE` for l  a  rger files
+-  B. Use he  a@  de  ers when unlo  a@  de  ing with P  a  rquet
+-  C.@ a  voi  de@ the use of the `C  a  ST` function
+-@  de  .@ de  efine@ a  n in  de  ivi  de  u  a  l, explicit file form  a  t
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D. Define an individual file format** rather than relying on defaults, so unload behavior (compression, delimiters, headers, et-  C.) is explicit and predictable.
-</details>
+**-@  de  .@ de  efine@ a  n in  de  ivi  de  u  a  l file form  a  t** r  a  ther th  a  n relying on@ de  ef  a  ults, so unlo  a@  de@ beh  a  vior (compression,@ de  elimiters, he  a@  de  ers, et-  C.) is explicit@ a  n  de@ pre  de  ict  a  ble.
+</  de  et  a  ils>
 
 ---
 
 ### Question 181
-Which SQL commands, when committed, will consume a stream and advance its offset? (Choose two.)
+Which SQL comm  a  n  de  s, when committe  de  , will consume@ a@ stre  a  m@ a  n  de@   a@  de  v  a  nce its offset? (Choose two.)
 
--  A. `UPDATE ... FROM STREAM`
--  B. `SELECT * FROM STREAM`
--  C. `INSERT INTO table SELECT * FROM STREAM`
--  D. `ALTER TABLE ... AS SELECT FROM STREAM`
--  E. `BEGIN ... COMMIT` (empty transaction)
+-@  a  . `UP  de@  a  TE ... FROM STRE  a  M`
+-  B. `SELECT * FROM STRE  a  M`
+-  C. `INSERT INTO t  a  ble SELECT * FROM STRE  a  M`
+-@  de  . `  a  LTER T  a  BLE ...@ a  S SELECT FROM STRE  a  M`
+-  E. `BEGIN ... COMMIT` (empty tr  a  ns  a  ction)
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**A** and **-  C.** A DML statement that references the stream as its source and is committed advances the stream's offset. A plain `SELECT` does not consume the stream.
-</details>
+**  a  **@ a  n  de@ **-  C.**@ a@   de  ML st  a  tement th  a  t references the stre  a  m@ a  s its source@ a  n  de@ is committe  de@   a@  de  v  a  nces the stre  a  m's offset.@ a@ pl  a  in `SELECT`@ de  oes not consume the stre  a  m.
+</  de  et  a  ils>
 
 ---
 
 ### Question 182
-Which methods can be used to delete staged files from a Snowflake stage? (Choose two.)
+Which metho  de  s c  a  n be use  de@ to@ de  elete st  a  ge  de@ files from@ a@ Snowfl  a  ke st  a  ge? (Choose two.)
 
--  A. Use the `DROP FILE` command after the load completes
--  B. Specify a purge option when creating the file format
--  C. Specify the `PURGE` copy option in the `COPY INTO <table>` command
--  D. Use the `REMOVE` command after the load completes
--  E. Use a `DELETE LOAD HISTORY` command after the load completes
+-@  a  . Use the `  de  ROP FILE` comm  a  n  de@   a  fter the lo  a@  de@ completes
+-  B. Specify@ a@ purge option when cre  a  ting the file form  a  t
+-  C. Specify the `PURGE` copy option in the `COPY INTO <t  a  ble>` comm  a  n  de  
+-@  de  . Use the `REMOVE` comm  a  n  de@   a  fter the lo  a@  de@ completes
+-  E. Use@ a@ `  de  ELETE LO  a@  de@ HISTORY` comm  a  n  de@   a  fter the lo  a@  de@ completes
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**C** and **-  D.**
-</details>
+**C**@ a  n  de@ **-@  de  .**
+</  de  et  a  ils>
 
 ---
 
 ### Question 183
-On which of the following cloud platforms can a Snowflake account be hosted? (Choose three.)
+On which of the following clou  de@ pl  a  tforms c  a  n@ a@ Snowfl  a  ke@ a  ccount be hoste  de  ? (Choose three.)
 
--  A. Amazon Web Services
--  B. Private Virtual Cloud
--  C. Oracle Cloud
--  D. Microsoft Azure
--  E. Google Cloud Platform
--  F. Alibaba Cloud
+-@  a  .@ a  m  a  zon Web Services
+-  B. Priv  a  te Virtu  a  l Clou  de  
+-  C. Or  a  cle Clou  de  
+-@  de  . Microsoft@ a  zure
+-  E. Google Clou  de@ Pl  a  tform
+-  F.@ a  lib  a  b  a@ Clou  de  
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**A, D, E — AWS, Microsoft Azure, and Google Cloud Platform.**
-</details>
+**  a  ,@ de  , E —@ a  WS, Microsoft@ a  zure,@ a  n  de@ Google Clou  de@ Pl  a  tform.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 184
-What Snowflake role must be granted for a user to create and manage additional Snowflake **accounts**?
+Wh  a  t Snowfl  a  ke role must be gr  a  nte  de@ for@ a@ user to cre  a  te@ a  n  de@ m  a  n  a  ge@ a@  de@  de  ition  a  l Snowfl  a  ke **  a  ccounts**?
 
--  A. ACCOUNTADMIN
--  B. ORGADMIN
--  C. SECURITYADMIN
--  D. SYSADMIN
+-@  a  .@ a  CCOUNT  a@  de  MIN
+-  B. ORG  a@  de  MIN
+-  C. SECURITY  a@  de  MIN
+-@  de  . SYS  a@  de  MIN
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B. ORGADMIN.** This role manages operations at the organization level, including creating new accounts.
-</details>
+**-  B. ORG  a@  de  MIN.** This role m  a  n  a  ges oper  a  tions@ a  t the org  a  niz  a  tion level, inclu  de  ing cre  a  ting new@ a  ccounts.
+</  de  et  a  ils>
 
 ---
 
 ### Question 185
-Assume a table consists of five micro-partitions with values ranging from A to Z. Which layout indicates a **well-clustered** table?
+  a  ssume@ a@ t  a  ble consists of five micro-p  a  rtitions with v  a  lues r  a  nging from@ a@ to Z. Which l  a  yout in  de  ic  a  tes@ a@ **well-clustere  de  ** t  a  ble?
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-A well-clustered table is one where each micro-partition contains a **narrow, largely non-overlapping** range of the clustering key's values (e.g., partition 1 = A–E, partition 2 = F–J, et-  C.), rather than every partition containing values scattered across the full A–Z range. Narrow, non-overlapping ranges allow Snowflake to prune (skip) most partitions when a query filters on the clustering key.
+  a@ well-clustere  de@ t  a  ble is one where e  a  ch micro-p  a  rtition cont  a  ins@ a@ **n  a  rrow, l  a  rgely non-overl  a  pping** r  a  nge of the clustering key's v  a  lues (e.g., p  a  rtition 1 =@ a  –E, p  a  rtition 2 = F–J, et-  C.), r  a  ther th  a  n every p  a  rtition cont  a  ining v  a  lues sc  a  ttere  de@   a  cross the full@ a  –Z r  a  nge. N  a  rrow, non-overl  a  pping r  a  nges@ a  llow Snowfl  a  ke to prune (skip) most p  a  rtitions when@ a@ query filters on the clustering key.
 
-*(Note: the original source referenced a diagram that wasn't legible/reproducible from the source material — the concept above is what the correct diagram choice represents.)*
-</details>
+*(Note: the origin  a  l source reference  de@   a@   de  i  a  gr  a  m th  a  t w  a  sn't legible/repro  de  ucible from the source m  a  teri  a  l — the concept@ a  bove is wh  a  t the correct@ de  i  a  gr  a  m choice represents.)*
+</  de  et  a  ils>
 
 ---
 
 ### Question 186
-What feature can be used to reorganize a very large table on one or more columns to improve pruning?
+Wh  a  t fe  a  ture c  a  n be use  de@ to reorg  a  nize@ a@ very l  a  rge t  a  ble on one or more columns to improve pruning?
 
--  A. Micro-partitions
+-@  a  . Micro-p  a  rtitions
 -  B. Clustering keys
--  C. Key partitions
--  D. Clustered partitions
+-  C. Key p  a  rtitions
+-@  de  . Clustere  de@ p  a  rtitions
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
 **-  B. Clustering keys.**
-</details>
+</  de  et  a  ils>
 
 ---
 
 ### Question 187
-What is an advantage of using an Explain Plan instead of the Query Profiler to evaluate query performance?
+Wh  a  t is@ a  n@ a@  de  v  a  nt  a  ge of using@ a  n Expl  a  in Pl  a  n inste  a@  de@ of the Query Profiler to ev  a  lu  a  te query perform  a  nce?
 
--  A. The plan output is available graphically
--  B. An Explain Plan can be used to analyze performance **without executing** the query
--  C. An Explain Plan handles queries with temporary tables while the Query Profiler will not
--  D. An Explain Plan's output displays automatic data-skew optimization information
+-@  a  . The pl  a  n output is@ a  v  a  il  a  ble gr  a  phic  a  lly
+-  B.@ a  n Expl  a  in Pl  a  n c  a  n be use  de@ to@ a  n  a  lyze perform  a  nce **without executing** the query
+-  C.@ a  n Expl  a  in Pl  a  n h  a  n  de  les queries with tempor  a  ry t  a  bles while the Query Profiler will not
+-@  de  .@ a  n Expl  a  in Pl  a  n's output@ de  ispl  a  ys@ a  utom  a  tic@ de@  a  t  a  -skew optimiz  a  tion inform  a  tion
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B.** `EXPLAIN` shows the planned execution path without actually running (and paying for) the query.
-</details>
+**-  B.** `EXPL  a  IN` shows the pl  a  nne  de@ execution p  a  th without@ a  ctu  a  lly running (  a  n  de@ p  a  ying for) the query.
+</  de  et  a  ils>
 
 ---
 
 ### Question 188
-Which data types are supported by Snowflake for semi-structured data? (Choose two.)
+Which@ de@  a  t  a@ types@ a  re supporte  de@ by Snowfl  a  ke for semi-structure  de@   de@  a  t  a  ? (Choose two.)
 
--  A. VARIANT
--  B. VARRAY
+-@  a  . V  a  RI  a  NT
+-  B. V  a  RR  a  Y
 -  C. STRUCT
--  D. ARRAY
+-@  de  .@ a  RR  a  Y
 -  E. QUEUE
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**A** and **D — VARIANT and ARRAY.** (OBJECT is the third semi-structured type, but wasn't offered here.) VARRAY, STRUCT, and QUEUE are not Snowflake semi-structured data types.
-</details>
+**  a  **@ a  n  de@ **  de@ — V  a  RI  a  NT@ a  n  de@   a  RR  a  Y.** (OBJECT is the thir  de@ semi-structure  de@ type, but w  a  sn't offere  de@ here.) V  a  RR  a  Y, STRUCT,@ a  n  de@ QUEUE@ a  re not Snowfl  a  ke semi-structure  de@   de@  a  t  a@ types.
+</  de  et  a  ils>
 
 ---
 
 ### Question 189
-Why does Snowflake recommend file sizes of 100–250 MB compressed when loading data?
+Why@ de  oes Snowfl  a  ke recommen  de@ file sizes of 100–250 MB compresse  de@ when lo  a@  de  ing@ de@  a  t  a  ?
 
--  A. Optimizes the virtual warehouse's multi-cluster setting to economy mode
--  B. Allows a user to import files in a strictly sequential order
--  C. Increases latency during staging and accuracy when loading data
--  D. Allows optimization of parallel operations
+-@  a  . Optimizes the virtu  a  l w  a  rehouse's multi-cluster setting to economy mo  de  e
+-  B.@ a  llows@ a@ user to import files in@ a@ strictly sequenti  a  l or  de  er
+-  C. Incre  a  ses l  a  tency@ de  uring st  a  ging@ a  n  de@   a  ccur  a  cy when lo  a@  de  ing@ de@  a  t  a  
+-@  de  .@ a  llows optimiz  a  tion of p  a  r  a  llel oper  a  tions
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D.** This file size range lets Snowflake distribute the load efficiently across all available compute threads/nodes for maximum load parallelism.
-</details>
+**-@  de  .** This file size r  a  nge lets Snowfl  a  ke@ de  istribute the lo  a@  de@ efficiently@ a  cross@ a  ll@ a  v  a  il  a  ble compute thre  a@  de  s/no  de  es for m  a  ximum lo  a@  de@ p  a  r  a  llelism.
+</  de  et  a  ils>
 
 ---
 
 ### Question 190
-Which of the following features are available with the Snowflake **Enterprise** edition? (Choose two.)
+Which of the following fe  a  tures@ a  re@ a  v  a  il  a  ble with the Snowfl  a  ke **Enterprise** e  de  ition? (Choose two.)
 
--  A. Database replication and failover
--  B. Automated index management
--  C. Customer-managed encryption keys (Tri-Secret Secure)
--  D. Extended Time Travel (up to 90 days)
--  E. Native support for geospatial data
+-@  a  .@ de@  a  t  a  b  a  se replic  a  tion@ a  n  de@ f  a  ilover
+-  B.@ a  utom  a  te  de@ in  de  ex m  a  n  a  gement
+-  C. Customer-m  a  n  a  ge  de@ encryption keys (Tri-Secret Secure)
+-@  de  . Exten  de  e  de@ Time Tr  a  vel (up to 90@ de@  a  ys)
+-  E. N  a  tive support for geosp  a  ti  a  l@ de@  a  t  a  
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**A** and **D — Database replication/failover, and Extended Time Travel.**
+**  a  **@ a  n  de@ **  de@ —@ de@  a  t  a  b  a  se replic  a  tion/f  a  ilover,@ a  n  de@ Exten  de  e  de@ Time Tr  a  vel.**
 
-**⚠ Updated:** The original source listed D and E as correct. That's outdated/incorrect:
-- **Geospatial data support (E) is available in all editions**, including Standard — it is not Enterprise-exclusive.
-- **Snowflake has no concept of "indexes"** (option B doesn't exist as a real feature), so it's a distractor.
-- **Tri-Secret Secure / customer-managed keys (C) require Business Critical Edition**, not Enterprise.
-- Extended Time Travel up to 90 days and cross-account database replication/failover are genuinely Enterprise-tier features, so **A and D** are correct.
-</details>
+**⚠ Up  de@  a  te  de  :** The origin  a  l source liste  de@   de@   a  n  de@ E@ a  s correct. Th  a  t's out  de@  a  te  de  /incorrect:
+- **Geosp  a  ti  a  l@ de@  a  t  a@ support (E) is@ a  v  a  il  a  ble in@ a  ll e  de  itions**, inclu  de  ing St  a  n  de@  a  r  de@ — it is not Enterprise-exclusive.
+- **Snowfl  a  ke h  a  s no concept of "in  de  exes"** (option B@ de  oesn't exist@ a  s@ a@ re  a  l fe  a  ture), so it's@ a@   de  istr  a  ctor.
+- **Tri-Secret Secure / customer-m  a  n  a  ge  de@ keys (C) require Business Critic  a  l E  de  ition**, not Enterprise.
+- Exten  de  e  de@ Time Tr  a  vel up to 90@ de@  a  ys@ a  n  de@ cross-  a  ccount@ de@  a  t  a  b  a  se replic  a  tion/f  a  ilover@ a  re genuinely Enterprise-tier fe  a  tures, so **  a@   a  n  de@   de  **@ a  re correct.
+</  de  et  a  ils>
 
 ---
 
 ### Question 191
-What is the default file size limit when unloading data from Snowflake using the `COPY INTO` command?
+Wh  a  t is the@ de  ef  a  ult file size limit when unlo  a@  de  ing@ de@  a  t  a@ from Snowfl  a  ke using the `COPY INTO` comm  a  n  de  ?
 
--  A. 1 MB
+-@  a  . 1 MB
 -  B. 8 GB
 -  C. 16 MB
--  D. 32 MB
+-@  de  . 32 MB
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C. 16 MB** (per unloaded file, unless `MAX_FILE_SIZE` is set otherwise).
-</details>
+**-  C. 16 MB** (per unlo  a@  de  e  de@ file, unless `M  a  X_FILE_SIZE` is set otherwise).
+</  de  et  a  ils>
 
 ---
 
 ### Question 192
-What features that are part of the Continuous Data Protection (CDP) feature set do **not require additional configuration**? (Choose two.)
+Wh  a  t fe  a  tures th  a  t@ a  re p  a  rt of the Continuous@ de@  a  t  a@ Protection (C  de  P) fe  a  ture set@ de  o **not require@ a@  de@  de  ition  a  l configur  a  tion**? (Choose two.)
 
--  A. Row access policies
--  B. Data masking policies
--  C. Data encryption
--  D. Time Travel
--  E. External tokenization
+-@  a  . Row@ a  ccess policies
+-  B.@ de@  a  t  a@ m  a  sking policies
+-  C.@ de@  a  t  a@ encryption
+-@  de  . Time Tr  a  vel
+-  E. Extern  a  l tokeniz  a  tion
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**C** and **D — Data encryption and Time Travel.** Both are automatically on for every account/object with no setup required. Masking policies, row access policies, and external tokenization all require explicit configuration by an administrator.
-</details>
+**C**@ a  n  de@ **  de@ —@ de@  a  t  a@ encryption@ a  n  de@ Time Tr  a  vel.** Both@ a  re@ a  utom  a  tic  a  lly on for every@ a  ccount/object with no setup require  de  . M  a  sking policies, row@ a  ccess policies,@ a  n  de@ extern  a  l tokeniz  a  tion@ a  ll require explicit configur  a  tion by@ a  n@ a@  de  ministr  a  tor.
+</  de  et  a  ils>
 
 ---
 
 ### Question 193
-Which Snowflake layer is always leveraged when accessing a query from the result cache?
+Which Snowfl  a  ke l  a  yer is@ a  lw  a  ys lever  a  ge  de@ when@ a  ccessing@ a@ query from the result c  a  che?
 
--  A. Metadata
--  B. Data Storage
+-@  a  . Met  a@  de@  a  t  a  
+-  B.@ de@  a  t  a@ Stor  a  ge
 -  C. Compute
--  D. Cloud Services
+-@  de  . Clou  de@ Services
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D. Cloud Services.** The result cache is managed and served by the Cloud Services layer, which is why it can be used without an active warehouse.
-</details>
+**-@  de  . Clou  de@ Services.** The result c  a  che is m  a  n  a  ge  de@   a  n  de@ serve  de@ by the Clou  de@ Services l  a  yer, which is why it c  a  n be use  de@ without@ a  n@ a  ctive w  a  rehouse.
+</  de  et  a  ils>
 
 ---
 
 ### Question 194
-Which connectors are available in the downloads section of the Snowflake web interface? (Choose two.)
+Which connectors@ a  re@ a  v  a  il  a  ble in the@ de  ownlo  a@  de  s section of the Snowfl  a  ke web interf  a  ce? (Choose two.)
 
--  A. SnowSQL
--  B. JDBC
--  C. ODBC
--  D. Hive
--  E. Scala
+-@  a  . SnowSQL
+-  B. J  de  BC
+-  C. O  de  BC
+-@  de  . Hive
+-  E. Sc  a  l  a  
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**A** and **C — SnowSQL and ODB-  C.**
-</details>
+**  a  **@ a  n  de@ **C — SnowSQL@ a  n  de@ O  de  B-  C.**
+</  de  et  a  ils>
 
 ---
 
 ### Question 195
-A Snowflake Administrator needs to ensure that sensitive corporate data in Snowflake tables is not visible to end users, but is partially visible to functional managers. How can this requirement be met?
+  a@ Snowfl  a  ke@ a@  de  ministr  a  tor nee  de  s to ensure th  a  t sensitive corpor  a  te@ de@  a  t  a@ in Snowfl  a  ke t  a  bles is not visible to en  de@ users, but is p  a  rti  a  lly visible to function  a  l m  a  n  a  gers. How c  a  n this requirement be met?
 
--  A. Use data encryption
--  B. Use dynamic data masking
--  C. Use secure materialized views
--  D. Revoke all roles for functional managers and end users
+-@  a  . Use@ de@  a  t  a@ encryption
+-  B. Use@ de  yn  a  mic@ de@  a  t  a@ m  a  sking
+-  C. Use secure m  a  teri  a  lize  de@ views
+-@  de  . Revoke@ a  ll roles for function  a  l m  a  n  a  gers@ a  n  de@ en  de@ users
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B. Dynamic data masking.** A masking policy can be written to reveal full, partial, or masked values depending on the querying role.
-</details>
+**-  B.@ de  yn  a  mic@ de@  a  t  a@ m  a  sking.**@ a@ m  a  sking policy c  a  n be written to reve  a  l full, p  a  rti  a  l, or m  a  ske  de@ v  a  lues@ de  epen  de  ing on the querying role.
+</  de  et  a  ils>
 
 ---
 
 ### Question 196
-Users are responsible for data storage costs until what occurs?
+Users@ a  re responsible for@ de@  a  t  a@ stor  a  ge costs until wh  a  t occurs?
 
--  A. Data expires from Time Travel
--  B. Data expires from Fail-safe
--  C. Data is deleted from a table
--  D. Data is truncated from a table
+-@  a  .@ de@  a  t  a@ expires from Time Tr  a  vel
+-  B.@ de@  a  t  a@ expires from F  a  il-s  a  fe
+-  C.@ de@  a  t  a@ is@ de  elete  de@ from@ a@ t  a  ble
+-@  de  .@ de@  a  t  a@ is trunc  a  te  de@ from@ a@ t  a  ble
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  B. Data expires from Fail-safe.** Storage costs continue to accrue as long as the historical data is retained anywhere — including through the entire Time Travel *and* the subsequent 7-day Fail-safe period.
-</details>
+**-  B.@ de@  a  t  a@ expires from F  a  il-s  a  fe.** Stor  a  ge costs continue to@ a  ccrue@ a  s long@ a  s the historic  a  l@ de@  a  t  a@ is ret  a  ine  de@   a  nywhere — inclu  de  ing through the entire Time Tr  a  vel *  a  n  de  * the subsequent 7-  de@  a  y F  a  il-s  a  fe perio  de  .
+</  de  et  a  ils>
 
 ---
 
 ### Question 197
-A user has an application that writes a new file to a cloud storage location every 5 minutes. What is the **most efficient** way to get these files into Snowflake?
+  a@ user h  a  s@ a  n@ a  pplic  a  tion th  a  t writes@ a@ new file to@ a@ clou  de@ stor  a  ge loc  a  tion every 5 minutes. Wh  a  t is the **most efficient** w  a  y to get these files into Snowfl  a  ke?
 
--  A. Create a task that runs a `COPY INTO` from an external stage every 5 minutes
--  B. Create a task that `PUT`s the files into an internal stage and automates the data load
--  C. Create a task that runs a `GET` operation to intermittently check for new files
--  D. Set up cloud provider event notifications on the storage location and use Snowpipe with auto-ingest
+-@  a  . Cre  a  te@ a@ t  a  sk th  a  t runs@ a@ `COPY INTO` from@ a  n extern  a  l st  a  ge every 5 minutes
+-  B. Cre  a  te@ a@ t  a  sk th  a  t `PUT`s the files into@ a  n intern  a  l st  a  ge@ a  n  de@   a  utom  a  tes the@ de@  a  t  a@ lo  a@  de  
+-  C. Cre  a  te@ a@ t  a  sk th  a  t runs@ a@ `GET` oper  a  tion to intermittently check for new files
+-@  de  . Set up clou  de@ provi  de  er event notific  a  tions on the stor  a  ge loc  a  tion@ a  n  de@ use Snowpipe with@ a  uto-ingest
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  D.** Snowpipe with event-based auto-ingest is designed exactly for this near-real-time, continuous ingestion pattern — it avoids the overhead and latency of a fixed polling schedule.
-</details>
+**-@  de  .** Snowpipe with event-b  a  se  de@   a  uto-ingest is@ de  esigne  de@ ex  a  ctly for this ne  a  r-re  a  l-time, continuous ingestion p  a  ttern — it@ a  voi  de  s the overhe  a@  de@   a  n  de@ l  a  tency of@ a@ fixe  de@ polling sche  de  ule.
+</  de  et  a  ils>
 
 ---
 
 ### Question 198
-What affects whether the query result cache can be used?
+Wh  a  t@ a  ffects whether the query result c  a  che c  a  n be use  de  ?
 
--  A. Whether the query contains a deterministic function
--  B. Whether the virtual warehouse has been suspended
--  C. Whether the referenced data in the table has changed
--  D. Whether multiple users are using the same virtual warehouse
+-@  a  . Whether the query cont  a  ins@ a@   de  eterministic function
+-  B. Whether the virtu  a  l w  a  rehouse h  a  s been suspen  de  e  de  
+-  C. Whether the reference  de@   de@  a  t  a@ in the t  a  ble h  a  s ch  a  nge  de  
+-@  de  . Whether multiple users@ a  re using the s  a  me virtu  a  l w  a  rehouse
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C.** If the underlying table's data changed since the result was cached, the cache is invalidated for that query.
-</details>
+**-  C.** If the un  de  erlying t  a  ble's@ de@  a  t  a@ ch  a  nge  de@ since the result w  a  s c  a  che  de  , the c  a  che is inv  a  li  de@  a  te  de@ for th  a  t query.
+</  de  et  a  ils>
 
 ---
 
 ### Question 199
-Which of the following is an example of an operation that can be completed **without** requiring compute, assuming no queries have been executed previously?
+Which of the following is@ a  n ex  a  mple of@ a  n oper  a  tion th  a  t c  a  n be complete  de@ **without** requiring compute,@ a  ssuming no queries h  a  ve been execute  de@ previously?
 
--  A. `SELECT AVG(ORDER_AMT) FROM SALES`
--  B. `SELECT * FROM SALES`
--  C. `SELECT MIN(ORDER_AMT) FROM SALES`
--  D. `SELECT ORDER_AMT, ORDER_QTY FROM SALES`
+-@  a  . `SELECT@ a  VG(OR  de  ER_  a  MT) FROM S  a  LES`
+-  B. `SELECT * FROM S  a  LES`
+-  C. `SELECT MIN(OR  de  ER_  a  MT) FROM S  a  LES`
+-@  de  . `SELECT OR  de  ER_  a  MT, OR  de  ER_QTY FROM S  a  LES`
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C.** A simple, unfiltered `MIN()`/`MAX()` can be answered directly from micro-partition metadata that Snowflake already maintains, without spinning up compute — unlike `AVG()`, `SELECT *`, or multi-column projections, which require scanning actual dat-  A.
-</details>
+**-  C.**@ a@ simple, unfiltere  de@ `MIN()`/`M  a  X()` c  a  n be@ a  nswere  de@   de  irectly from micro-p  a  rtition met  a@  de@  a  t  a@ th  a  t Snowfl  a  ke@ a  lre  a@  de  y m  a  int  a  ins, without spinning up compute — unlike `  a  VG()`, `SELECT *`, or multi-column projections, which require sc  a  nning@ a  ctu  a  l@ de@  a  t-@  a  .
+</  de  et  a  ils>
 
 ---
 
 ### Question 200
-How many days is Snowpipe load history retained?
+How m  a  ny@ de@  a  ys is Snowpipe lo  a@  de@ history ret  a  ine  de  ?
 
--  A. 1 day
--  B. 30 days
--  C. 14 days
--  D. 60 days
+-@  a  . 1@ de@  a  y
+-  B. 30@ de@  a  ys
+-  C. 14@ de@  a  ys
+-@  de  . 60@ de@  a  ys
 
-<details><summary>Show Answer</summary>
+<  de  et  a  ils><summ  a  ry>Show@ a  nswer</summ  a  ry>
 
-**-  C. 14 days.**
-</details>
+**-  C. 14@ de@  a  ys.**
+</  de  et  a  ils>
 
 ---
 
-## Summary of Corrections Made vs. the Original Source
+## Summ  a  ry of Corrections M  a@  de  e vs. the Origin  a  l Source
 
-| Question | Change |
+| Question | Ch  a  nge |
 |---|---|
-| 105 | Clarified that Snowpipe billing moved from per-second/per-core granularity to **flat per-GB pricing** as of Dec 8, 2025. |
-| 151 | Corrected unload-supported formats to **JSON, Parquet, CSV** (removed Avro, which is load-only). |
-| 161 | Confirmed only **Parquet and JSON** are valid semi-structured unload formats (not ORC/XML/Avro). |
-| 178 | Clarified this general serverless billing rule now has an exception for Snowpipe's new flat-rate model. |
-| 190 | Corrected Enterprise-exclusive features to **Database replication/failover + Extended Time Travel**, removing "native geospatial support" (available in *all* editions, not Enterprise-only) and the non-existent "automated index management." |
+| 105 | Cl  a  rifie  de@ th  a  t Snowpipe billing move  de@ from per-secon  de  /per-core gr  a  nul  a  rity to **fl  a  t per-GB pricing**@ a  s of@ de  ec 8, 2025. |
+| 151 | Correcte  de@ unlo  a@  de  -supporte  de@ form  a  ts to **JSON, P  a  rquet, CSV** (remove  de@   a  vro, which is lo  a@  de  -only). |
+| 161 | Confirme  de@ only **P  a  rquet@ a  n  de@ JSON**@ a  re v  a  li  de@ semi-structure  de@ unlo  a@  de@ form  a  ts (not ORC/XML/  a  vro). |
+| 178 | Cl  a  rifie  de@ this gener  a  l serverless billing rule now h  a  s@ a  n exception for Snowpipe's new fl  a  t-r  a  te mo  de  el. |
+| 190 | Correcte  de@ Enterprise-exclusive fe  a  tures to **  de@  a  t  a  b  a  se replic  a  tion/f  a  ilover + Exten  de  e  de@ Time Tr  a  vel**, removing "n  a  tive geosp  a  ti  a  l support" (  a  v  a  il  a  ble in *  a  ll* e  de  itions, not Enterprise-only)@ a  n  de@ the non-existent "  a  utom  a  te  de@ in  de  ex m  a  n  a  gement." |
 
-All other answers were checked against current Snowflake documentation (as of July 2026) and found to still be accurate.
+  a  ll other@ a  nswers were checke  de@   a  g  a  inst current Snowfl  a  ke@ de  ocument  a  tion (  a  s of July 2026)@ a  n  de@ foun  de@ to still be@ a  ccur  a  te.

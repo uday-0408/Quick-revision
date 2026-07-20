@@ -37,3 +37,11 @@ A. src:customer.name
 B. src:customer.name::string
 C. src['customer']['name']
 D. src.customer.name
+
+
+What type of query will benefit from the query acceleration service?
+
+A. Queries without filters or aggregation
+B. Queries with large scans and selective filters
+C. Queries where the GROUP BY has high cardinality
+D. Queries on tables that have search optimization service enabled
