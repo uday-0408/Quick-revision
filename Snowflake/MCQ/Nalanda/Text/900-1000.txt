@@ -1,0 +1,825 @@
+Here is the heavily cleaned, formatted, and corrected text for the next batch of 100 questions (Questions 901 through 1000). All OCR artifacts, misspellings, corrupted characters, and pagination noise have been removed for readability.
+
+---
+
+**Question 901**
+What are the least privileges needed to view and modify resource monitors? (Choose two.)
+A. SELECT
+B. OWNERSHIP
+C. MONITOR
+D. MODIFY
+E. USAGE
+Correct Answer: CD
+
+**Question 902**
+When does a materialized view get suspended in Snowflake?
+A. When a column is added to the base table
+B. When a column is dropped from the base table
+C. When a DML operation is run on the base table
+D. When the base table is reclustered
+Correct Answer: B
+
+**Question 903**
+What happens when a Snowflake user alters the data retention period at the account level?
+A. All child objects will retain data for the new retention period.
+B. All child objects that do not have an explicit retention period will automatically inherit the new retention period.
+C. All child objects with an explicit retention period will be overridden with the new retention period.
+D. All explicit child object retention periods will remain unchanged.
+Correct Answer: B
+
+**Question 904**
+Snowpark provides libraries for which programming languages? (Choose two.)
+A. JavaScript
+B. Python
+C. Scala
+D. C++
+Correct Answer: BC
+
+**Question 905**
+How can a Snowflake user sample 10% of a table named SNOWPRO? (Choose two.)
+A. SELECT * FROM SNOWPRO SAMPLE SYSTEM (10);
+B. SELECT * FROM SNOWPRO TABLESAMPLE (10 ROWS);
+C. SELECT * FROM SNOWPRO TABLESAMPLE BLOCK (10);
+D. SELECT * FROM SNOWPRO TABLESAMPLE BLOCK (10 ROWS);
+E. SELECT * FROM SNOWPRO SAMPLE BERNOULLI (10 ROWS);
+Correct Answer: AC
+
+**Question 906**
+Why would a Snowflake user choose to use a transient table?
+A. To store data for long-term analysis
+B. To store large data files that are used frequently
+C. To create a permanent table for ongoing use in ELT
+D. To store transitory data that needs to be maintained beyond the session
+Correct Answer: D
+
+**Question 907**
+What does a masking policy consist of in Snowflake?
+A. A single data type, with one or more conditions, and one or more masking functions
+B. A single data type, with only one condition, and only one masking function
+C. Multiple data types, with only one condition, and one or more masking functions
+D. Multiple data types, with one or more conditions, and one or more masking functions
+Correct Answer: A
+
+**Question 908**
+What actions can be performed by a consumer account on a shared database? (Choose two.)
+A. Cloning a shared table
+B. Modifying the data in a shared table
+C. Using Time Travel on a table
+D. Executing the SELECT statement on a shared table
+E. Joining the data from a shared table with another table
+Correct Answer: DE
+
+**Question 909**
+What data type is used to ingest semi-structured data into a Snowflake table?
+A. BOOLEAN
+B. NUMBER
+C. VARBINARY
+D. VARIANT
+Correct Answer: D
+
+**Question 910**
+Which security feature is used to connect or log in to a Snowflake account?
+A. Network policies
+B. SCIM
+C. Role-Based Access Control (RBAC)
+D. Key pair authentication
+Correct Answer: D
+
+**Question 911**
+Given the statement template below, which database objects can be added to a share? (Choose two.)
+`GRANT [privilege] ON [object] [object_name] TO SHARE [share_name];`
+A. Secure functions
+B. Stored procedures
+C. Streams
+D. Tables
+E. Tasks
+Correct Answer: AD
+
+**Question 912**
+Which Snowflake feature or tool helps troubleshoot issues in SQL query expressions that commonly cause performance bottlenecks?
+A. Persisted results
+B. QUERY_HISTORY view
+C. Query acceleration service
+D. Query Profile
+Correct Answer: D
+
+**Question 913**
+What is a non-configurable feature that provides historical data that Snowflake may recover during a 7-day period?
+A. Fail-safe
+B. Time Travel
+C. Cloning
+D. Account replication
+Correct Answer: A
+
+**Question 914**
+Which function should be used to authorize users to access rows in a base table when using secure views with Secure Data Sharing?
+A. CURRENT_ROLE()
+B. CURRENT_ACCOUNT()
+C. CURRENT_REGION()
+D. CURRENT_USER()
+Correct Answer: B
+
+**Question 915**
+What is the purpose of collecting statistics on data in Snowflake?
+A. To identify data storage order correlations
+B. To enable efficient pruning based on query filters
+C. To reduce the total of micro-partitions in a table
+D. To optimize query performance by reading all data in a table
+Correct Answer: B
+
+**Question 916**
+What type of function returns one value for each invocation?
+A. Aggregate
+B. Scalar
+C. Table
+D. Window
+Correct Answer: B
+
+**Question 917**
+Which file formats support unloading semi-structured data? (Choose two.)
+A. AVRO
+B. JSON
+C. ORC
+D. Parquet
+E. XML
+Correct Answer: BD
+
+**Question 918**
+Which Snowflake role has the ability to rename an account and specify whether the original URL can be used to access the renamed account?
+A. ACCOUNTADMIN
+B. SECURITYADMIN
+C. SYSADMIN
+D. ORGADMIN
+Correct Answer: D
+
+**Question 919**
+How can a user get the MOST detailed information about individual table storage details in Snowflake?
+A. SHOW TABLES command
+B. SHOW EXTERNAL TABLES command
+C. TABLES view
+D. TABLE_STORAGE_METRICS view
+Correct Answer: D
+
+**Question 920**
+What type of account can be used to share data with a consumer who does not have a Snowflake account?
+A. Data provider
+B. Data consumer
+C. Reader
+D. Organization
+Correct Answer: C
+
+**Question 921**
+By default, which role has access to the SYSTEM$GLOBAL_ACCOUNT_SET_PARAMETER function?
+A. ACCOUNTADMIN
+B. SECURITYADMIN
+C. SYSADMIN
+D. ORGADMIN
+Correct Answer: D
+
+**Question 922**
+If a virtual warehouse is suspended, what happens to the warehouse cache?
+A. The cache is dropped when the warehouse is suspended and is no longer available upon resume.
+B. The warehouse cache persists for as long as the warehouse exists, regardless of its suspension status.
+C. The cache is maintained for up to two hours and can be restored if the warehouse is restarted within this limit.
+D. The cache is maintained for the auto_suspend duration and can be restored if the warehouse is restarted within this limit.
+Correct Answer: A
+
+**Question 923**
+What are the primary authentication methods that Snowflake supports for securing REST API interactions? (Choose two.)
+A. OAuth
+B. Key pair authentication
+C. Federated authentication
+D. Multi-Factor Authentication (MFA)
+E. Username and password authentication
+Correct Answer: AB
+
+**Question 924**
+A Snowflake user is trying to load a 125 GB file using a COPY command. The file continues to load for almost an entire day. What will happen at the 24-hour mark?
+A. The file will continue to load until all contents are loaded.
+B. The file will stop loading and all data up to that point will be committed.
+C. The file loading will be aborted without any portion of the file being committed.
+D. The file's number of allowable hours to load can be programmatically controlled to load easily into Snowflake.
+Correct Answer: C
+
+**Question 925**
+What information does the Query Profile provide?
+A. Graphical representation of the data model
+B. Statistics for each component of the processing plan
+C. Detailed information about the database schema
+D. Real-time monitoring of database operations
+Correct Answer: B
+
+**Question 926**
+Which command is used to start configuring Snowflake for Single Sign-on (SSO)?
+A. CREATE SESSION POLICY
+B. CREATE NETWORK RULE
+C. CREATE SECURITY INTEGRATION
+D. CREATE POLICY
+Correct Answer: C
+
+**Question 927**
+Which sequence (order) of object privileges should be used to grant a custom role read-only access on a table?
+A. 1. Schema Usage, 2. Database Usage, 3. Table Select
+B. 1. Table Select, 2. Schema Usage, 3. Database Usage
+C. 1. Database Usage, 2. Schema Usage, 3. Table Select
+D. 1. Database Select, 2. Schema Select, 3. Table Select
+Correct Answer: C
+
+**Question 928**
+Which command removes a role from another role in Snowflake?
+A. ALTER ROLE
+B. REVOKE ROLE
+C. USE ROLE
+D. USE ROLES
+Correct Answer: B
+
+**Question 929**
+In which hierarchy is tag inheritance possible?
+A. Organization -> Account -> Role
+B. Account -> User -> Schema
+C. Database -> View -> Column
+D. Database -> Schema -> Table -> Column
+Correct Answer: D
+
+**Question 930**
+What happens when a network policy includes values that appear in both the allowed and blocked IP address lists?
+A. Those IP addresses are allowed access to the Snowflake account as Snowflake applies the allowed IP address list first.
+B. Those IP addresses are denied access to the Snowflake account as Snowflake applies the blocked IP address list first.
+C. Snowflake issues an alert and adds the duplicate IP address values to the allowed and blocked IP address lists.
+D. Snowflake issues an error message and adds the duplicate IP address values to both the allowed and blocked IP address lists.
+Correct Answer: B
+
+**Question 931**
+For directory tables, what stage allows for automatic refreshing of metadata?
+A. User stage
+B. Table stage
+C. Named internal stage
+D. Named external stage
+Correct Answer: D
+
+**Question 932**
+Which command is used to unload data from a Snowflake database table into one or more files in a Snowflake stage?
+A. CREATE STAGE
+B. COPY INTO [location]
+C. INSERT INTO [location]
+D. CREATE PIPE
+Correct Answer: B
+
+**Question 933**
+Any user with the appropriate privileges can view data storage for individual tables by using which queries? (Choose two.)
+A. METERING_HISTORY view in the ACCOUNT_USAGE schema
+B. TABLE_STORAGE_METRICS view in the INFORMATION_SCHEMA
+C. STORAGE_USAGE in the ACCOUNT_USAGE schema
+D. TABLES view in the INFORMATION_SCHEMA
+E. STORAGE_METRICS view in the ORGANIZATION_USAGE schema
+Correct Answer: BD
+
+**Question 934**
+A user created a database and set the DATA_RETENTION_TIME_IN_DAYS to 30, but did not set the DATA_RETENTION_TIME_IN_DAYS in table T1. After 5 days, the user accidentally drops table T1. What are the considerations for recovering table T1?
+A. The user can recover the table T1 after 30 days.
+B. The table can be recovered because the table retention period defaults to the database level.
+C. The table can only be recovered by contacting Snowflake Support to recover the table from Fail-safe.
+D. The table cannot be recovered because the parameter was not set for table T1.
+Correct Answer: B
+
+**Question 935**
+What table functions in the Snowflake Information Schema can be queried to retrieve information about directory tables? (Choose two.)
+A. STAGE_DIRECTORY_FILE_REGISTRATION_HISTORY
+B. STAGE_FILE_HISTORY
+C. EXTERNAL_TABLE_HISTORY
+D. DIRECTORY_TABLE_USAGE
+E. DIRECTORY_TABLE_REFRESH_HISTORY
+Correct Answer: AE
+
+**Question 936**
+Which Snowflake table type persists until it is explicitly dropped, is available for all users with relevant privileges (across sessions), and has no Fail-safe period?
+A. Temporary
+B. Permanent
+C. External
+D. Transient
+Correct Answer: D
+
+**Question 937**
+Snowflake's access control framework combines which models for securing data? (Choose two.)
+A. Attribute-based Access Control (ABAC)
+B. Discretionary Access Control (DAC)
+C. Access Control List (ACL)
+D. Role-based Access Control (RBAC)
+E. Rule-based Access Control (RuBAC)
+Correct Answer: BD
+
+**Question 938**
+Which semi-structured file format is a compressed, efficient, columnar data representation?
+A. JSON
+B. CSV
+C. XML
+D. Parquet
+Correct Answer: D
+
+**Question 939**
+How does Snowflake describe its unique architecture?
+A. A single-cluster shared data architecture using a central data repository and massively parallel processing (MPP)
+B. A multi-cluster shared data architecture using a central data repository and massively parallel processing (MPP)
+C. A single-cluster shared nothing architecture using a siloed data repository and symmetric multiprocessing (SMP)
+D. A multi-cluster shared nothing architecture using a siloed data repository and symmetric multiprocessing (SMP)
+Correct Answer: B
+
+**Question 940**
+Which data type can be used to load semi-structured data files directly, without explicitly describing the hierarchical structure of the data?
+A. BOOLEAN
+B. VARIANT
+C. VARCHAR
+D. VARBINARY
+Correct Answer: B
+
+**Question 941**
+The following settings are configured:
+The DATA_RETENTION_TIME_IN_DAYS is set to 5 at the account level.
+The DATA_RETENTION_TIME_IN_DAYS is set to 2 at the object level.
+How many days will the data be retained at the object level?
+A. 0
+B. 5
+C. 2
+D. 7
+Correct Answer: C
+
+**Question 942**
+Which key control concept does Snowflake describe as a defined level of access to an object?
+A. Grant
+B. Privilege
+C. Role
+D. Session
+Correct Answer: B
+
+**Question 943**
+Which Snowflake object consumes credits for maintenance?
+A. Regular table
+B. Regular View
+C. Materialized view
+D. Cached query result
+Correct Answer: C
+
+**Question 944**
+How many credits does a size 3X-Large virtual warehouse consume if it runs continuously for 2 hours?
+A. 32
+B. 64
+C. 128
+D. 256
+Correct Answer: C
+
+**Question 945**
+What is the purpose of a Query Profile?
+A. To profile how many times a particular query was executed and analyze its usage statistics over time.
+B. To profile a particular query to understand the mechanics of the query, its behavior, and performance.
+C. To profile the user and/or role of a query and all privileges and policies applied to the objects within the query.
+D. To profile which queries are running in each warehouse and identify proper warehouse utilization and sizing for better performance and cost balancing.
+Correct Answer: B
+
+**Question 946**
+Which common query problems are identified by the Query Profile? (Choose two.)
+A. Syntax errors
+B. Inefficient pruning
+C. Ambiguous column names
+D. Queries too large to fit in memory
+E. Object does not exist or not authorized
+Correct Answer: BD
+
+**Question 947**
+While running a query on a virtual warehouse in auto-scale mode, additional clusters are started immediately if which setting is configured?
+A. Scaling policy is Economy
+B. Scaling policy is Maximized
+C. Scaling policy is Standard
+D. Scaling policy is Custom
+Correct Answer: C
+
+**Question 948**
+Which Snowflake role can manage any object grant globally, including modifying and revoking grants?
+A. USERADMIN
+B. ORGADMIN
+C. SYSADMIN
+D. SECURITYADMIN
+Correct Answer: D
+
+**Question 949**
+What is the MINIMUM permission needed to access a file URL from an external stage?
+A. MODIFY
+B. READ
+C. SELECT
+D. USAGE
+Correct Answer: D
+
+**Question 950**
+In the Data Exchange, who can get or request data from the listings? (Choose two.)
+A. Users with the ACCOUNTADMIN role
+B. Users with the SYSADMIN role
+C. Users with the ORGADMIN role
+D. Users with the IMPORT SHARE privilege
+E. Users with the MANAGE GRANTS privilege
+Correct Answer: AD
+
+**Question 951**
+What does Snowflake attempt to do if any of the compute resources for a virtual warehouse fail to provision during start up?
+A. Repair the failed resources
+B. Restart the failed resources
+C. Queue the failed resources
+D. Provision the failed resources
+Correct Answer: A
+
+**Question 952**
+How does Snowflake manage its approach to Discretionary Access Control (DAC)?
+A. A defined level of access to an object.
+B. An entity to which access can be granted.
+C. Each object has an owner, who can in turn grant access to that object.
+D. Access privileges are assigned to roles, which are in turn assigned to users.
+Correct Answer: C
+
+**Question 953**
+Which command is used to take away staged files from a Snowflake stage after a successful data ingestion?
+A. DELETE
+B. DROP
+C. REMOVE
+D. TRUNCATE
+Correct Answer: C
+
+**Question 954**
+The Snowflake VARIANT data type imposes a 16 MB size limit on what?
+A. An individual row
+B. An individual column
+C. A view
+D. A stage
+Correct Answer: A
+
+**Question 955**
+Which Snowflake feature records changes made to a table so actions can be taken using that data capture?
+A. Materialized View
+B. Pipe
+C. Stream
+D. Task
+Correct Answer: C
+
+**Question 956**
+Which system-defined, read-only view displays information on column lineage that specifies how data flows from source to target in a SQL write operation?
+A. ACCESS_HISTORY
+B. LOAD_HISTORY
+C. QUERY_HISTORY
+D. COPY_HISTORY
+Correct Answer: A
+
+**Question 957**
+Who can create network policies within Snowflake? (Choose two.)
+A. SYSADMIN only
+B. ORGADMIN only
+C. SECURITYADMIN or higher
+D. A role with the CREATE NETWORK POLICY privilege
+E. A role with the CREATE SECURITY INTEGRATION privilege
+Correct Answer: CD
+
+**Question 958**
+Who can grant object privileges in a regular schema?
+A. Object owner
+B. Schema owner
+C. Database owner
+D. SYSADMIN
+Correct Answer: A
+
+**Question 959**
+Which command can be used to list all the file formats for which a user has access privileges?
+A. LIST FILE FORMATS
+B. ALTER FILE FORMAT
+C. DESCRIBE FILE FORMAT
+D. SHOW FILE FORMATS
+Correct Answer: D
+
+**Question 960**
+Which Snowflake feature supports continuous data loading into tables as soon as new data is available?
+A. Snowpark
+B. SnowSQL
+C. Snowcd
+D. Snowpipe
+Correct Answer: D
+
+**Question 961**
+What value provides information on disk usage for operations where intermediate results do not fit in memory in a Query profile?
+A. Initialization
+B. Network
+C. Pruning
+D. Spilling
+Correct Answer: D
+
+**Question 962**
+Regardless of which notation is used, what are considerations for writing the column name and element names when traversing semi-structured data?
+A. The column name and element names are both case-sensitive.
+B. The column name and element names are both case-insensitive.
+C. The column name is case-sensitive but element names are case-insensitive.
+D. The column name is case-insensitive but element names are case-sensitive.
+Correct Answer: D
+
+**Question 963**
+Which Snowflake data type is used to store JSON key value pairs?
+A. ARRAY
+B. BINARY
+C. STRING
+D. VARIANT
+Correct Answer: D
+
+**Question 964**
+How are network policies defined in Snowflake?
+A. They are a set of rules that define the network routes within Snowflake.
+B. They are a set of rules that dictate how Snowflake accounts can be used between multiple users.
+C. They are a set of rules that dictate how data can be shared between different Snowflake accounts within an organization.
+D. They are a set of rules that control access to Snowflake accounts by specifying the IP addresses or ranges of IP addresses that are allowed to connect.
+Correct Answer: D
+
+**Question 965**
+What is the only supported character set for loading and unloading data from all supported file formats?
+A. UTF-8
+B. UTF-16
+C. ISO-8859-1
+D. WINDOWS-1252
+Correct Answer: A
+
+**Question 966**
+Which function is used to convert rows in a relational table to a single VARIANT column?
+A. ARRAY_AGG
+B. OBJECT_AGG
+C. ARRAY_CONSTRUCT
+D. OBJECT_CONSTRUCT
+Correct Answer: D
+
+**Question 967**
+Which command can be used to delete Staged files from a Snowflake Stage when the files are no longer needed?
+A. DELETE
+B. DROP
+C. REMOVE
+D. TABLE
+Correct Answer: C
+
+**Question 968**
+A Virtual warehouse initially had high latency as a result of queries from multiple concurrent processes queuing. Over time, the problem resolved. What action can be taken to prevent this from happening again?
+A. Increase the size of the virtual warehouse.
+B. Add a cluster key for the most used JOIN key.
+C. Change the multi-cluster settings to add additional clusters.
+D. Enable the search optimization service for the underlying tables.
+Correct Answer: C
+
+**Question 969**
+What action can be performed using the GET command in Snowflake?
+A. Automatically rename downloaded files.
+B. Automatically decrypt downloaded data on a client machine.
+C. Download data files from Snowflake internal stages to a local directory/folder.
+D. Download data files from Snowflake external stages to a local directory.
+Correct Answer: C
+
+**Question 970**
+Which validation option is the only one that supports the COPY INTO [location] command?
+A. RETURN_ROWS
+B. RETURN_ALL_ERRORS
+C. RETURN_ERRORS
+D. VALIDATION_MODE
+Correct Answer: C
+
+**Question 971**
+What are the correct settings for column and element names, regardless of which notation is used while accessing elements in a JSON object?
+A. Both the column name and the element name are case-insensitive.
+B. Both the column name and the element name are case-sensitive.
+C. The column name is case-sensitive and the element names are case-insensitive.
+D. The column name is case-insensitive and the element name is case-sensitive.
+Correct Answer: D
+
+**Question 972**
+How can the Query Profile be used to identify the costliest operator of a query?
+A. Select any node in the tree and look at the number of micro-partitions scanned.
+B. Find the operator node with the highest fraction of time or percentage of total time.
+C. Select the TableScan operator node and look at the percentage scanned from cache.
+D. Look at the number of rows between operator nodes across the operator tree.
+Correct Answer: B
+
+**Question 973**
+In order to access Snowflake Marketplace listings, who needs to accept the Snowflake Consumer Terms of Service?
+A. SYSADMIN
+B. SECURITYADMIN
+C. ACCOUNTADMIN
+D. ORGADMIN
+Correct Answer: D
+
+**Question 974**
+Which statistics are displayed in a Query Profile that indicate that intermediate results do not fit in memory? (Choose two.)
+A. Bytes scanned
+B. Partitions scanned
+C. Bytes spilled to local storage
+D. Bytes spilled to remote storage
+E. Percentage scanned from cache
+Correct Answer: CD
+
+**Question 975**
+How can a dropped internal stage be restored?
+A. Enable Time Travel.
+B. Clone the dropped stage.
+C. Execute the UNDROP command.
+D. Recreate the dropped stage.
+Correct Answer: D
+
+**Question 976**
+Which command line flags can be used to log into a Snowflake account using SnowSQL? (Choose two.)
+A. -a (account)
+B. -p (password)
+C. -r (role)
+D. -u (user)
+E. -d (database)
+Correct Answer: AD
+
+**Question 977**
+What is a key benefit of using organizations in Snowflake?
+A. Ability to use ACCOUNT_USAGE views
+B. Ability to use zero-copy cloning across accounts
+C. Ability to consolidate account management and billing
+D. Ability to access new releases for testing and validation purposes
+Correct Answer: C
+
+**Question 978**
+Which privilege is required on a virtual warehouse to abort any existing executing queries?
+A. USAGE
+B. OPERATE
+C. MODIFY
+D. MONITOR
+Correct Answer: B
+
+**Question 979**
+Which command should be used to look into the validity of an XML object in Snowflake?
+A. XMLGET
+B. TO_XML
+C. PARSE_XML
+D. CHECK_XML
+Correct Answer: D
+
+**Question 980**
+Who can activate a network policy for users in a Snowflake account? (Choose two.)
+A. ACCOUNTADMIN
+B. USERADMIN
+C. PUBLIC
+D. SYSADMIN
+E. Any role that has the global ATTACH POLICY privilege
+Correct Answer: AE
+
+**Question 981**
+In which use cases is running a virtual warehouse required? (Choose two.)
+A. When creating a table
+B. When loading data into a table
+C. When unloading data from a table
+D. When executing a SHOW command
+E. When executing a LIST command
+Correct Answer: BC
+
+**Question 982**
+What action should be taken if a Snowflake user wants to share a newly created object in a database with consumers?
+A. Use the automatic sharing feature for seamless access.
+B. Drop the object and then re-add it to the database to trigger sharing.
+C. Recreate the object with a different name in the database before sharing.
+D. Use the GRANT privilege TO SHARE command to grant the necessary privileges.
+Correct Answer: D
+
+**Question 983**
+Which privilege is required on a pipe object to pause or resume pipes?
+A. OPERATE
+B. READ
+C. SELECT
+D. USAGE
+Correct Answer: A
+
+**Question 984**
+Which commands can a Snowflake user execute to specify a cluster key for a table? (Choose two.)
+A. CREATE TABLE
+B. UPDATE
+C. ALTER TABLE
+D. SET
+E. SHOW
+Correct Answer: AC
+
+**Question 985**
+Authorization to execute CREATE [object] statements comes only from which role?
+A. Primary role
+B. Secondary role
+C. Application role
+D. Database role
+Correct Answer: A
+
+**Question 986**
+Which VALIDATION_MODE value will return all errors across the files specified in a COPY command, including files that partially loaded during an earlier load?
+A. RETURN_ROWS
+B. RETURN_ERRORS
+C. RETURN_1_ERROR
+D. RETURN_ALL_ERRORS
+Correct Answer: D
+
+**Question 987**
+Which command is used to upload data files from a local directory or folder on a client machine to an internal stage, for a specified table?
+A. GET
+B. PUT
+C. CREATE STREAM
+D. COPY INTO [location]
+Correct Answer: B
+
+**Question 988**
+Which governance feature is supported by all Snowflake editions?
+A. Object tags
+B. Masking policies
+C. Row access policies
+D. OBJECT_DEPENDENCIES view
+Correct Answer: D
+
+**Question 989**
+Which chart type is supported in Snowsight for Snowflake users to visualize data with dashboards?
+A. Area chart
+B. Box plot
+C. Heat grid
+D. Pie chart
+Correct Answer: C
+
+**Question 990**
+At what levels is the DATA_RETENTION_TIME_IN_DAYS parameter set?
+A. Account
+B. Database
+C. Schema
+D. All of the above
+Correct Answer: D
+
+**Question 991**
+Which function returns an integer between 0 and 100 when used to calculate the similarity of strings?
+A. APPROXIMATE_SIMILARITY
+B. JAROWINKLER_SIMILARITY
+C. EDITDISTANCE
+D. MINHASH_COMBINE
+Correct Answer: B
+
+**Question 992**
+Which Snowflake data feature can support auditing when a query reads data?
+A. Access History
+B. Data classification
+C. Column-level security
+D. Object dependencies
+Correct Answer: A
+
+**Question 993**
+Which categories are included in the execution time summary in a Query Profile? (Choose two.)
+A. Pruning
+B. Spilling
+C. Initialization
+D. Local Disk I/O
+E. Percentage of data read from cache
+Correct Answer: CD
+
+**Question 994**
+Which command can be used to list all network policies available in an account?
+A. DESCRIBE SESSION POLICY
+B. DESCRIBE NETWORK POLICY
+C. SHOW SESSION POLICIES
+D. SHOW NETWORK POLICIES
+Correct Answer: D
+
+**Question 995**
+Which type of loop requires a BREAK statement to stop executing?
+A. FOR
+B. LOOP
+C. REPEAT
+D. WHILE
+Correct Answer: B
+
+**Question 996**
+Which virtual warehouse consideration can help lower compute resource credit consumption?
+A. Setting up a dedicated warehouse
+B. Resizing the virtual warehouse to a larger size
+C. Automating the virtual warehouse suspension and resumption settings
+D. Increasing the maximum cluster count parameter for a multi-cluster virtual warehouse
+Correct Answer: C
+
+**Question 997**
+To use the OVERWRITE option on INSERT, which privilege must be granted to the role?
+A. TRUNCATE
+B. DELETE
+C. UPDATE
+D. SELECT
+Correct Answer: B
+
+**Question 998**
+What happens when a suspended virtual warehouse is resized in Snowflake?
+A. It will return an error.
+B. It will return a warning.
+C. The suspended warehouse is resumed and compute resources are provisioned immediately.
+D. The additional compute resources are provisioned when the warehouse is resumed.
+Correct Answer: D
+
+**Question 999**
+How does Snowflake handle the data retention period for a table if a stream has not been consumed?
+A. The data retention period defaults to a minimum of 14 days.
+B. The data retention period is permanently extended for the table.
+C. The data retention period is temporarily extended to the stream's offset.
+D. The data retention period is not affected by the stream consumption.
+Correct Answer: C
+
+**Question 1000**
+Which task is supported by the use of Access History in Snowflake?
+A. Data backups
+B. Cost monitoring
+C. Compliance auditing
+D. Performance optimization
+Correct Answer: C
